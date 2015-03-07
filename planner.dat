@@ -1,0 +1,56 @@
+set leiders := tim hans fokkelien inge jolanda;
+set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy;
+set teams := tim inge peter johan;
+
+param teamlid default 0 (tr) :
+            inge    peter   johan   tim :=
+tim         .       .       .       1
+johan       .       .       1       .
+rosalie     .       1       .       1
+andreas     .       .       1       .
+inge        1       .       .       .
+joshua      1       .       .       .
+justin      1       .       .       .
+xandra      1       .       .       .
+peter       .       1       .       .
+jonathan    .       1       .       .
+wendy       .       1       .       .
+;
+
+#0 is onmisbaar, verder hoe hoger hoe slechter misbaar
+param teamlidmisbaar default 0 :=
+    wendy   1
+    andreas 1
+    rosalie 2
+    inge    2
+    xandra  2
+    justin  3
+;
+
+param teamminimum default 3 :=
+    tim 2
+    peter 2
+;
+
+param teammaximum default 4 :=
+    tim 3
+    peter 3
+;
+                    
+param teamrustminimum default 1 :=
+    tim 3
+    peter 3
+;
+
+param teamritmegewenst default 3 :=
+    tim 6
+    peter 6
+;
+
+param leiderminimum default 2;
+
+param leidermaximum default 3;
+                    
+param leiderrust default 3;
+
+end;
