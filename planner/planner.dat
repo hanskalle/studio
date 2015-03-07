@@ -1,6 +1,7 @@
 set leiders := tim hans fokkelien inge jolanda;
 set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy;
 set teams := tim inge peter johan;
+set schuivers := hans hansd david;
 
 param teamlid default 0 (tr) :
             inge    peter   johan   tim :=
@@ -46,6 +47,8 @@ param teamritmegewenst default 3 :=
     tim 6
     peter 6
 ;
+
+param schuiverritmegewenst default 3;
 
 param leiderminimum default 2;
 
