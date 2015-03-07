@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 def get_page():
     import httplib, urllib
-    params = urllib.urlencode({'u': 'hanskalle', 'p': 'notenuur80', 'r': '0'})
+    params = urllib.urlencode({'u': 'rooster', 'p': 'rooster', 'r': '0'})
     headers = {"Content-type": "application/x-www-form-urlencoded",
                "Accept": "text/plain"}
     conn = httplib.HTTPConnection("johankn146.146.axc.nl")
@@ -53,7 +53,7 @@ def write_beschikbaarheid(filename, beschikbaarheid):
     file = open(filename, 'w')
     file.write('param eerste_week := ' + min(beschikbaarheid['week']) + ';\n')
     file.write('param laatste_week := ' + max(beschikbaarheid['week']) + ';\n')
-    file.write('param beschikbaar default 0:\n')
+    file.write('param beschikbaar default 1:\n')
     for week in beschikbaarheid['week']:
         file.write(' ')
         file.write(week)
@@ -98,7 +98,7 @@ def get_results(beschikbaarheid):
     
 def write_markup(filename, rooster):
     file = open(filename, 'w')
-    file.write('^week^datum^leiding^team^opmerkingen^\n')
+    file.write('^week^datum^leiding^team^geluid^beamer^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
         file.write('|week ')
@@ -109,6 +109,10 @@ def write_markup(filename, rooster):
         file.write(rooster[week]['leider'])
         file.write('|')
         file.write(rooster[week]['team'])
+        file.write('|')
+        file.write(rooster[week]['schuiver'])
+        file.write('|')
+        file.write(rooster[week]['beamer'])
         file.write('|')
         if 'missendteamlid' in rooster[week]: 
             file.write(rooster[week]['missendteamlid'])

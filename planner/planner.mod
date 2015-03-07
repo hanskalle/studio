@@ -7,8 +7,11 @@ set muzikanten;
 set teams within muzikanten;
 set leiders;
 set dubbelleiders := teams inter leiders;
+
 set schuivers;
-set personen := muzikanten union leiders union schuivers;
+set beamers;
+
+set personen := muzikanten union leiders union schuivers union beamers;
 
 ### parameters ###
 
@@ -26,6 +29,7 @@ param leidermaximum {t in leiders}, >=1;
 param leiderrust {t in leiders}, >=0;
 param teamlidmisbaar {m in muzikanten}, >=0;
 param schuiverritmegewenst {s in schuivers}, >=0;
+param beamerritmegewenst {b in beamers}, >=0;
 
 ### variables ###
 
@@ -37,6 +41,8 @@ var teamlidmist {m in muzikanten, z in zondagen}, binary;
 var teamuitritme {t in teams, z in zondagen}, binary;
 var geluid {s in schuivers, z in zondagen}, binary;
 var schuiveruitritme {s in schuivers, z in zondagen}, binary;
+var beaming {b in beamers, z in zondagen}, binary;
+var beameruitritme {b in beamers, z in zondagen}, binary;
 
 ### objective ###
 
@@ -44,7 +50,8 @@ minimize afwijkingen:
     (sum {m in muzikanten, z in zondagen} teamlidmist[m,z]*teamlidmisbaar[m])
     + (sum {p in personen, z in zondagen} 3*tegenzin[p,z])
     + (sum {t in teams, z in zondagen} 6*teamuitritme[t,z])
-    + (sum {s in schuivers, z in zondagen} 3*schuiveruitritme[s,z]);
+    + (sum {s in schuivers, z in zondagen} 3*schuiveruitritme[s,z])
+    + (sum {b in beamers, z in zondagen} 3*beameruitritme[b,z]);
 
 ### constraints ###
 
@@ -120,6 +127,26 @@ subject to geen_geluid_en_leiding_tegelijk
     {p in leiders inter schuivers, z in zondagen}:
     geluid[p,z] + leiding[p,z] <= 1;
 
+subject to een_beamer
+    {z in zondagen}:
+	(sum {b in beamers} beaming[b,z]) = 1;
+
+subject to beamer_beschikbaar
+    {z in zondagen, b in beamers}:
+	beaming[b,z] <= beschikbaar[b,z];
+
+subject to een_beamer_heeft_gewenste_ritme
+    {b in beamers, z1 in zondagen: z1 <= laatste_week - beamerritmegewenst[b] + 1}:
+    (sum {z2 in z1..(z1 + beamerritmegewenst[b] - 1)} beaming[b,z2]) <= 1 + beameruitritme[b,z1];
+
+subject to geen_beamer_en_geluid_tegelijk
+    {p in beamers inter schuivers, z in zondagen}:
+    beaming[p,z] + geluid[p,z] <= 1;
+
+subject to geen_beamer_en_muziek_tegelijk
+    {p in beamers inter muzikanten, z in zondagen, t in teams: teamlid[t,p]=1}:
+    beaming[p,z] + spelen[t,z] <= 1;
+
 solve ;
 
 display {z in zondagen, team in teams: spelen[team,z] = 1}: z, team;
@@ -127,5 +154,6 @@ display {z in zondagen, leider in leiders: leiding[leider,z] = 1}: z, leider;
 display {z in zondagen, missendteamlid in muzikanten: teamlidmist[missendteamlid,z] = 1}: z, missendteamlid;
 display {z in zondagen, mettegenzin in personen: tegenzin[mettegenzin,z] = 1}: z, mettegenzin;
 display {z in zondagen, schuiver in schuivers: geluid[schuiver,z] = 1}: z, schuiver;
+display {z in zondagen, beamer in beamers: beaming[beamer,z] = 1}: z, beamer;
 
 end;
