@@ -64,7 +64,7 @@ def write_beschikbaarheid(filename, beschikbaarheid):
             for beschikbaar in beschikbaarheid[teamlid]:
                 file.write(' ')
                 if beschikbaar == 'x':
-                    file.write('.')
+                    file.write('0')
                 if beschikbaar == '':
                     file.write('1')
                 if beschikbaar == '-':
@@ -98,7 +98,7 @@ def get_results(beschikbaarheid):
     
 def write_markup(filename, rooster):
     file = open(filename, 'w')
-    file.write('^week^datum^leiding^team^geluid^beamer^opmerkingen^\n')
+    file.write('^week^datum^leiding^team^geluid^beamer^blauw^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
         file.write('|week ')
@@ -114,12 +114,18 @@ def write_markup(filename, rooster):
         file.write('|')
         file.write(rooster[week]['beamer'])
         file.write('|')
+        file.write(rooster[week]['leider_blauw'])
+        file.write(' & ')
+        file.write(rooster[week]['helper_blauw'])
+        file.write('|')
         if 'missendteamlid' in rooster[week]: 
             file.write(rooster[week]['missendteamlid'])
-            file.write(' mist ')
+            file.write(' mist, ')
         if 'mettegenzin' in rooster[week]: 
             file.write(rooster[week]['mettegenzin'])
-            file.write(' liever niet')
+            file.write(' liever niet, ')
+        if 'nietvoorkeurpaar_blauw' in rooster[week]: 
+            file.write('afwijkend paar blauw, ')
         file.write(' |\n')
     file.close()
 
