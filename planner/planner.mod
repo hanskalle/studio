@@ -19,8 +19,9 @@ set leiders_rood;
 set rood := leiders_rood;
 set schenkers;
 set koffieteams;
+set gastvrouwen;
 
-set personen := muzikanten union leiders union schuivers union beamers union blauw union wit union rood union schenkers;
+set personen := muzikanten union leiders union schuivers union beamers union blauw union wit union rood union schenkers union gastvrouwen;
 
 ### parameters ###
 
@@ -46,6 +47,7 @@ param voorkeurpaar_wit {l in leiders_wit, h in helpers_wit}, binary;
 param roodritmegewenst {l in leiders_rood}, >=0;
 param koffieteamlid {k in koffieteams, s in schenkers}, binary;
 param koffieteamritmegewenst {k in koffieteams}, >=0;
+param gastvrouwritmegewenst {g in gastvrouwen}, >=0;
 
 ### variables ###
 
@@ -70,6 +72,8 @@ var leiding_rood {l in leiders_rood, z in zondagen}, binary;
 var rooduitritme {l in leiders_rood, z in zondagen}, binary;
 var schenkendteam {k in koffieteams, z in zondagen}, binary;
 var koffieteamuitritme {k in koffieteams, z in zondagen}, binary;
+var welkom {g in gastvrouwen, z in zondagen}, binary;
+var gastvrouwuitritme {g in gastvrouwen, z in zondagen}, binary;
 
 ### objective ###
 
@@ -85,6 +89,7 @@ minimize afwijkingen:
     + (sum {z in zondagen} 2*nietvoorkeurpaar_wit[z])
     + (sum {l in leiders_rood, z in zondagen} 3*rooduitritme[l,z])
     + (sum {k in koffieteams, z in zondagen} 3*koffieteamuitritme[k,z])
+    + (sum {g in gastvrouwen, z in zondagen} 3*gastvrouwuitritme[g,z])
 ;
 
 ### constraints ###
@@ -161,10 +166,6 @@ subject to een_schuiver_heeft_gewenste_ritme
     {s in schuivers, z1 in zondagen: z1 <= laatste_week - schuiverritmegewenst[s] + 1}:
     (sum {z2 in z1..(z1 + schuiverritmegewenst[s] - 1)} geluid[s,z2]) <= 1 + schuiveruitritme[s,z1];
 
-subject to geen_geluid_en_leiding_tegelijk
-    {p in leiders inter schuivers, z in zondagen}:
-    geluid[p,z] + leiding[p,z] <= 1;
-
 
 
 subject to een_beamer
@@ -178,14 +179,6 @@ subject to beamer_beschikbaar
 subject to een_beamer_heeft_gewenste_ritme
     {b in beamers, z1 in zondagen: z1 <= laatste_week - beamerritmegewenst[b] + 1}:
     (sum {z2 in z1..(z1 + beamerritmegewenst[b] - 1)} beaming[b,z2]) <= 1 + beameruitritme[b,z1];
-
-subject to geen_beamer_en_geluid_tegelijk
-    {p in beamers inter schuivers, z in zondagen}:
-    beaming[p,z] + geluid[p,z] <= 1;
-
-subject to geen_beamer_en_muziek_tegelijk
-    {p in beamers inter muzikanten, z in zondagen, t in teams: teamlid[t,p]=1}:
-    beaming[p,z] + spelen[t,z] <= 1;
 
 
 
@@ -212,14 +205,6 @@ subject to helper_blauw_beschikbaar
 subject to liefst_voorkeurparen_blauw
     {z in zondagen, l in leiders_blauw, h in helpers_blauw}:
 	leiding_blauw[l,z] + helpend_blauw[h,z] <= 1 + voorkeurpaar_blauw[l,h] + nietvoorkeurpaar_blauw[z];
-	
-subject to geen_beamer_en_blauw_tegelijk
-    {p in beamers inter helpers_blauw, z in zondagen}:
-    beaming[p,z] + helpend_blauw[p,z] <= 1;
-
-subject to geen_geluid_en_blauw_tegelijk
-    {p in schuivers inter helpers_blauw, z in zondagen}:
-    geluid[p,z] + helpend_blauw[p,z] <= 1;
 
 
 
@@ -246,14 +231,6 @@ subject to helper_wit_beschikbaar
 subject to liefst_voorkeurparen_wit
     {z in zondagen, l in leiders_wit, h in helpers_wit}:
 	leiding_wit[l,z] + helpend_wit[h,z] <= 1 + voorkeurpaar_wit[l,h] + nietvoorkeurpaar_wit[z];
-	
-subject to geen_beamer_en_wit_tegelijk
-    {p in beamers inter helpers_wit, z in zondagen}:
-    beaming[p,z] + helpend_wit[p,z] <= 1;
-
-subject to geen_wit_en_blauw_tegelijk
-    {p in helpers_wit inter helpers_blauw, z in zondagen}:
-    helpend_wit[p,z] + helpend_blauw[p,z] <= 1;
 
 
 
@@ -269,10 +246,6 @@ subject to een_leider_rood_heeft_gewenste_ritme
     {l in leiders_rood, z1 in zondagen: z1 <= laatste_week - roodritmegewenst[l] + 1}:
     (sum {z2 in z1..(z1 + roodritmegewenst[l] - 1)} leiding_rood[l,z2]) <= 1 + rooduitritme[l,z1];
 
-subject to geen_leiding_en_rood_tegelijk
-    {p in leiders inter leiders_rood, z in zondagen}:
-    leiding[p,z] + leiding_rood[p,z] <= 1;
-
 
         
 subject to een_koffieteam
@@ -286,7 +259,63 @@ subject to koffieleden_beschikbaar
 subject to een_koffieteam_heeft_gewenste_ritme
     {k in koffieteams, z1 in zondagen: z1 <= laatste_week - koffieteamritmegewenst[k] + 1}:
     (sum {z2 in z1..(z1 + koffieteamritmegewenst[k] - 1)} schenkendteam[k,z2]) <= 1 + koffieteamuitritme[k,z1];
-        
+
+
+
+subject to een_gastvrouw
+    {z in zondagen}:
+	(sum {g in gastvrouwen} welkom[g,z]) = 1;
+
+subject to gastvrouw_beschikbaar
+    {z in zondagen, g in gastvrouwen}:
+	welkom[g,z] <= beschikbaar[g,z];
+
+subject to een_gastvrouw_heeft_gewenste_ritme
+    {g in gastvrouwen, z1 in zondagen: z1 <= laatste_week - gastvrouwritmegewenst[g] + 1}:
+    (sum {z2 in z1..(z1 + gastvrouwritmegewenst[g] - 1)} welkom[g,z2]) <= 1 + gastvrouwuitritme[g,z1];
+    
+
+
+
+subject to geen_geluid_en_leiding_tegelijk
+    {p in leiders inter schuivers, z in zondagen}:
+    geluid[p,z] + leiding[p,z] <= 1;
+	
+subject to geen_beamer_en_geluid_tegelijk
+    {p in beamers inter schuivers, z in zondagen}:
+    beaming[p,z] + geluid[p,z] <= 1;
+
+subject to geen_beamer_en_muziek_tegelijk
+    {p in beamers inter muzikanten, z in zondagen, t in teams: teamlid[t,p]=1}:
+    beaming[p,z] + spelen[t,z] <= 1;
+
+subject to geen_beamer_en_blauw_tegelijk
+    {p in beamers inter helpers_blauw, z in zondagen}:
+    beaming[p,z] + helpend_blauw[p,z] <= 1;
+
+subject to geen_geluid_en_blauw_tegelijk
+    {p in schuivers inter helpers_blauw, z in zondagen}:
+    geluid[p,z] + helpend_blauw[p,z] <= 1;
+	
+subject to geen_beamer_en_wit_tegelijk
+    {p in beamers inter helpers_wit, z in zondagen}:
+    beaming[p,z] + helpend_wit[p,z] <= 1;
+
+subject to geen_wit_en_blauw_tegelijk
+    {p in helpers_wit inter helpers_blauw, z in zondagen}:
+    helpend_wit[p,z] + helpend_blauw[p,z] <= 1;
+
+subject to geen_leiding_en_rood_tegelijk
+    {p in leiders inter leiders_rood, z in zondagen}:
+    leiding[p,z] + leiding_rood[p,z] <= 1;
+
+subject to geen_blauw_en_koffie_tegelijk
+    {p in leiders_blauw inter schenkers, k in koffieteams, z in zondagen: koffieteamlid[k,p]=1}:
+    leiding_blauw[p,z] + schenkendteam[k,z] <= 1;
+
+subject to geen_muziek_en_welkom_tegelijk
+    {p in muzikanten inter gastvrouwen, t in teams, z in zondagen: teamlid[t,p]=1}:
+    spelen[t,z] + welkom[p,z] <= 1;
 
 solve ;
 
@@ -304,5 +333,6 @@ display {z in zondagen, helper_wit in helpers_wit: helpend_wit[helper_wit,z] = 1
 display {z in zondagen: nietvoorkeurpaar_wit[z] = 1}: z, 'nietvoorkeurpaar_wit';
 display {z in zondagen, leider_rood in leiders_rood: leiding_rood[leider_rood,z] = 1}: z, leider_rood;
 display {z in zondagen, koffie in koffieteams: schenkendteam[koffie,z] = 1}: z, koffie;
+display {z in zondagen, gastvrouw in gastvrouwen: welkom[gastvrouw,z] = 1}: z, gastvrouw;
 
 end;

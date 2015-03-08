@@ -1,5 +1,5 @@
 set leiders := tim hans fokkelien inge jolanda;
-set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy selicia;
+set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy selicia vena;
 set teams := tim inge peter johan;
 set schuivers := hans hansd david;
 set beamers := david jeroen danny jonathan;
@@ -10,6 +10,7 @@ set helpers_wit := thirza mattanja esther emma vivianne;
 set leiders_rood := nora jan_martijn jolanda tim;
 set schenkers := andreas ailine jacolien miranda lydia emmely mieke tom marieke rinus monika nora wim;
 set koffieteams := casson jacolien lydia vermeulen pigmans rosier;
+set gastvrouwen := suki wenny vena miranda chantal;
 
 param koffieteamlid default 0 (tr) :
             casson  jacolien    lydia   vermeulen   pigmans rosier :=
@@ -53,6 +54,7 @@ tim         .       .       .       1
 johan       .       .       1       .
 rosalie     .       1       .       1
 andreas     .       .       1       .
+vena        .       .       1       .
 inge        1       .       .       .
 joshua      1       .       .       .
 justin      1       .       .       .
@@ -65,6 +67,7 @@ wendy       .       1       .       .
 #0 is onmisbaar, verder hoe hoger hoe slechter misbaar
 param teamlidmisbaar default 0 :=
     wendy   1
+    vena    1
     andreas 1
     rosalie 2
     inge    2
@@ -109,5 +112,7 @@ param witritmegewenst default 5;
 param roodritmegewenst default 4;
 
 param koffieteamritmegewenst default 6;
+
+param gastvrouwritmegewenst default 5;
 
 end;

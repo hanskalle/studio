@@ -98,7 +98,7 @@ def get_results(beschikbaarheid):
     
 def write_markup(filename, rooster):
     file = open(filename, 'w')
-    file.write('^week^datum^leiding^team^geluid^beamer^blauw^opmerkingen^\n')
+    file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
         file.write('|week ')
@@ -125,6 +125,8 @@ def write_markup(filename, rooster):
         file.write(rooster[week]['leider_rood'])
         file.write('|')
         file.write(rooster[week]['koffie'])
+        file.write('|')
+        file.write(rooster[week]['gastvrouw'])
         file.write('|')
         if 'missendteamlid' in rooster[week]: 
             file.write(rooster[week]['missendteamlid'])
