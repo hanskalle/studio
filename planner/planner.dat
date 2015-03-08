@@ -4,16 +4,47 @@ set teams := tim inge peter johan;
 set schuivers := hans hansd david;
 set beamers := david jeroen danny jonathan;
 set leiders_blauw := rachel mieke annelies mirjam lidian miranda;
-set helpers_blauw := selicia david chiara anneke noa wenny;
+set helpers_blauw := selicia david chiara anneke noa vivianne;
+set leiders_wit := jennifer xandra lianne dieuwke yentl;
+set helpers_wit := thirza mattanja esther emma vivianne;
+set leiders_rood := nora jan_martijn jolanda tim;
+set schenkers := andreas ailine jacolien miranda lydia emmely mieke tom marieke rinus monika nora wim;
+set koffieteams := casson jacolien lydia vermeulen pigmans rosier;
+
+param koffieteamlid default 0 (tr) :
+            casson  jacolien    lydia   vermeulen   pigmans rosier :=
+andreas     1       .           .       .           .       .
+ailine      1       .           .       .           .       .
+jacolien    .       1           .       .           .       .
+miranda     .       1           .       .           .       .
+lydia       .       .           1       .           .       .
+emmely      .       .           1       .           .       .
+mieke       .       .           1       .           .       .
+tom         .       .           .       1           .       .
+marieke     .       .           .       1           .       .
+rinus       .       .           .       .           1       .
+monika      .       .           .       .           1       .
+nora        .       .           .       .           .       1
+wim         .       .           .       .           .       1
+;
 
 param voorkeurpaar_blauw default 0:
-            wenny   anneke  noa     selicia david   chiara :=
-rachel      1       .       .       .       .       .
-mieke       .       1       .       .       .       .
-annelies    .       .       1       .       .       .
-mirjam      .       .       .       1       .       .
-lidian      .       .       .       .       1       .
-miranda     .       .       .       .       .       1
+            vivianne    anneke  noa     selicia david   chiara :=
+rachel      1           .       .       .       .       .
+mieke       .           1       .       .       .       .
+annelies    .           .       1       .       .       .
+mirjam      .           .       .       1       .       .
+lidian      .           .       .       .       1       .
+miranda     .           .       .       .       .       1
+;
+
+param voorkeurpaar_wit default 0:
+            thirza  mattanja    esther  emma    vivianne :=
+jennifer    1       .           .       .       .
+xandra      .       1           .       .       .
+lianne      .       .           1       .       .
+dieuwke     .       .           .       1       .
+yentl       .       .           .       .       1
 ;
 
 param teamlid default 0 (tr) :
@@ -72,5 +103,11 @@ param schuiverritmegewenst default 3;
 param beamerritmegewenst default 4;
 
 param blauwritmegewenst default 6;
+
+param witritmegewenst default 5;
+
+param roodritmegewenst default 4;
+
+param koffieteamritmegewenst default 6;
 
 end;
