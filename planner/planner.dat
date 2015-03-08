@@ -1,7 +1,7 @@
-set leiders := tim hans fokkelien inge jolanda;
+set leiders := tim hans_k fokkelien inge jolanda;
 set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy selicia vena;
 set teams := tim inge peter johan;
-set schuivers := hans hansd david;
+set schuivers := hans_k hans_d david;
 set beamers := david jeroen danny jonathan;
 set leiders_blauw := rachel mieke annelies mirjam lidian miranda;
 set helpers_blauw := selicia david chiara anneke noa vivianne;
