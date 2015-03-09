@@ -12,8 +12,8 @@ set schenkers := andreas ailine jacolien miranda lydia emmely mieke tom marieke 
 set koffieteams := casson jacolien lydia vermeulen pigmans rosier;
 set gastvrouwen := suki wenny vena miranda chantal;
 set kosters := jose hans_d herman matthijs andreas frank;
-#set hulpkosters := chris_v_m rinus jan_martijn hans_m gerben jeroen peter ad
-#                    wilfred ramon puch jaap tim jef ferdinand johan jonathan;
+set hulpkosters := chris_v_m rinus jan_martijn hans_m gerben jeroen peter ad
+                    wilfred ramon puch jaap tim jef ferdinand johan jonathan;
 
 param koffieteamlid default 0 (tr) :
             casson  jacolien    lydia   vermeulen   pigmans rosier :=
@@ -107,6 +107,7 @@ param beamerritmegewenst default 4;
 param blauwritmegewenst default 6;
 param witritmegewenst default 5;
 param roodritmegewenst default 4;
+param roodminimumrust default 2;
 param koffieteamritmegewenst default 6;
 param gastvrouwritmegewenst default 5;
 param kosterritmegewenst default 12;
