@@ -78,38 +78,33 @@ param teamlidmisbaar default 0 :=
     justin  3
 ;
 
-param teamminimum default 3 :=
-    tim 2
-    peter 2
-;
-
-param teammaximum default 4 :=
-    tim 3
-    peter 3
-;
-                    
-param teamrustminimum default 1 :=
-    tim 3
-    peter 3
-;
-
-param teamritmegewenst default 3 :=
+param leiderritme default 5;
+param leiderrust default 3;
+param teamritme default 3 :=
     tim 6
     peter 6
 ;
-
-param leiderritmegewenst default 5;
-
-param leiderrust default 3;
-
-param schuiverritmegewenst default 3;
-param beamerritmegewenst default 4;
-param blauwritmegewenst default 6;
-param witritmegewenst default 5;
-param roodritmegewenst default 4;
-param roodminimumrust default 2;
-param koffieteamritmegewenst default 6;
-param gastvrouwritmegewenst default 5;
-param kosterritmegewenst default 12;
+param teamrust default 1 :=
+    tim 3
+    peter 3
+;
+param schuiverritme default 3;
+param schuiverrust default 1;
+param beamerritme default 4;
+param beamerrust default 1;
+param blauwritme default 6;
+param blauwrust default 1;
+param witritme default 5;
+param witrust default 1;
+param roodritme default 4;
+param roodrust default 1;
+param koffieritme default 6;
+param koffierust default 1;
+param gastvrouwritme default 5;
+param gastvrouwrust default 1;
+param kosterritme default 12;
+param kosterrust default 2;
+param hulpkosterritme default 8;
+param hulpkosterrust default 1;
 
 end;
