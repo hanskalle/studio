@@ -2,22 +2,23 @@ set leiders := tim hans_k fokkelien inge jolanda;
 set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy selicia vena;
 set teams := tim inge peter johan;
 set schuivers := hans_k hans_d david;
-set beamers := david jeroen danny jonathan;
-set leiders_blauw := rachel mieke annelies mirjam lidian miranda;
+set beamers := david jeroen danny jonathan; #bas esther (noa)
+set leiders_blauw := rachel mieke annelies mirjam lidian miranda wenny;
 set helpers_blauw := selicia david chiara anneke noa vivianne;
 set leiders_wit := jennifer xandra lianne dieuwke yentl;
-set helpers_wit := thirza mattanja esther emma vivianne;
-set leiders_rood := nora jan_martijn jolanda tim;
-set schenkers := andreas ailine jacolien miranda lydia emmely mieke tom marieke rinus monika nora wim;
+set helpers_wit := thirza mattanja esther emma;
+set leiders_rood := xnora xjan_martijn xjolanda xtim in_dienst;
+set schenkers := emma lilian ailine jacolien miranda lydia emmely mieke tom marieke rinus monika nora wim;
 set koffieteams := casson jacolien lydia vermeulen pigmans rosier;
 set gastvrouwen := suki wenny vena miranda chantal;
 set kosters := jose hans_d herman matthijs andreas frank;
-set hulpkosters := chris_v_m rinus jan_martijn hans_m gerben jeroen peter ad
-                    wilfred ramon puch jaap tim jef ferdinand johan jonathan;
+set hulpkosters := chris_v_m rinus wim_a hans_m gerben jeroen peter ad
+                    wilfred ramon puch jaap tim jef ferdinand johan jonathan; #david hans_k hans_z
 
 param koffieteamlid default 0 (tr) :
             casson  jacolien    lydia   vermeulen   pigmans rosier :=
-andreas     1       .           .       .           .       .
+emma        1       .           .       .           .       .
+lilian      1       .           .       .           .       .
 ailine      1       .           .       .           .       .
 jacolien    .       1           .       .           .       .
 miranda     .       1           .       .           .       .
@@ -40,15 +41,16 @@ annelies    .           .       1       .       .       .
 mirjam      .           .       .       1       .       .
 lidian      .           .       .       .       1       .
 miranda     .           .       .       .       .       1
+wenny       .           .       .       .       1       .
 ;
 
 param voorkeurpaar_wit default 0:
-            thirza  mattanja    esther  emma    vivianne :=
-jennifer    1       .           .       .       .
-xandra      .       1           .       .       .
-lianne      .       .           1       .       .
-dieuwke     .       .           .       1       .
-yentl       .       .           .       .       1
+            thirza  mattanja    esther  emma    :=
+jennifer    1       .           .       .
+xandra      .       1           .       .
+lianne      .       .           1       .
+dieuwke     .       .           .       1
+yentl       .       .           1       .
 ;
 
 param teamlid default 0 (tr) :
@@ -92,18 +94,23 @@ param schuiverritme default 3;
 param schuiverrust default 1;
 param beamerritme default 4;
 param beamerrust default 1;
-param blauwritme default 6;
+param blauwritme default 7;
 param blauwrust default 1;
 param witritme default 5;
 param witrust default 1;
-param roodritme default 4;
-param roodrust default 1;
+param roodritme default 4
+	xnora 8
+	in_dienst 8
+;
+param roodrust default 3
+	xnora 7
+	in_dienst 7;
 param koffieritme default 6;
 param koffierust default 1;
 param gastvrouwritme default 5;
 param gastvrouwrust default 1;
 param kosterritme default 12;
-param kosterrust default 2;
+param kosterrust default 1;
 param hulpkosterritme default 8;
 param hulpkosterrust default 1;
 
