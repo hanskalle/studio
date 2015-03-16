@@ -91,12 +91,16 @@ var kosterdienst {k in kosters, z in zondagen}, binary;
 var kosteruitritme {k in kosters, z in zondagen_uitgebreid}, binary;
 var hulpkosterdienst {h in hulpkosters, z in zondagen}, binary;
 var hulpkosteruitritme {hulpkosters, zondagen_uitgebreid}, binary;
+var wijngaardenbreuk {zondagen}, binary;
+var timofrachel {zondagen}, binary;
+var liannezondermatthijs, binary;
+var matthijszonderlianne, binary;
 
 ### objective ###
 
 minimize afwijkingen:
     (sum {m in muzikanten, z in zondagen} teamlidmist[m,z]*teamlidmisbaar[m])
-    + (sum {p in personen, z in zondagen} 10*tegenzin[p,z])
+    + (sum {p in personen, z in zondagen} 20*tegenzin[p,z])
     + (sum {t in teams, z in zondagen_uitgebreid} 8*teamuitritme[t,z])
     + (sum {l in leiders, z in zondagen_uitgebreid} 6*leideruitritme[l,z])
     + (sum {s in schuivers, z in zondagen_uitgebreid} 5*schuiveruitritme[s,z])
@@ -105,14 +109,14 @@ minimize afwijkingen:
     + (sum {z in zondagen} 6*nietvoorkeurpaar_blauw[z])
     + (sum {l in leiders_wit, z in zondagen_uitgebreid} 4*wituitritme[l,z])
     + (sum {z in zondagen} 100*nietvoorkeurpaar_wit[z])
-    + (sum {l in leiders_rood, z in zondagen_uitgebreid} 4*rooduitritme[l,z])
+    + (sum {l in leiders_rood, z in zondagen_uitgebreid} 1*rooduitritme[l,z])
     + (sum {k in koffieteams, z in zondagen_uitgebreid} 3*koffieteamuitritme[k,z])
     + (sum {g in gastvrouwen, z in zondagen_uitgebreid} 2*gastvrouwuitritme[g,z])
     + (sum {k in kosters, z in zondagen_uitgebreid} 8*kosteruitritme[k,z])
     + (sum {h in hulpkosters, z in zondagen_uitgebreid} 4*hulpkosteruitritme[h,z])
+    + (sum {z in zondagen} 4*wijngaardenbreuk[z])
+    + 10*matthijszonderlianne + 20*liannezondermatthijs
 ;
-#liefst tim en rachel tegelijk
-
 
 ### constraints ###
 
@@ -330,7 +334,7 @@ subject to een_leider_rood_heeft_gewenste_ritme
 
 subject to een_leider_rood_leidt_een_minimaal_aantal_maal
     {l in leiders_rood}:
-    (sum {z in zondagen} leiding_rood[l,z]) >= aantal_weken/roodritme[l]-1;
+    (sum {z in zondagen} leiding_rood[l,z]) >= aantal_weken/roodritme[l]-2;
         
 subject to een_leider_rood_leidt_een_maximaal_aantal_maal
     {l in leiders_rood}:
@@ -391,7 +395,7 @@ subject to een_gastvrouw_welkomt_een_maximaal_aantal_maal
     (sum {z in zondagen} welkom[g,z]) <= aantal_weken/gastvrouwritme[g]+2;
 
 subject to een_gastvrouw_heeft_steeds_een_minimale_rust
-    {g in gastvrouwen, z1 in zondagen}:
+    {g in gastvrouwen, z1 in zondagen: g!='lianne'}:
     (sum {z2 in z1..(z1+gastvrouwrust[g]): z2 in zondagen} welkom[g,z2]) <= 1;
 
 
@@ -461,6 +465,10 @@ subject to geen_leiding_en_rood_tegelijk
     {p in leiders inter leiders_rood, z in zondagen}:
     leiding[p,z] + leiding_rood[p,z] <= 1;
 
+subject to geen_muziek_en_wit_tegelijk
+    {p in muzikanten inter leiders_wit, t in teams, z in zondagen: teamlid[t,p]=1}:
+    spelen[t,z] + leiding_wit[p,z] <= 1;
+
 subject to geen_muziek_en_welkom_tegelijk
     {p in muzikanten inter gastvrouwen, t in teams, z in zondagen: teamlid[t,p]=1}:
     spelen[t,z] + welkom[p,z] <= 1;
@@ -485,10 +493,6 @@ subject to geen_beamer_en_wit_tegelijk
     {p in beamers inter helpers_wit, z in zondagen}:
     beaming[p,z] + helpend_wit[p,z] <= 1;
 
-#subject to geen_beamer_en_hulpkoster_tegelijk
-#    {p in hulpkosters inter beamers, z in zondagen}:
-#    hulpkosterdienst[p,z] + beaming[p,z] <= 1;
-
 subject to geen_geluid_en_blauw_tegelijk
     {p in schuivers inter helpers_blauw, z in zondagen}:
     geluid[p,z] + helpend_blauw[p,z] <= 1;
@@ -505,6 +509,18 @@ subject to geen_blauw_en_koffie_tegelijk
     {p in leiders_blauw inter schenkers, k in koffieteams, z in zondagen: koffieteamlid[k,p]=1}:
     leiding_blauw[p,z] + schenkendteam[k,z] <= 1;
 
+subject to geen_blauw_en_welkom_tegelijk
+    {p in leiders_blauw inter gastvrouwen, z in zondagen}:
+    leiding_blauw[p,z] + welkom[p,z] <= 1;
+
+subject to geen_wit_en_welkom_tegelijk
+    {p in leiders_wit inter gastvrouwen, z in zondagen}:
+    leiding_wit[p,z] + welkom[p,z] <= 1;
+
+subject to geen_rood_en_welkom_tegelijk
+    {p in leiders_rood inter gastvrouwen, z in zondagen}:
+    leiding_rood[p,z] + welkom[p,z] <= 1;
+
 subject to geen_leiding_rood_en_koffie_tegelijk
     {p in leiders_rood inter schenkers, k in koffieteams, z in zondagen: koffieteamlid[k,p]=1}:
     leiding_rood[p,z] + schenkendteam[k,z] <= 1;
@@ -514,12 +530,13 @@ subject to geen_leiding_rood_en_hulpkoster_tegelijk
     leiding_rood[p,z] + hulpkosterdienst[p,z] <= 1;
 
 #ministry sluit kinderdienst, muziek, leiding en geluid uit
-#welkom en kinderdienst
-
 
 ### vast ingedeeld ###
-#subject to rijswijk_special {z in zondagen}:
-#    welkom['lianne',z] = kosterdienst['matthijs',z];
+subject to rijswijk_special1 {z in zondagen}: kosterdienst['matthijs',z] <= welkom['lianne',z] + matthijszonderlianne;
+subject to rijswijk_special2 {z in zondagen}: welkom['lianne',z] <= kosterdienst['matthijs',z] + liannezondermatthijs;
+subject to wijngaarden_special {z in zondagen}: leiding_blauw['rachel',z] + leiding_rood['tim',z] = 2*timofrachel[z] - wijngaardenbreuk[z];
+subject to rood14: leiding_rood['special',14] = 1;
+subject to rood_special: (sum {z in zondagen:z!=14} leiding_rood['special',z]) = 0;
     
 solve ;
 

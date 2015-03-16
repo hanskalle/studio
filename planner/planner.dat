@@ -7,10 +7,10 @@ set leiders_blauw := rachel mieke annelies mirjam lidian miranda wenny;
 set helpers_blauw := selicia david chiara anneke noa vivianne;
 set leiders_wit := jennifer xandra lianne dieuwke yentl;
 set helpers_wit := thirza mattanja esther emma;
-set leiders_rood := xnora xjan_martijn xjolanda xtim in_dienst;
+set leiders_rood := nora jan_martijn jolanda tim in_dienst special;
 set schenkers := emma lilian ailine jacolien miranda lydia emmely mieke tom marieke rinus monika nora wim;
 set koffieteams := casson jacolien lydia vermeulen pigmans rosier;
-set gastvrouwen := suki wenny vena miranda chantal;
+set gastvrouwen := suki wenny vena miranda chantal lianne;
 set kosters := jose hans_d herman matthijs andreas frank;
 set hulpkosters := chris_v_m rinus wim_a hans_m gerben jeroen peter ad
                     wilfred ramon puch jaap tim jef ferdinand johan jonathan; #david hans_k hans_z
@@ -71,17 +71,17 @@ wendy       .       1       .       .
 
 #0 is onmisbaar, verder hoe hoger hoe slechter misbaar
 param teamlidmisbaar default 0 :=
-    wendy   1
-    vena    1
-    andreas 1
-    rosalie 2
-    inge    2
-    xandra  2
-    justin  3
+    wendy   5
+    vena    5
+    andreas 5
+    rosalie 10
+    inge    10
+    xandra  10
+    justin  30
 ;
 
 param leiderritme default 5;
-param leiderrust default 3;
+param leiderrust default 2;
 param teamritme default 3 :=
     tim 6
     peter 6
@@ -94,24 +94,27 @@ param schuiverritme default 3;
 param schuiverrust default 1;
 param beamerritme default 4;
 param beamerrust default 1;
-param blauwritme default 7;
-param blauwrust default 1;
+param blauwritme default 6
+    wenny 13
+    lidian 13;
+param blauwrust default 3;
 param witritme default 5;
-param witrust default 1;
+param witrust default 3;
 param roodritme default 4
-	xnora 8
-	in_dienst 8
+	nora 8
+	in_dienst 13
+	special 13
 ;
 param roodrust default 3
-	xnora 7
-	in_dienst 7;
+    nora 3
+    in_dienst 7;
 param koffieritme default 6;
-param koffierust default 1;
-param gastvrouwritme default 5;
-param gastvrouwrust default 1;
+param koffierust default 2;
+param gastvrouwritme default 6;
+param gastvrouwrust default 2;
 param kosterritme default 12;
-param kosterrust default 1;
+param kosterrust default 2;
 param hulpkosterritme default 8;
-param hulpkosterrust default 1;
+param hulpkosterrust default 2;
 
 end;
