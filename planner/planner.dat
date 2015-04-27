@@ -138,5 +138,4 @@ param Hulpkoster_ritme default 8;
 param Hulpkoster_offritme_penalty := 2;
 param Hulpkoster_rather_not_penalty := 10;
 param Hulpkoster_rest default 1;
-
 end;

@@ -93,7 +93,7 @@ def parse_results(filename):
 def get_results(beschikbaarheid):
     import subprocess
     write_beschikbaarheid('beschikbaarheid.dat', beschikbaarheid)
-    subprocess.check_call(['glpsol','--model','planner.mod','--data','planner.dat','--data','beschikbaarheid.dat','-y','results.txt'])
+    subprocess.check_call(['glpsol','--tmlim','180','--mipgap','0.05','--model','planner.mod','--data','planner.dat','--data','beschikbaarheid.dat','-y','results.txt','-o','dump.txt'])
     return parse_results('results.txt')
     
 def write_markup(filename, rooster):
