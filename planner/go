@@ -1,0 +1,2 @@
+./createmodel.py > gen.mod
+./generateschedule.py

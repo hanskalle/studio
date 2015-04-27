@@ -1,110 +1,142 @@
-set leiders := tim hans_k fokkelien inge jolanda;
-set muzikanten := tim johan rosalie andreas inge joshua justin xandra peter jonathan wendy selicia vena;
-set teams := tim inge peter johan;
-set schuivers := hans_k hans_d david;
-set beamers := david jeroen danny jonathan;
-set leiders_blauw := rachel mieke annelies mirjam lidian miranda;
-set helpers_blauw := selicia david chiara anneke noa vivianne;
-set leiders_wit := jennifer xandra lianne dieuwke yentl;
-set helpers_wit := thirza mattanja esther emma vivianne;
-set leiders_rood := nora jan_martijn jolanda tim;
-set schenkers := andreas ailine jacolien miranda lydia emmely mieke tom marieke rinus monika nora wim;
-set koffieteams := casson jacolien lydia vermeulen pigmans rosier;
-set gastvrouwen := suki wenny vena miranda chantal;
-set kosters := jose hans_d herman matthijs andreas frank;
-set hulpkosters := chris_v_m rinus jan_martijn hans_m gerben jeroen peter ad
-                    wilfred ramon puch jaap tim jef ferdinand johan jonathan;
+set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
+set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter Jonathan Wendy Selicia Vena Hans_Z;
+#Andreas 
+set Muziek_teams := Tim Inge Peter Johan;
+set Geluid_persons := Hans_K Hans_D David;
+set Beamer_persons := David Jeroen Danny Jonathan;
+set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda;
+set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
+set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl;
+set Groep_Wit_persons := Thirza Mattanja Esther Emma Vivianne;
+set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim;
+set Koffie_persons := Andreas Ailine Jacolien Miranda Lydia Emmely Mieke Tom Marieke Rinus Monika Nora Wim;
+set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier;
+set Welkom_persons := Suki Wenny Vena Miranda Chantal;
+set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank;
+set Hulpkoster_persons := Chris_vM Rinus Jan_Martijn Hans_M Gerben Jeroen Peter Ad
+                    Wilfred Ramon Puch Jaap Tim Jef Ferdinand Johan Jonathan;
 
-param koffieteamlid default 0 (tr) :
-            casson  jacolien    lydia   vermeulen   pigmans rosier :=
-andreas     1       .           .       .           .       .
-ailine      1       .           .       .           .       .
-jacolien    .       1           .       .           .       .
-miranda     .       1           .       .           .       .
-lydia       .       .           1       .           .       .
-emmely      .       .           1       .           .       .
-mieke       .       .           1       .           .       .
-tom         .       .           .       1           .       .
-marieke     .       .           .       1           .       .
-rinus       .       .           .       .           1       .
-monika      .       .           .       .           1       .
-nora        .       .           .       .           .       1
-wim         .       .           .       .           .       1
-;
-
-param voorkeurpaar_blauw default 0:
-            vivianne    anneke  noa     selicia david   chiara :=
-rachel      1           .       .       .       .       .
-mieke       .           1       .       .       .       .
-annelies    .           .       1       .       .       .
-mirjam      .           .       .       1       .       .
-lidian      .           .       .       .       1       .
-miranda     .           .       .       .       .       1
-;
-
-param voorkeurpaar_wit default 0:
-            thirza  mattanja    esther  emma    vivianne :=
-jennifer    1       .           .       .       .
-xandra      .       1           .       .       .
-lianne      .       .           1       .       .
-dieuwke     .       .           .       1       .
-yentl       .       .           .       .       1
-;
-
-param teamlid default 0 (tr) :
-            inge    peter   johan   tim :=
-tim         .       .       .       1
-johan       .       .       1       .
-rosalie     .       1       .       1
-andreas     .       .       1       .
-vena        .       .       1       .
-inge        1       .       .       .
-joshua      1       .       .       .
-justin      1       .       .       .
-xandra      1       .       .       .
-peter       .       1       .       .
-jonathan    .       1       .       .
-wendy       .       1       .       .
+param Muziek_member default 0 (tr) :
+            Inge    Peter   Johan   Tim :=
+Tim         .       .       .       1
+Johan       .       .       1       .
+Rosalie     .       1       .       1
+#Andreas     .       .       .       .
+Hans_Z      .       .       1       .
+Vena        .       .       .       1
+Inge        1       .       .       .
+Joshua      1       .       .       .
+Justin      1       .       .       .
+Xandra      1       .       .       .
+Peter       .       1       .       .
+Jonathan    .       1       .       .
+Wendy       .       1       .       .
 ;
 
 #0 is onmisbaar, verder hoe hoger hoe slechter misbaar
-param teamlidmisbaar default 0 :=
-    wendy   1
-    vena    1
-    andreas 1
-    rosalie 2
-    inge    2
-    xandra  2
-    justin  3
+param Muziek_essential default 0 :=
+    Wendy   1
+    Vena    1
+#    Andreas 1
+    Rosalie 2
+    Inge    2
+    Xandra  2
+    Justin  3
 ;
 
-param leiderritme default 5;
-param leiderrust default 3;
-param teamritme default 3 :=
-    tim 6
-    peter 6
+param Koffie_member default 0 (tr) :
+            Casson  Jacolien    Lydia   Vermeulen   Pigmans Rosier :=
+Andreas     1       .           .       .           .       .
+Ailine      1       .           .       .           .       .
+Jacolien    .       1           .       .           .       .
+Miranda     .       1           .       .           .       .
+Lydia       .       .           1       .           .       .
+Emmely      .       .           1       .           .       .
+Mieke       .       .           1       .           .       .
+Tom         .       .           .       1           .       .
+Marieke     .       .           .       1           .       .
+Rinus       .       .           .       .           1       .
+Monika      .       .           .       .           1       .
+Nora        .       .           .       .           .       1
+Wim         .       .           .       .           .       1
 ;
-param teamrust default 1 :=
-    tim 3
-    peter 3
+
+param Koffie_essential default 1;
+
+param Groep_Blauw_prefered_pair default 0:
+            Vivianne    Anneke  Noa     Selicia David   Chiara :=
+Rachel      1           .       .       .       .       .
+Mieke       .           1       .       .       .       .
+Annelies    .           .       1       .       .       .
+Mirjam      .           .       .       1       .       .
+Lidian      .           .       .       .       1       .
+Miranda     .           .       .       .       .       1
 ;
-param schuiverritme default 3;
-param schuiverrust default 1;
-param beamerritme default 4;
-param beamerrust default 1;
-param blauwritme default 6;
-param blauwrust default 1;
-param witritme default 5;
-param witrust default 1;
-param roodritme default 4;
-param roodrust default 1;
-param koffieritme default 6;
-param koffierust default 1;
-param gastvrouwritme default 5;
-param gastvrouwrust default 1;
-param kosterritme default 12;
-param kosterrust default 2;
-param hulpkosterritme default 8;
-param hulpkosterrust default 1;
+
+param Groep_Wit_prefered_pair default 0:
+            Thirza  Mattanja    Esther  Emma    Vivianne :=
+Jennifer    1       .           .       .       .
+Xandra      .       1           .       .       .
+Lianne      .       .           1       .       .
+Dieuwke     .       .           .       1       .
+Yentl       .       .           .       .       1
+;
+
+param Zangleiding_offritme_penalty := 6;
+param Zangleiding_ritme default 5;
+param Zangleiding_rest default 3;
+param Zangleiding_rather_not_penalty := 10;
+param Muziek_offritme_penalty 8;
+param Muziek_ritme default 3 :=
+    Tim 6
+    Peter 6
+;
+param Muziek_rest default 1 :=
+    Tim 3
+    Peter 3
+;
+param Muziek_maximum_missing default 3;
+param Muziek_rather_not_penalty := 10;
+param Geluid_ritme default 3;
+param Geluid_offritme_penalty := 5;
+param Geluid_rather_not_penalty := 10;
+param Geluid_rest default 0;
+param Beamer_ritme default 4;
+param Beamer_offritme_penalty := 3;
+param Beamer_rather_not_penalty := 10;
+param Beamer_rest default 1;
+param Leiding_Blauw_ritme default 6;
+param Leiding_Blauw_offritme_penalty := 4;
+param Leiding_Blauw_rather_not_penalty := 10;
+param Leiding_Blauw_rest default 1;
+param Groep_Blauw_not_prefered_pair_penalty := 2;
+param Groep_Blauw_rather_not_penalty := 10;
+param Leiding_Wit_ritme default 5;
+param Leiding_Wit_offritme_penalty := 4;
+param Leiding_Wit_rather_not_penalty := 10;
+param Leiding_Wit_rest default 1;
+param Groep_Wit_not_prefered_pair_penalty := 2;
+param Groep_Wit_rather_not_penalty := 10;
+param Leiding_Rood_ritme default 4;
+param Leiding_Rood_offritme_penalty := 4;
+param Leiding_Rood_rather_not_penalty := 10;
+param Leiding_Rood_rest default 1;
+param Koffie_ritme default 6;
+param Koffie_offritme_penalty := 3;
+param Koffie_rather_not_penalty := 10;
+param Koffie_rest default 1;
+param Koffie_maximum_missing default 1;
+param Welkom_ritme default 5;
+param Welkom_offritme_penalty := 2;
+param Welkom_rather_not_penalty := 10;
+param Welkom_rest default 1;
+param Hoofdkoster_ritme default 12;
+param Hoofdkoster_offritme_penalty := 3;
+param Hoofdkoster_rather_not_penalty := 10;
+param Hoofdkoster_rest default 2;
+param Hulpkoster_ritme default 8;
+param Hulpkoster_offritme_penalty := 2;
+param Hulpkoster_rather_not_penalty := 10;
+param Hulpkoster_rest default 1;
 
 end;

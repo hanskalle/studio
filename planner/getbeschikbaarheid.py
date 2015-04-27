@@ -60,7 +60,7 @@ def write_beschikbaarheid(filename, beschikbaarheid):
     file.write(':=\n')        
     for teamlid in sorted(beschikbaarheid):
         if teamlid != 'week':
-            file.write(teamlid.lower())
+            file.write(teamlid)
             for beschikbaar in beschikbaarheid[teamlid]:
                 file.write(' ')
                 if beschikbaar == 'x':
