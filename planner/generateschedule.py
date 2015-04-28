@@ -82,10 +82,10 @@ def parse_results(filename):
                 rooster[week][task] = person
     return rooster
 
-def get_results(persons):
+def get_results(persons, timlim):
     import subprocess
     write_beschikbaarheid('beschikbaarheid.dat', persons)
-    subprocess.check_call(['glpsol','--tmlim','300','--model','gen.mod','--data','planner.dat','--data','beschikbaarheid.dat','-y','results.txt'])
+    subprocess.check_call(['glpsol','--tmlim',timlim,'--model','gen.mod','--data','planner.dat','--data','beschikbaarheid.dat','-y','results.txt'])
     return parse_results('results.txt')
     
 def write_markup(filename, rooster):
@@ -138,6 +138,12 @@ def write_markup(filename, rooster):
     for line in open(filename, 'r'):
         print line[0:-1]
 
-persons = get_persons()
-rooster = get_results(persons)
-write_markup('rooster.txt', rooster)
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) == 2:
+        timlim = sys.argv[1]
+    else:
+        timlim = '300'
+    persons = get_persons()
+    rooster = get_results(persons, timlim)
+    write_markup('rooster.txt', rooster)

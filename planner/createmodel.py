@@ -1,56 +1,76 @@
 #!/usr/bin/env python
 
-def createSetnames(single_tasks, team_tasks, pair_tasks):
-    setnames = []
-    for task in single_tasks:
-        setnames.append("set %s_persons;" % task)
-    for task in team_tasks:
-        setnames.append("set %s_persons;" % task)
-        setnames.append("set %s_teams;" % task)
-    for task, pair in pair_tasks:
-        setnames.append("set %s_persons;" % task)
-        if task != pair:
-            setnames.append("set %s_persons;" % pair)
-    return setnames
+class Task:
+    def __init__(self,name,in_teams=False,paired_task=None):
+        self.name = name.replace(' ','_')
+        self.in_teams = in_teams
+        if paired_task != None:
+            self.paired_task = paired_task.replace(' ','_')
+        else:
+            self.paired_task = None
+        self.dict = {'name': self.name, 'paired_task': self.paired_task}
+        if in_teams:
+            self.dict['set'] = "teams"
+        else:
+            self.dict['set'] = "persons"
     
-def createParams(task,isTeam=False,pair=None):
-    params = []
-    params.append("param %s_offritme_penalty, >=0;" % task)
-    params.append("param %s_rather_not_penalty, >=0;" % task)
-    if isTeam:
-        setname = "teams"
-        params.append("param %s_member {t in %s_teams, p in %s_persons}, binary;" % (task, task, task))
-        params.append("param %s_maximum_missing {t in %s_teams}, >= 0;" % (task, task))
-        params.append("param %s_essential {p in %s_persons}, >= 0;" % (task, task))
-    else:
-        setname = "persons"
-    params.append("param %s_available {p in %s_persons, w in weeks}, >=0, <=1;" % (task, task))
-    params.append("param %s_ritme {x in %s_%s}, integer, >=1;" % (task, task, setname))
-    params.append("param %s_rest {x in %s_%s}, integer, >=0;" % (task, task, setname))
-    if pair != None:
-        params.append("param %s_prefered_pair {p1 in %s_persons, p2 in %s_persons}, binary;" % (pair, task, pair))
-        params.append("param %s_not_prefered_pair_penalty, >=0;" % pair)
-        if pair != task:
-            params.append("param %s_rather_not_penalty, >=0;" % pair)
-            params.append("param %s_available {p in %s_persons, w in weeks}, >=0, <=1;" % (pair, pair))
-    return params
-    
-def createVariables(task,isTeam=False,pair=None):
-    variables = []
-    if isTeam:
-        setname = "teams"
-        variables.append("var %s_missing {p in %s_persons, w in weeks}, binary;" % (task, task))
-    else:
-        setname = "persons"
-    variables.append("var %s {x in %s_%s, w in weeks}, binary;" % (task, task, setname))
-    variables.append("var %s_offritme {x in %s_%s, w in weeks_extended}, binary;" % (task, task, setname))
-    variables.append("var %s_rather_not {p in %s_persons, w in weeks}, binary;" % (task, task))
-    if pair != None:
-        variables.append("var %s_not_prefered_pair {w in weeks}, binary;" % pair)
-        if pair != task:
-            variables.append("var %s {p in %s_persons, w in weeks}, binary;" % (pair, pair))
-            variables.append("var %s_rather_not {p in %s_persons, w in weeks}, binary;" % (pair, pair))
-    return variables
+    def get_sets(self):
+        sets = []
+        sets.append("set %(name)s_persons;" % self.dict)
+        if self.in_teams:
+            sets.append("set %(name)s_teams;" % self.dict)
+        return sets
+
+    def get_params(self):
+        params = []
+        params.append("param %(name)s_offritme_penalty, >=0;" % self.dict)
+        params.append("param %(name)s_rather_not_penalty, >=0;" % self.dict)
+        params.append("param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;" % self.dict)
+        if self.in_teams:
+            params.append("param %(name)s_member {t in %(name)s_teams, p in %(name)s_persons}, binary;" % self.dict)
+            params.append("param %(name)s_essential {p in %(name)s_persons}, >= 0;" % self.dict)
+            params.append("param %(name)s_maximum_missing {t in %(name)s_teams}, >= 0;" % self.dict)
+        if self.paired_task != None:
+            params.append("param %(name)s_prefered_pair {p1 in %(paired_task)s_persons, p2 in %(name)s_persons}, binary;" % self.dict)
+            params.append("param %(name)s_not_prefered_pair_penalty, >=0;" % self.dict)
+        else:
+            params.append("param %(name)s_ritme {p in %(name)s_%(set)s}, integer, >=1;" % self.dict)
+            params.append("param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
+        return params
+
+    def get_vars(self):
+        variables = []
+        variables.append("var %(name)s {t in %(name)s_%(set)s, w in weeks}, binary;" % self.dict)
+        variables.append("var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;" % self.dict)
+        if self.in_teams:
+            variables.append("var %(name)s_missing {p in %(name)s_persons, w in weeks}, binary;" % self.dict)
+        if self.paired_task != None:
+            variables.append("var %(name)s_not_prefered_pair {w in weeks}, binary;" % self.dict)
+        else:
+            variables.append("var %(name)s_offritme {t in %(name)s_%(set)s, w in weeks_extended}, binary;" % self.dict)
+        return variables
+        
+    def get_rules(self):
+        rules = []
+        if self.in_teams:
+            addRuleAvailableTeam(rules,self.name)
+            addRuleMissing(rules,self.name)
+            addRuleMaximumMissing(rules,self.name)
+        else:
+            addRuleAvailablePersons(rules,self.name)
+        addRuleSingle(rules,self.name,self.dict['set'])
+        addRuleRitme(rules,self.name,self.dict['set'])
+        addRuleMinimum(rules,self.name,self.dict['set'])
+        addRuleMaximum(rules,self.name,self.dict['set'])
+        addRuleRest(rules,self.name,self.dict['set'])
+#        if pair != None:
+#            addRuleSinglePair(rules,pair)
+#            addRuleAvailablePair(rules,pair)
+#            addRulePreferedPair(rules,task,pair)
+#            if task == pair:
+#                addRuleExclusion(rules,task,pair)
+        return rules
+
     
 def createRules(task,isTeam=False,pair=None):
     rules = []
@@ -206,35 +226,50 @@ if __name__ == "__main__":
     single_tasks = ["Zangleiding", "Geluid", "Beamer", "Leiding_Rood", "Welkom", "Hoofdkoster", "Hulpkoster"]
     team_tasks = ["Muziek", "Koffie"]
     pair_tasks = [("Leiding_Blauw", "Groep_Blauw"), ("Leiding_Wit", "Groep_Wit")] #, ("Ministry", "Ministry")]
-    exclusions = [("Zangleiding", "Geluid"), ("Muziek", "Welkom"), ("Zangleiding", "Leiding_Rood"),
-                    ("Muziek", "Hulpkoster"), ("Beamer", "Geluid"), ("Muziek", "Beamer"),
-                    ("Groep_Blauw", "Beamer"), ("Groep_Wit", "Beamer"), ("Hulpkoster", "Beamer")]
+    exclusions = [("Zangleiding", "Geluid"), ("Zangleiding", "Leiding_Rood"), ("Muziek", "Leiding_Wit"), 
+                    ("Muziek", "Welkom"), ("Muziek", "Hulpkoster"), ("Beamer", "Geluid"), 
+                    ("Muziek", "Beamer"), ("Groep_Blauw", "Beamer"), ("Groep_Wit", "Beamer"),
+                    ("Groep_Blauw", "Geluid"), ("Geluid", "Hoofdkoster"), ("Geluid", "Hulpkoster"),
+                    ("Groep_Blauw","Groep_Wit"), ("Koffie","Leiding_Blauw"), ("Welkom","Leiding_Blauw"),
+                    ("Welkom","Leiding_Wit"), ("Welkom","Leiding_Rood"), ("Koffie","Leiding_Rood"),
+                    ("Leiding_Rood","Hulpkoster"), ("Hulpkoster", "Beamer")]
+                    #ministry sluit kinderdienst, muziek, leiding en geluid uit
                     
-    for setname in createSetnames(single_tasks, team_tasks, pair_tasks):
-        print setname
-    print "param first_week, integer, >= 1;"
-    print "param last_week, integer, <= 53;"
-    print "param number_of_weeks := last_week - first_week+1;"
-    print "set weeks := first_week .. last_week;"
-    print "set weeks_extended := (first_week-number_of_weeks+2) .. (last_week+number_of_weeks-2);"
-    for task in single_tasks:
-        for param in createParams(task):
-            print param
-    for task in team_tasks:
-        for param in createParams(task,True):
-            print param
-    for task, pair in pair_tasks:
-        for param in createParams(task,False,pair):
-            print param
-    for task in single_tasks:
-        for variable in createVariables(task):
-            print variable
-    for task in team_tasks:
-        for variable in createVariables(task,True):
-            print variable
-    for task, pair in pair_tasks:
-        for variable in createVariables(task,False,pair):
-            print variable
+    tasks = []
+    tasks.append(Task("Zangleiding"))
+    tasks.append(Task("Muziek",True))
+    tasks.append(Task("Geluid"))
+    tasks.append(Task("Beamer"))
+    tasks.append(Task("Leiding Rood"))
+    tasks.append(Task("Leiding Wit"))
+    tasks.append(Task("Groep Wit",paired_task="Leiding Wit"))
+    tasks.append(Task("Leiding Blauw"))
+    tasks.append(Task("Groep Blauw",paired_task="Leiding Blauw"))
+    tasks.append(Task("Koffie",True))
+    tasks.append(Task("Welkom"))
+    tasks.append(Task("Hoofdkoster"))
+    tasks.append(Task("Hulpkoster"))
+
+    output = []
+    for task in tasks:
+        output.extend(task.get_sets())
+    output.append("param first_week, integer, >= 1;")
+    output.append("param last_week, integer, <= 53;")
+    output.append("param number_of_weeks := last_week - first_week+1;")
+    output.append("set weeks := first_week .. last_week;")
+    output.append("set weeks_extended := (first_week-number_of_weeks+2) .. (last_week+number_of_weeks-2);")
+    for task in tasks:
+        output.extend(task.get_params())
+    for task in tasks:
+        output.extend(task.get_vars())
+
+
+#    for task in tasks:
+#        output.extend(task.get_rules())
+
+    for line in output:
+        print line
+                    
     for objectives in createObjective(single_tasks, team_tasks, pair_tasks):
         print objectives
     for task in single_tasks:
