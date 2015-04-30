@@ -1,27 +1,34 @@
 set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
-set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter Jonathan Wendy Selicia Vena Hans_Z;
+set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
+                    Jonathan Wendy Selicia Vena Hans_Z;
 #Andreas 
 set Muziek_teams := Tim Inge Peter Johan;
 set Geluid_persons := Hans_K Hans_D David;
-set Beamer_persons := David Jeroen Danny Jonathan;
+set Beamer_persons := David Jeroen Danny Jonathan; #Albert vragen voor beamer
+#Bas Esther (Noa)
 set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda;
-set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
+set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne Wenny;
 set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl;
 set Groep_Wit_persons := Thirza Mattanja Esther Emma Vivianne;
-set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim;
-set Koffie_persons := Andreas Ailine Jacolien Miranda Lydia Emmely Mieke Tom Marieke Rinus Monika Nora Wim;
+set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst;
+set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
+                    Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
 set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier;
-set Welkom_persons := Suki Wenny Vena Miranda Chantal;
-set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank;
-set Hulpkoster_persons := Chris_vM Rinus Jan_Martijn Hans_M Gerben Jeroen Peter Ad
-                    Wilfred Ramon Puch Jaap Tim Jef Ferdinand Johan Jonathan;
+set Welkom_persons := Suki Wenny Vena Miranda Chantal Lianne;
+set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
+set Hulpkoster_persons := Rinus Hans_M Gerben Jeroen Peter
+                    Ad Wilfred Ramon Puch Jaap Jef Ferdinand Johan
+                    Jonathan Hans_Z Wim_A Teus;
+#set Ministry := Andreas Fokkelien Xandra;
+
+#Jolanda doet Rood samen met Emmely!!!
 
 param Muziek_member default 0 (tr) :
             Inge    Peter   Johan   Tim :=
 Tim         .       .       .       1
 Johan       .       .       1       .
 Rosalie     .       1       .       1
-#Andreas     .       .       .       .
+#Andreas    .       .       .       .
 Hans_Z      .       .       1       .
 Vena        .       .       .       1
 Inge        1       .       .       .
@@ -37,7 +44,7 @@ Wendy       .       1       .       .
 param Muziek_essential default 0 :=
     Wendy   1
     Vena    1
-#    Andreas 1
+#   Andreas 1
     Rosalie 2
     Inge    2
     Xandra  2
@@ -45,20 +52,23 @@ param Muziek_essential default 0 :=
 ;
 
 param Koffie_member default 0 (tr) :
-            Casson  Jacolien    Lydia   Vermeulen   Pigmans Rosier :=
-Andreas     1       .           .       .           .       .
-Ailine      1       .           .       .           .       .
-Jacolien    .       1           .       .           .       .
-Miranda     .       1           .       .           .       .
-Lydia       .       .           1       .           .       .
-Emmely      .       .           1       .           .       .
-Mieke       .       .           1       .           .       .
-Tom         .       .           .       1           .       .
-Marieke     .       .           .       1           .       .
-Rinus       .       .           .       .           1       .
-Monika      .       .           .       .           1       .
-Nora        .       .           .       .           .       1
-Wim         .       .           .       .           .       1
+            Casson  Jacolien    Lydia   Vermeulen   Pigmans Rosier  Mertens :=
+Lilian.     1       .           .       .           .       .       .
+Emma        1       .           .       .           .       .       .
+Ailine      1       .           .       .           .       .       .
+Jacolien    .       1           .       .           .       .       .
+Miranda     .       1           .       .           .       .       .
+Lydia       .       .           1       .           .       .       .
+Emmely      .       .           1       .           .       .       .
+Mieke       .       .           1       .           .       .       .
+Tom         .       .           .       1           .       .       .
+Marieke     .       .           .       1           .       .       .
+Rinus       .       .           .       .           1       .       .
+Monika      .       .           .       .           1       .       .
+Nora        .       .           .       .           .       1       .
+Wim_R       .       .           .       .           .       1       .
+Dieuwke     .       .           .       .           .       .       1
+Hans_M      .       .           .       .           .       .       1
 ;
 
 param Koffie_essential default 1;
@@ -70,8 +80,10 @@ Mieke       .           1       .       .       .       .
 Annelies    .           .       1       .       .       .
 Mirjam      .           .       .       1       .       .
 Lidian      .           .       .       .       1       .
+Wenny       .           .       .       .       1       .
 Miranda     .           .       .       .       .       1
 ;
+
 
 param Groep_Wit_prefered_pair default 0:
             Thirza  Mattanja    Esther  Emma    Vivianne :=
@@ -79,7 +91,7 @@ Jennifer    1       .           .       .       .
 Xandra      .       1           .       .       .
 Lianne      .       .           1       .       .
 Dieuwke     .       .           .       1       .
-Yentl       .       .           .       .       1
+Yentl       .       .           1       .       1
 ;
 
 param Zangleiding_offritme_penalty := 6;
@@ -111,13 +123,22 @@ param Leiding_Blauw_rather_not_penalty := 10;
 param Leiding_Blauw_rest default 1;
 param Groep_Blauw_not_prefered_pair_penalty := 2;
 param Groep_Blauw_rather_not_penalty := 10;
-param Leiding_Wit_ritme default 5;
+param Leiding_Wit_ritme default 6
+    Lidian  12
+    Wenny   12
+;
+param Leiding_Wit_rest default 1
+    Lidian 7
+    Wenny 7
+;
 param Leiding_Wit_offritme_penalty := 4;
 param Leiding_Wit_rather_not_penalty := 10;
-param Leiding_Wit_rest default 1;
 param Groep_Wit_not_prefered_pair_penalty := 2;
 param Groep_Wit_rather_not_penalty := 10;
-param Leiding_Rood_ritme default 4;
+param Leiding_Rood_ritme default 4
+    Nora 8
+    In_de_dienst 8
+;
 param Leiding_Rood_offritme_penalty := 4;
 param Leiding_Rood_rather_not_penalty := 10;
 param Leiding_Rood_rest default 1;

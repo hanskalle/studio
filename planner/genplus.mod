@@ -517,13 +517,13 @@ subject to een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_m
     {p in Zangleiding_persons inter Muziek_teams, w in weeks}:
     Muziek[p,w] >= Zangleiding[p,w];
 
-#subject to rijswijk_special1
-#    {w in weeks}:
-#    Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne;
+subject to rijswijk_special1
+    {w in weeks}:
+    Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne;
 
-#subject to rijswijk_special2
-#    {w in weeks}:
-#    Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs;
+subject to rijswijk_special2
+    {w in weeks}:
+    Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs;
 
 subject to wijngaarden_special
     {w in weeks}: Leiding_Blauw['Rachel',w] + Leiding_Rood['Tim',w] = 2 * timofrachel[w] - wijngaardenbreuk[w];
