@@ -4,12 +4,13 @@ set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
 #Andreas 
 set Muziek_teams := Tim Inge Peter Johan;
 set Geluid_persons := Hans_K Hans_D David;
-set Beamer_persons := David Jeroen Danny Jonathan; #Albert vragen voor beamer
+set Beamer_persons := David Jeroen Danny Jonathan;
+#Albert vragen voor beamer
 #Bas Esther (Noa)
-set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda;
-set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne Wenny;
+set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
+set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
 set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl;
-set Groep_Wit_persons := Thirza Mattanja Esther Emma Vivianne;
+set Groep_Wit_persons := Thirza Mattanja Esther Emma;
 set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst;
 set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
                     Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
@@ -61,7 +62,7 @@ Miranda     .       1           .       .           .       .       .
 Lydia       .       .           1       .           .       .       .
 Emmely      .       .           1       .           .       .       .
 Mieke       .       .           1       .           .       .       .
-Tom         .       .           .       1           .       .       .
+Ton         .       .           .       1           .       .       .
 Marieke     .       .           .       1           .       .       .
 Rinus       .       .           .       .           1       .       .
 Monika      .       .           .       .           1       .       .
@@ -128,8 +129,8 @@ param Leiding_Wit_ritme default 6
     Wenny   12
 ;
 param Leiding_Wit_rest default 1
-    Lidian 7
-    Wenny 7
+    Lidian 5
+    Wenny 5
 ;
 param Leiding_Wit_offritme_penalty := 4;
 param Leiding_Wit_rather_not_penalty := 10;
