@@ -5,8 +5,6 @@ set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
 set Muziek_teams := Tim Inge Peter Johan;
 set Geluid_persons := Hans_K Hans_D David;
 set Beamer_persons := David Jeroen Danny Jonathan;
-#Albert vragen voor beamer
-#Bas Esther (Noa)
 set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
 set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
 set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl;
@@ -14,7 +12,7 @@ set Groep_Wit_persons := Thirza Mattanja Esther Emma;
 set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst;
 set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
                     Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
-set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier;
+set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier Mertens;
 set Welkom_persons := Suki Wenny Vena Miranda Chantal Lianne;
 set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
 set Hulpkoster_persons := Rinus Hans_M Gerben Jeroen Peter
@@ -23,6 +21,8 @@ set Hulpkoster_persons := Rinus Hans_M Gerben Jeroen Peter
 #set Ministry := Andreas Fokkelien Xandra;
 
 #Jolanda doet Rood samen met Emmely!!!
+
+#Albert vragen voor beamer en ook Bas Esther (Noa)
 
 param Muziek_member default 0 (tr) :
             Inge    Peter   Johan   Tim :=
@@ -54,7 +54,7 @@ param Muziek_essential default 0 :=
 
 param Koffie_member default 0 (tr) :
             Casson  Jacolien    Lydia   Vermeulen   Pigmans Rosier  Mertens :=
-Lilian.     1       .           .       .           .       .       .
+Lilian      1       .           .       .           .       .       .
 Emma        1       .           .       .           .       .       .
 Ailine      1       .           .       .           .       .       .
 Jacolien    .       1           .       .           .       .       .
@@ -118,17 +118,17 @@ param Beamer_ritme default 4;
 param Beamer_offritme_penalty := 3;
 param Beamer_rather_not_penalty := 10;
 param Beamer_rest default 1;
-param Leiding_Blauw_ritme default 6;
+param Leiding_Wit_ritme default 6;
 param Leiding_Blauw_offritme_penalty := 4;
 param Leiding_Blauw_rather_not_penalty := 10;
-param Leiding_Blauw_rest default 1;
+param Leiding_Wit_rest default 1;
 param Groep_Blauw_not_prefered_pair_penalty := 2;
 param Groep_Blauw_rather_not_penalty := 10;
-param Leiding_Wit_ritme default 6
+param Leiding_Blauw_ritme default 6
     Lidian  12
     Wenny   12
 ;
-param Leiding_Wit_rest default 1
+param Leiding_Blauw_rest default 1
     Lidian 5
     Wenny 5
 ;
