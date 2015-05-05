@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from itertools import combinations
 
 class Task:
     def __init__(self,name,in_teams=False,paired_task=None):
@@ -26,6 +27,7 @@ class Task:
         params.append("param %(name)s_offritme_penalty, >=0;" % self.dict)
         params.append("param %(name)s_rather_not_penalty, >=0;" % self.dict)
         params.append("param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;" % self.dict)
+        params.append("param %(name)s_number_needed {w in weeks}, integer, >=0;" % self.dict)
         if self.in_teams:
             params.append("param %(name)s_member {t in %(name)s_teams, p in %(name)s_persons}, binary;" % self.dict)
             params.append("param %(name)s_essential {p in %(name)s_persons}, >= 0;" % self.dict)
@@ -50,190 +52,155 @@ class Task:
             variables.append("var %(name)s_offritme {t in %(name)s_%(set)s, w in weeks_extended}, binary;" % self.dict)
         return variables
         
+    def get_objective_terms(self):
+        terms = []
+        terms.append("  + (sum {p in %(name)s_persons, w in weeks}" % self.dict)
+        terms.append("    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])" % self.dict)
+        if self.in_teams:
+            terms.append("  + (sum {p in %(name)s_persons, w in weeks}" % self.dict)
+            terms.append("    %(name)s_essential[p] * %(name)s_missing[p,w])" % self.dict)
+        if self.paired_task == None:
+            terms.append("  + (sum {x in %(name)s_%(set)s, w in weeks_extended}" % self.dict)
+            terms.append("    %(name)s_offritme_penalty * %(name)s_offritme[x,w])" % self.dict)
+        else:
+            terms.append("  + (sum {w in weeks}")
+            terms.append("    %(name)s_not_prefered_pair_penalty * %(name)s_not_prefered_pair[w])" % self.dict)
+        return terms
+
     def get_rules(self):
         rules = []
+        rules.extend(self.get_rule_number_needed())
+        rules.extend(self.get_rule_available())
         if self.in_teams:
-            addRuleAvailableTeam(rules,self.name)
-            addRuleMissing(rules,self.name)
-            addRuleMaximumMissing(rules,self.name)
+            rules.extend(self.get_rule_missing())
+#            rules.extend(self.get_rule_maximum_missing())
+        if self.paired_task == None:
+            rules.extend(self.get_rule_ritme())
+            rules.extend(self.get_rule_rest())
+            rules.extend(self.get_rule_minimum())
+            rules.extend(self.get_rule_maximum())
         else:
-            addRuleAvailablePersons(rules,self.name)
-        addRuleSingle(rules,self.name,self.dict['set'])
-        addRuleRitme(rules,self.name,self.dict['set'])
-        addRuleMinimum(rules,self.name,self.dict['set'])
-        addRuleMaximum(rules,self.name,self.dict['set'])
-        addRuleRest(rules,self.name,self.dict['set'])
-#        if pair != None:
-#            addRuleSinglePair(rules,pair)
-#            addRuleAvailablePair(rules,pair)
-#            addRulePreferedPair(rules,task,pair)
-#            if task == pair:
-#                addRuleExclusion(rules,task,pair)
+            rules.extend(self.get_rule_prefered_pair())
+        return rules
+        
+    def get_exclusion_rules(self, other_task):
+        rules = []
+        rules.append("subject to %s_excludes_%s" % (self.name, other_task.name))
+        generator = ("  {w in weeks, p in %s_persons inter %s_persons" % (self.name, other_task.name))
+        if self.in_teams:
+            generator += ", t1 in %s_teams" % (self.name)
+        if other_task.in_teams:
+            generator += ", t2 in %s_teams" % (other_task.name)
+        if self.in_teams or other_task.in_teams:
+            generator += ": "
+        if self.in_teams:
+            generator += "%s_member[t1,p]=1" % (self.name)
+        if self.in_teams and other_task.in_teams:
+            generator += " and "
+        if other_task.in_teams:
+            generator += "%s_member[t2,p]=1" % (other_task.name)
+        generator += "}:"
+        rules.append(generator)        
+        if self.in_teams:
+            expression = "  %s[t1,w]" % (self.name)
+        else:
+            expression = "  %s[p,w]" % (self.name)
+        if other_task.in_teams:
+            expression += " + %s[t2,w]" % (other_task.name)
+        else:
+            expression += " + %s[p,w]" % (other_task.name)
+        expression += (" <= 1;")
+        rules.append(expression)
         return rules
 
-    
-def createRules(task,isTeam=False,pair=None):
-    rules = []
-    if isTeam:
-        setname = "teams"
-        addRuleAvailableTeam(rules,task)
-        addRuleMissing(rules,task)
-        addRuleMaximumMissing(rules,task)
-    else:
-        setname = "persons"
-        addRuleAvailablePersons(rules,task)
-    addRuleSingle(rules,task,setname)
-    addRuleRitme(rules,task,setname)
-    addRuleMinimum(rules,task,setname)
-    addRuleMaximum(rules,task,setname)
-    addRuleRest(rules,task,setname)
-    if pair != None:
-        addRuleSinglePair(rules,pair)
-        addRuleAvailablePair(rules,pair)
-        addRulePreferedPair(rules,task,pair)
-        if task == pair:
-            addRuleExclusion(rules,task,pair)
-    return rules
-    
-def addRuleSingle(rules,task,setname):
-    rules.append("subject to single_%s" % task)
-    rules.append("  {w in weeks}:")
-    rules.append("  (sum {x in %s_%s} %s[x,w]) = 1;" % (task, setname, task))
+    def get_rule_number_needed(self):
+        rules = []
+        rules.append("subject to number_needed_%(name)s" % self.dict)
+        rules.append("  {w in weeks}:")
+        rules.append("  (sum {x in %(name)s_%(set)s} %(name)s[x,w]) = %(name)s_number_needed[w];" % self.dict)
+        return rules
 
-def addRuleAvailablePersons(rules,task):
-    rules.append("subject to available_%s" % task)
-    rules.append("  {w in weeks, p in %s_persons}:" % task)
-    rules.append("  %s[p,w] <= %s_available[p,w] + 0.5 * %s_rather_not[p,w];" % (task, task, task))
+    def get_rule_available(self):
+        rules = []
+        rules.append("subject to available_%(name)s" % self.dict)
+        generator = "  {w in weeks, p in %(name)s_persons" % self.dict
+        if self.in_teams:
+            generator += ", t in %(name)s_teams: %(name)s_member[t,p]=1 and %(name)s_essential[p]=0" % self.dict
+        generator += "}:"
+        rules.append(generator)
+        expression = "  %(name)s[" % self.dict
+        if self.in_teams:
+            expression += "t"
+        else:
+            expression += "p"
+        expression += ",w] <= %(name)s_available[p,w] + 0.5 * %(name)s_rather_not[p,w];" % self.dict
+        rules.append(expression)
+        return rules
+        
+    def get_rule_ritme(self):
+        rules = []
+        rules.append("subject to ritme_%(name)s" % self.dict)
+        rules.append("  {w1 in weeks_extended, x in %(name)s_%(set)s}:" % self.dict)
+        rules.append("  (sum {w2 in w1..(w1 + %(name)s_ritme[x]-1): w2 in weeks} %(name)s[x,w2])" % self.dict)
+        rules.append("    <= 1 + %(name)s_offritme[x,w1];" % self.dict)
+        return rules
 
-def addRuleAvailableTeam(rules,task):
-    rules.append("subject to available_%s" % task)
-    rules.append("  {w in weeks, t in %s_teams, p in %s_persons: %s_member[t,p]=1 and %s_essential[p]=0}:" % (task, task, task, task))
-    rules.append("  %s[t,w] <= %s_available[p,w] + 0.5 * %s_rather_not[p,w];" % (task, task, task))
+    def get_rule_minimum(self):
+        rules = []
+        rules.append("subject to minimum_%(name)s" % self.dict)
+        rules.append("  {x in %(name)s_%(set)s}:" % self.dict)
+        rules.append("  (sum {w in weeks} %(name)s[x,w])" % self.dict)
+        rules.append("    >= number_of_weeks/%(name)s_ritme[x]-2;" % self.dict)
+        return rules
 
-def addRuleRitme(rules,task,setname):
-    rules.append("subject to ritme_%s" % task)
-    rules.append("  {w1 in weeks_extended, x in %s_%s}:" % (task,setname))
-    rules.append("  (sum {w2 in w1..(w1 + %s_ritme[x]-1): w2 in weeks} %s[x,w2])" % (task, task))
-    rules.append("    <= 1 + %s_offritme[x,w1];" % task)
+    def get_rule_maximum(self):
+        rules = []
+        rules.append("subject to maximum_%(name)s" % self.dict)
+        rules.append("  {x in %(name)s_%(set)s}:" % self.dict)
+        rules.append("  (sum {w in weeks} %(name)s[x,w])" % self.dict)
+        rules.append("    <= number_of_weeks/%(name)s_ritme[x]+2;" % self.dict)
+        return rules
 
-def addRuleMinimum(rules,task,setname):
-    rules.append("subject to minimum_%s" % task)
-    rules.append("  {x in %s_%s}:" % (task, setname))
-    rules.append("  (sum {w in weeks} %s[x,w])" % task)
-    rules.append("    >= number_of_weeks/%s_ritme[x]-2;" % task)
+    def get_rule_rest(self):
+        rules = []
+        rules.append("subject to rest_%(name)s" % self.dict)
+        rules.append("  {x in %(name)s_%(set)s, w1 in weeks}:" % self.dict)
+        rules.append("  (sum {w2 in w1..(w1 + %(name)s_rest[x]): w2 in weeks} %(name)s[x,w2]) <= 1;" % self.dict)
+        return rules
 
-def addRuleMaximum(rules,task,setname):
-    rules.append("subject to maximum_%s" % task)
-    rules.append("  {x in %s_%s}:" % (task, setname))
-    rules.append("  (sum {w in weeks} %s[x,w])" % task)
-    rules.append("    <= number_of_weeks/%s_ritme[x]+2;" % task)
+    def get_rule_prefered_pair(self):
+        rules = []
+        rules.append("subject to prefered_pair_%(name)s" % self.dict)
+        rules.append("  {w in weeks, p1 in %(paired_task)s_persons, p2 in %(name)s_persons}:" % self.dict)
+        rules.append("  %(paired_task)s[p1,w] + %(name)s[p2,w] <= 1 + %(name)s_prefered_pair[p1,p2] + %(name)s_not_prefered_pair[w];" % self.dict)
+        return rules
 
-def addRuleRest(rules,task,setname):
-    rules.append("subject to rest_%s" % task)
-    rules.append("  {x in %s_%s, w1 in weeks}:" % (task, setname))
-    rules.append("  (sum {w2 in w1..(w1 + %s_rest[x]): w2 in weeks} %s[x,w2])" % (task, task))
-    rules.append("    <= 1;")
-
-def addRuleMissing(rules,task):
-    rules.append("subject to missing_%s" % task)
-    rules.append("  {w in weeks, t in %s_teams, p in %s_persons: %s_member[t,p]=1 and %s_essential[p]>=1}:" % (task, task, task, task))
-    rules.append("  %s[t,w] <= %s_available[p,w] + %s_missing[p,w];" % (task, task, task))
+    def get_rule_missing(self):
+        rules = []
+        rules.append("subject to missing_%(name)s" % self.dict)
+        rules.append("  {w in weeks, t in %(name)s_teams, p in %(name)s_persons: %(name)s_member[t,p]=1 and %(name)s_essential[p]>=1}:" % self.dict)
+        rules.append("  %(name)s[t,w] <= %(name)s_available[p,w] + %(name)s_missing[p,w];" % self.dict)
+        return rules
 		
-def addRuleMaximumMissing(rules,task):
-    rules.append("subject to maximum_missing_%s" % task)
-    rules.append("  {w in weeks, t in %s_teams}:" % task)
-    rules.append("  (sum {p in %s_persons: %s_member[t,p]=1} %s_missing[p,w] * %s_essential[p]) <= %s_maximum_missing[t];" % (task, task, task, task, task))
-    
-def addRuleSinglePair(rules,pair):
-    rules.append("subject to single_%s" % pair)
-    rules.append("  {w in weeks}:")
-    rules.append("	(sum {p in %s_persons} %s[p,w]) = 1;" % (pair, pair))
+    def get_rule_maximum_missing(self):
+        rules = []
+        rules.append("subject to maximum_missing_%(name)s" % self.dict)
+        rules.append("  {w in weeks, t in %(name)s_teams}:" % self.dict)
+        rules.append("  (sum {p in %(name)s_persons: %(name)s_member[t,p]=1}" % self.dict)
+        rules.append("  %(name)s_missing[p,w] * %(name)s_essential[p]) <= %(name)s_maximum_missing[t];" % self.dict)
+        return rules
 
-def addRuleAvailablePair(rules,pair):
-    rules.append("subject to available_%s" % pair)
-    rules.append("  {w in weeks, p in %s_persons}:" % pair)
-    rules.append("  %s[p,w] <= %s_available[p,w];" % (pair, pair))
-                
-def addRulePreferedPair(rules,task,pair):
-    rules.append("subject to prefered_pair_%s" % pair)
-    rules.append("  {w in weeks, p1 in %s_persons, p2 in %s_persons}:" % (task,pair))
-    rules.append("  %s[p1,w] + %s[p2,w] <= 1 + %s_prefered_pair[p1,p2] + %s_not_prefered_pair[w];" % (task,pair,pair,pair))
-                
-def addRuleExclusionPair(rules,task,pair):
-    rules.append("subject to exclusion_%s" % pair)
-    rules.append("  {w in weeks, p in %s_persons}:" % task)
-    rules.append("  %s[p,w] + %s[p,w] <= 1;" % (task,pair))
-    
-def addRuleExclusion(rules,task,pair):
-    rules.append("subject to exclusion_%s" % pair)
-    rules.append("  {w in weeks, p in %s_persons}:" % task)
-    rules.append("  %s[p,w] + %s[p,w] <= 1;" % (task,pair))
-
-def createExclusionRules(task1,task2):
-    rules = []
-    rules.append("subject to %s_excludes_%s" % (task1, task2))
-    if task1 != "Muziek":
-        rules.append("  {w in weeks, p in %s_persons inter %s_persons}:" % (task1, task2))
-        rules.append("  %s[p,w] + %s[p,w] <= 1;" % (task1,task2))
-    else:
-        rules.append("  {w in weeks, p in %s_persons inter %s_persons, t in %s_teams: %s_member[t,p]=1}:" % (task1, task2, task1, task1))
-        rules.append("  %s[t,w] + %s[p,w] <= 1;" % (task1,task2))
-    return rules
-    
-def createDisplay(task,isTeam=False,pair=None):
-    lines = []
-    if isTeam:
-        setname = "teams"
-        lines.append("display {w in weeks, missing_ in %s_persons: %s_missing[missing_,w]=1}: w, missing_;" % (task, task))
-    else:
-        setname = "persons"
-    lines.append("display {w in weeks, %s_ in %s_%s: %s[%s_,w]=1}: w, %s_;" % (task, task, setname, task, task, task))
-    lines.append("display {w in weeks, rather_not_ in %s_persons: %s_rather_not[rather_not_,w]=1}: w, rather_not_;" % (task, task))
-    if pair != None:
-        lines.append("display {w in weeks, not_prefered_pair_ in %s_persons: %s_not_prefered_pair[w]=1 and %s[not_prefered_pair_,w]=1}: w, not_prefered_pair_;" % (pair, pair, pair))
-    return lines
-    
-def addPenaltyOffritme(objective, task, setname):
-    objective.append("  + (sum {x in %s_%s, w in weeks_extended} %s_offritme_penalty * %s_offritme[x,w])" % (task, setname, task, task))
-    
-def addPenaltyMissing(objective, task):
-    objective.append("  + (sum {p in %s_persons, w in weeks} %s_essential[p] * %s_missing[p,w])" % (task, task, task))
-
-def addPenaltyPair(objective, pair):
-    objective.append("  + (sum {w in weeks} %s_not_prefered_pair_penalty * %s_not_prefered_pair[w])" % (pair, pair))
-    
-def addPenaltyRatherNot(objective, task):
-    objective.append("  + (sum {p in %s_persons, w in weeks} %s_rather_not_penalty * %s_rather_not[p,w])" % (task, task, task))
-
-def createObjective(single_tasks, team_tasks, pair_tasks):
-    objective = ["minimize penalties:"]
-    for task in single_tasks:
-        addPenaltyOffritme(objective, task, "persons")
-        addPenaltyRatherNot(objective, task)
-    for task in team_tasks:
-        addPenaltyOffritme(objective, task, "teams")
-        addPenaltyRatherNot(objective, task)
-        addPenaltyMissing(objective, task)
-    for task, pair in pair_tasks:
-        addPenaltyOffritme(objective, task, "persons")
-        if task != pair:
-            addPenaltyRatherNot(objective, pair)
-        addPenaltyPair(objective, pair)
-    objective.append(";")
-    return objective
+    def get_display_lines(self):
+        lines = []
+        lines.append("display {w in weeks, %(name)s_ in %(name)s_%(set)s: %(name)s[%(name)s_,w]=1}: w, %(name)s_;" % self.dict)
+        lines.append("display {w in weeks, rather_not_ in %(name)s_persons: %(name)s_rather_not[rather_not_,w]=1}: w, rather_not_;" % self.dict)
+        if self.in_teams:
+            lines.append("display {w in weeks, missing_ in %(name)s_persons: %(name)s_missing[missing_,w]=1}: w, missing_;" % self.dict)
+        if self.paired_task != None:
+            lines.append("display {w in weeks, not_prefered_pair_ in %(name)s_persons: %(name)s_not_prefered_pair[w]=1 and %(name)s[not_prefered_pair_,w]=1}: w, not_prefered_pair_;" % self.dict)
+        return lines
     
 if __name__ == "__main__":
-    single_tasks = ["Zangleiding", "Geluid", "Beamer", "Leiding_Rood", "Welkom", "Hoofdkoster", "Hulpkoster"]
-    team_tasks = ["Muziek", "Koffie"]
-    pair_tasks = [("Leiding_Blauw", "Groep_Blauw"), ("Leiding_Wit", "Groep_Wit")] #, ("Ministry", "Ministry")]
-    exclusions = [("Zangleiding", "Geluid"), ("Zangleiding", "Leiding_Rood"), ("Muziek", "Leiding_Wit"), 
-                    ("Muziek", "Welkom"), ("Muziek", "Hulpkoster"), ("Beamer", "Geluid"), 
-                    ("Muziek", "Beamer"), ("Groep_Blauw", "Beamer"), ("Groep_Wit", "Beamer"),
-                    ("Groep_Blauw", "Geluid"), ("Geluid", "Hoofdkoster"), ("Geluid", "Hulpkoster"),
-                    ("Groep_Blauw","Groep_Wit"), ("Koffie","Leiding_Blauw"), ("Welkom","Leiding_Blauw"),
-                    ("Welkom","Leiding_Wit"), ("Welkom","Leiding_Rood"), ("Koffie","Leiding_Rood"),
-                    ("Leiding_Rood","Hulpkoster"), ("Hulpkoster", "Beamer")]
-                    #ministry sluit kinderdienst, muziek, leiding en geluid uit
                     
     tasks = []
     tasks.append(Task("Zangleiding"))
@@ -241,6 +208,7 @@ if __name__ == "__main__":
     tasks.append(Task("Geluid"))
     tasks.append(Task("Beamer"))
     tasks.append(Task("Leiding Rood"))
+    tasks.append(Task("Groep Rood",paired_task="Leiding Rood"))
     tasks.append(Task("Leiding Wit"))
     tasks.append(Task("Groep Wit",paired_task="Leiding Wit"))
     tasks.append(Task("Leiding Blauw"))
@@ -262,42 +230,24 @@ if __name__ == "__main__":
         output.extend(task.get_params())
     for task in tasks:
         output.extend(task.get_vars())
-
-
-#    for task in tasks:
-#        output.extend(task.get_rules())
+    output.append("minimize penalties:")
+    for task in tasks:
+        output.extend(task.get_objective_terms())
+    output.append(";")
+    for task in tasks:
+        output.extend(task.get_rules())
+    dont_exclude = [("Beamer", "Hulpkoster"), ("Beamer", "Ministry"), ("Groep_Blauw", "Welkom"), 
+                    ("Hulpkoster", "Welkom"), ("Leiding_Blauw", "Welkom"), ("Muziek", "Zangleiding")]
+                    # ("Ministry", "Welkom"), 
+    for task1, task2 in combinations(tasks, 2):
+        if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
+            output.extend(task1.get_exclusion_rules(task2))
+    for rule in open("specials.mod","r"):
+        output.append(rule)
+    output.append("solve;")
+    for task in tasks:
+        output.extend(task.get_display_lines())
+    output.append("end;")
 
     for line in output:
         print line
-                    
-    for objectives in createObjective(single_tasks, team_tasks, pair_tasks):
-        print objectives
-    for task in single_tasks:
-        for rule in createRules(task):
-            print rule
-    for task in team_tasks:
-        for rule in createRules(task,True):
-            print rule
-    for task1, task2 in pair_tasks:
-        for rule in createRules(task1,False,task2):
-            print rule
-    for task1, task2 in exclusions:
-        for rule in createExclusionRules(task1, task2):
-            print rule
-    for line in open('specials.mod'):
-        print line[0:-1]
-    print "solve;"
-    for task in single_tasks:
-        for line in createDisplay(task):
-            print line
-    for task in team_tasks:
-        for line in createDisplay(task,True):
-            print line
-    for task, pair in pair_tasks:
-        for line in createDisplay(task,False,pair):
-            print line
-        if task != pair:
-            for line in createDisplay(pair):
-                print line
-    print "end;"
-

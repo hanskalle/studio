@@ -7,9 +7,10 @@ set Geluid_persons := Hans_K Hans_D David;
 set Beamer_persons := David Jeroen Danny Jonathan;
 set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
 set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
-set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl;
+set Leiding_Wit_persons := Vacature_Wit Xandra Lianne Dieuwke Yentl;
 set Groep_Wit_persons := Thirza Mattanja Esther Emma;
 set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst;
+set Groep_Rood_persons := Emmely Niemand;
 set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
                     Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
 set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier Mertens;
@@ -87,18 +88,30 @@ Miranda     .           .       .       .       .       1
 
 
 param Groep_Wit_prefered_pair default 0:
-            Thirza  Mattanja    Esther  Emma    Vivianne :=
-Jennifer    1       .           .       .       .
-Xandra      .       1           .       .       .
-Lianne      .       .           1       .       .
-Dieuwke     .       .           .       1       .
-Yentl       .       .           1       .       1
+                Thirza  Mattanja    Esther  Emma    :=
+Vacature_Wit    1       .           .       .       
+Xandra          .       1           .       .       
+Lianne          .       .           1       .       
+Dieuwke         .       .           .       1       
+Yentl           .       .           1       .       
 ;
 
+param Groep_Rood_prefered_pair default 0:
+            Emmely  Niemand :=
+Nora        .       1
+Jan_Martijn .       1
+Jolanda     1       .
+Tim         .       1
+In_de_dienst    .   1
+;
+
+param Zangleiding_number_needed default 1;
 param Zangleiding_offritme_penalty := 6;
 param Zangleiding_ritme default 5;
 param Zangleiding_rest default 3;
 param Zangleiding_rather_not_penalty := 10;
+
+param Muziek_number_needed default 1;
 param Muziek_offritme_penalty 8;
 param Muziek_ritme default 3 :=
     Tim 6
@@ -110,52 +123,126 @@ param Muziek_rest default 1 :=
 ;
 param Muziek_maximum_missing default 3;
 param Muziek_rather_not_penalty := 10;
+
+param Geluid_number_needed default 1;
 param Geluid_ritme default 3;
 param Geluid_offritme_penalty := 5;
 param Geluid_rather_not_penalty := 10;
 param Geluid_rest default 0;
+
+param Beamer_number_needed default 1;
 param Beamer_ritme default 4;
 param Beamer_offritme_penalty := 3;
 param Beamer_rather_not_penalty := 10;
 param Beamer_rest default 1;
-param Leiding_Wit_ritme default 6;
-param Leiding_Blauw_offritme_penalty := 4;
-param Leiding_Blauw_rather_not_penalty := 10;
+
+param Leiding_Wit_number_needed default 1 :=
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+;
+param Leiding_Wit_ritme default 4 :=
+    Yentl   8
+    Lianne  8
+;
 param Leiding_Wit_rest default 1;
-param Groep_Blauw_not_prefered_pair_penalty := 2;
-param Groep_Blauw_rather_not_penalty := 10;
-param Leiding_Blauw_ritme default 6
+param Leiding_Wit_offritme_penalty := 20;
+param Leiding_Wit_rather_not_penalty := 10;
+param Groep_Wit_number_needed default 1 :=
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+;
+param Groep_Wit_not_prefered_pair_penalty := 20;
+param Groep_Wit_rather_not_penalty := 10;
+
+param Leiding_Blauw_number_needed default 1 :=
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+;
+param Leiding_Blauw_ritme default 6 :=
     Lidian  12
     Wenny   12
 ;
-param Leiding_Blauw_rest default 1
+param Leiding_Blauw_rest default 1 :=
     Lidian 5
     Wenny 5
 ;
-param Leiding_Wit_offritme_penalty := 4;
-param Leiding_Wit_rather_not_penalty := 10;
-param Groep_Wit_not_prefered_pair_penalty := 2;
-param Groep_Wit_rather_not_penalty := 10;
+param Leiding_Blauw_offritme_penalty := 4;
+param Leiding_Blauw_rather_not_penalty := 10;
+param Groep_Blauw_number_needed default 1
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+;
+param Groep_Blauw_not_prefered_pair_penalty := 2;
+param Groep_Blauw_rather_not_penalty := 10;
+
+param Leiding_Rood_number_needed default 1
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+;
 param Leiding_Rood_ritme default 4
     Nora 8
     In_de_dienst 8
 ;
+param Leiding_Rood_rest default 1;
 param Leiding_Rood_offritme_penalty := 4;
 param Leiding_Rood_rather_not_penalty := 10;
-param Leiding_Rood_rest default 1;
+param Groep_Rood_number_needed default 1
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+;
+param Groep_Rood_not_prefered_pair_penalty := 2;
+param Groep_Rood_rather_not_penalty := 10;
+
+param Koffie_number_needed default 1;
 param Koffie_ritme default 6;
 param Koffie_offritme_penalty := 3;
 param Koffie_rather_not_penalty := 10;
 param Koffie_rest default 1;
 param Koffie_maximum_missing default 1;
+
+param Welkom_number_needed default 1;
 param Welkom_ritme default 5;
 param Welkom_offritme_penalty := 2;
 param Welkom_rather_not_penalty := 10;
 param Welkom_rest default 1;
+
+param Hoofdkoster_number_needed default 1;
 param Hoofdkoster_ritme default 12;
 param Hoofdkoster_offritme_penalty := 3;
 param Hoofdkoster_rather_not_penalty := 10;
 param Hoofdkoster_rest default 2;
+
+param Hulpkoster_number_needed default 2
+    29  0
+    30  0
+    31  0
+    32  0
+    33  4
+;
 param Hulpkoster_ritme default 8;
 param Hulpkoster_offritme_penalty := 2;
 param Hulpkoster_rather_not_penalty := 10;

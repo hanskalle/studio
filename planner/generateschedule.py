@@ -37,7 +37,14 @@ def get_tasks(persons):
 def get_availability(person, taskname):
     for task in person['tasks']:
         if task['task'] == taskname:
-            return task['availability'];
+            total = 0
+            state_value = { 'no': 0.0, 'yes': 1.0, 'maybe': 0.5 }
+            for week in task['availability']:
+                total += state_value[week['state']]
+            if total > 0.0:
+                return task['availability'];
+            else:
+                return None
     return None
 
 def write_beschikbaarheid(filename, persons):
@@ -106,21 +113,44 @@ def write_markup(filename, rooster):
         file.write('|')
         file.write("{:<8s}".format(rooster[week]['Beamer']))
         file.write('|')
-        file.write("{:<8s}".format(rooster[week]['Leiding Blauw']))
+        if 'Leiding Blauw' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Leiding Blauw']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write(' & ')
-        file.write("{:<8s}".format(rooster[week]['Groep Blauw']))
+        if 'Groep Blauw' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Groep Blauw']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write('|')
-        file.write("{:<8s}".format(rooster[week]['Leiding Wit']))
+        if 'Leiding Wit' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Leiding Wit']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write(' & ')
-        file.write("{:<8s}".format(rooster[week]['Groep Wit']))
+        if 'Groep Wit' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Groep Wit']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write('|')
-        file.write("{:<11s}".format(rooster[week]['Leiding Rood']))
+        if 'Leiding Wit' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Leiding Rood']))
+        else:
+            file.write("{:<8s}".format(''))
+        file.write(' & ')
+        if 'Groep Rood' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Groep Rood']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write('|')
         file.write("{:<9s}".format(rooster[week]['Koffie']))
         file.write('|')
         file.write("{:<8s}".format(rooster[week]['Hoofdkoster']))
         file.write(' & ')
-        file.write("{:<16s}".format(rooster[week]['Hulpkoster']))
+        if 'Hulpkoster' in rooster[week]:
+            file.write("{:<16s}".format(rooster[week]['Hulpkoster']))
+        else:
+            file.write("{:<16s}".format(''))
         file.write('|')
         file.write("{:<16s}".format(rooster[week]['Welkom']))
         file.write('|')
