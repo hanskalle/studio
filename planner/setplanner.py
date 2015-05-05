@@ -19,6 +19,58 @@ def post_availability(uid,name,task,week,state):
     conn.close()
     return result
 
+def get_persons():
+    import httplib, urllib, json, getpass
+    params = urllib.urlencode({'email': 'hans.kalle@telfort.nl', 'wachtwoord': getpass.getpass()})
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+               "Accept": "text/plain"}
+    conn = httplib.HTTPConnection("www.ichthusculemborg.nl")
+    conn.request("POST", "/intranet/login.asp?p=/planner/ready", params, headers)
+    response = conn.getresponse()
+    if response.status == 302:
+        response.read()
+        location = response.getheader('location');
+        headers = {"Content-type": "application/x-www-form-urlencoded",
+                   "Accept": "text/plain",
+                   "Cookie": response.getheader('set-cookie')}
+        conn.request("GET", location, '', headers)
+        response = conn.getresponse()
+    else:
+        return []
+    assert(response.status==200)
+    persons = response.read()
+    return json.loads(persons)
+
+def get_availability():
+    import httplib, urllib, json, getpass
+    params = urllib.urlencode({'email': 'hans.kalle@telfort.nl', 'wachtwoord': getpass.getpass()})
+    headers = {"Content-type": "application/x-www-form-urlencoded",
+               "Accept": "text/plain"}
+    conn = httplib.HTTPConnection("www.ichthusculemborg.nl")
+    conn.request("POST", "/intranet/login.asp?p=/planner/persons", params, headers)
+    response = conn.getresponse()
+    if response.status == 302:
+        response.read()
+        location = response.getheader('location');
+        headers = {"Content-type": "application/x-www-form-urlencoded",
+                   "Accept": "text/plain",
+                   "Cookie": response.getheader('set-cookie')}
+        conn.request("GET", location, '', headers)
+        response = conn.getresponse()
+    else:
+        return []
+    assert(response.status==200)
+    persons = response.read()
+    return json.loads(persons)
+    
+def exists(availability, name, task):
+    for person in availability:
+        if person["name"].replace(' ','_') == name:
+            for task2 in person["tasks"]:
+                if task2["task"].replace(' ','_') == task:
+                    return True
+    return False
+    
 def get_sets():
     sets = {}
     complete_line = ''
@@ -34,14 +86,21 @@ def get_sets():
                 complete_line = ''
     return sets
 
-sets = get_sets()
+availability = get_availability()
+persons = get_persons()
 uid_from_name = {}
+for person in persons:
+    name = person["name"].replace(' ','_')
+    uid = person["uid"]
+    if not name in uid_from_name:
+        uid_from_name[name] = uid
+sets = get_sets()
 for setname in sets:
-    print setname
     for name in sets[setname]:
         if not name in uid_from_name:
             uid_from_name[name] = get_uid()
 for setname in sets:
     for name in sets[setname]:
-        for week in range(27,27+13):
-            print post_availability(uid_from_name[name], name.replace('_',' '), setname.replace('_',' '), week, "yes")
+        if not exists(availability, name, setname):
+            for week in range(27,27+13):
+                print post_availability(uid_from_name[name], name.replace('_',' '), setname.replace('_',' '), week, "yes")
