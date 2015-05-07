@@ -75,6 +75,8 @@ def get_sets():
     sets = {}
     complete_line = ''
     for line in open('planner.dat', 'r'):
+        if '#' in line:
+            line = line[0:line.find('#')]
         complete_line = complete_line + ' ' + line
         complete_line = complete_line.strip()
         if len(complete_line) > 0:
