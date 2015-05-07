@@ -2,19 +2,20 @@
 from itertools import combinations
 
 class Task:
-    def __init__(self,name,in_teams=False,paired_task=None):
+    def __init__(self,name,in_teams=False,paired_task=None,succesive_count=1):
+        self.succesive_count = succesive_count
         self.name = name.replace(' ','_')
         self.in_teams = in_teams
         if paired_task != None:
             self.paired_task = paired_task.replace(' ','_')
         else:
             self.paired_task = None
-        self.dict = {'name': self.name, 'paired_task': self.paired_task}
+        self.dict = {'name': self.name, 'paired_task': self.paired_task, 'succesive_count': self.succesive_count}
         if in_teams:
             self.dict['set'] = "teams"
         else:
             self.dict['set'] = "persons"
-    
+            
     def get_sets(self):
         sets = []
         sets.append("set %(name)s_persons;" % self.dict)
@@ -38,6 +39,7 @@ class Task:
         else:
             params.append("param %(name)s_ritme {p in %(name)s_%(set)s}, integer, >=1;" % self.dict)
             params.append("param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
+            params.append("param %(name)s_last {x in %(name)s_%(set)s}, integer, < first_week;" % self.dict)
         return params
 
     def get_vars(self):
@@ -76,11 +78,15 @@ class Task:
 #            rules.extend(self.get_rule_maximum_missing())
         if self.paired_task == None:
             rules.extend(self.get_rule_ritme())
+            rules.extend(self.get_rule_ritme_history())
             rules.extend(self.get_rule_rest())
+            rules.extend(self.get_rule_rest_history())
             rules.extend(self.get_rule_minimum())
             rules.extend(self.get_rule_maximum())
         else:
             rules.extend(self.get_rule_prefered_pair())
+        if self.succesive_count == 2:
+            rules.extend(self.get_rule_twice())
         return rules
         
     def get_exclusion_rules(self, other_task):
@@ -136,13 +142,21 @@ class Task:
         expression += ",w] <= %(name)s_available[p,w] + 0.5 * %(name)s_rather_not[p,w];" % self.dict
         rules.append(expression)
         return rules
-        
+
     def get_rule_ritme(self):
         rules = []
         rules.append("subject to ritme_%(name)s" % self.dict)
         rules.append("  {w1 in weeks_extended, x in %(name)s_%(set)s}:" % self.dict)
         rules.append("  (sum {w2 in w1..(w1 + %(name)s_ritme[x]-1): w2 in weeks} %(name)s[x,w2])" % self.dict)
-        rules.append("    <= 1 + %(name)s_offritme[x,w1];" % self.dict)
+        rules.append("    <= %(succesive_count)i + %(name)s_offritme[x,w1];" % self.dict)
+        return rules
+
+    def get_rule_ritme_history(self):
+        rules = []
+        rules.append("subject to ritme_history_%(name)s" % self.dict)
+        rules.append("  {x in %(name)s_%(set)s, w1 in (first_week-%(name)s_ritme[x]+1)..%(name)s_last[x]}:" % self.dict)
+        rules.append("  (sum {w2 in w1..(w1 + %(name)s_ritme[x]-1): w2 in weeks} %(name)s[x,w2])" % self.dict)
+        rules.append("    <= %(name)s_offritme[x,w1];" % self.dict)
         return rules
 
     def get_rule_minimum(self):
@@ -165,9 +179,17 @@ class Task:
         rules = []
         rules.append("subject to rest_%(name)s" % self.dict)
         rules.append("  {x in %(name)s_%(set)s, w1 in weeks}:" % self.dict)
-        rules.append("  (sum {w2 in w1..(w1 + %(name)s_rest[x]): w2 in weeks} %(name)s[x,w2]) <= 1;" % self.dict)
+        rules.append("  (sum {w2 in w1..(w1 + %(name)s_rest[x]+%(succesive_count)i-1): w2 in weeks} %(name)s[x,w2])" % self.dict)
+        rules.append("  <= %(succesive_count)i;" % self.dict)
         return rules
 
+    def get_rule_rest_history(self):
+        rules = []
+        rules.append("subject to rest_history_%(name)s" % self.dict)
+        rules.append("  {x in %(name)s_%(set)s, w in (%(name)s_last[x]+1)..(%(name)s_last[x]+%(name)s_rest[x]): w in weeks}:" % self.dict)
+        rules.append("  %(name)s[x,w] == 0;" % self.dict)
+        return rules
+        
     def get_rule_prefered_pair(self):
         rules = []
         rules.append("subject to prefered_pair_%(name)s" % self.dict)
@@ -190,6 +212,13 @@ class Task:
         rules.append("  %(name)s_missing[p,w] * %(name)s_essential[p]) <= %(name)s_maximum_missing[t];" % self.dict)
         return rules
 
+    def get_rule_twice(self):
+        rules = []
+        rules.append("subject to twice_%(name)s" % self.dict)
+        rules.append("  {x in %(name)s_%(set)s, w in 0..(number_of_weeks/2-1): (first_week+2*w+1) in weeks}:" % self.dict)
+        rules.append("  %(name)s[x,first_week+2*w] = %(name)s[x,first_week+2*w+1];" % self.dict)
+        return rules
+
     def get_display_lines(self):
         lines = []
         lines.append("display {w in weeks, %(name)s_ in %(name)s_%(set)s: %(name)s[%(name)s_,w]=1}: w, %(name)s_;" % self.dict)
@@ -199,6 +228,19 @@ class Task:
         if self.paired_task != None:
             lines.append("display {w in weeks, not_prefered_pair_ in %(name)s_persons: %(name)s_not_prefered_pair[w]=1 and %(name)s[not_prefered_pair_,w]=1}: w, not_prefered_pair_;" % self.dict)
         return lines
+    
+def read_from(filename, start):
+    lines = []
+    copy = False
+    for line in open(filename, "r"):
+        line = line.strip()
+        if len(line) == 0:
+            copy = False
+        if line.startswith(start):
+            copy = True
+        if copy:
+            lines.append(line)
+    return lines
     
 if __name__ == "__main__":
                     
@@ -215,7 +257,7 @@ if __name__ == "__main__":
     tasks.append(Task("Groep Blauw",paired_task="Leiding Blauw"))
     tasks.append(Task("Koffie",True))
     tasks.append(Task("Welkom"))
-    tasks.append(Task("Hoofdkoster"))
+    tasks.append(Task("Hoofdkoster",succesive_count=1))
     tasks.append(Task("Hulpkoster"))
 
     output = []
@@ -230,9 +272,11 @@ if __name__ == "__main__":
         output.extend(task.get_params())
     for task in tasks:
         output.extend(task.get_vars())
+    output.extend(read_from("specials.mod", "var"))
     output.append("minimize penalties:")
     for task in tasks:
         output.extend(task.get_objective_terms())
+    output.extend(read_from("specials.mod", "+"))
     output.append(";")
     for task in tasks:
         output.extend(task.get_rules())
@@ -242,8 +286,7 @@ if __name__ == "__main__":
     for task1, task2 in combinations(tasks, 2):
         if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
             output.extend(task1.get_exclusion_rules(task2))
-    for rule in open("specials.mod","r"):
-        output.append(rule)
+    output.extend(read_from("specials.mod", "subject to"))
     output.append("solve;")
     for task in tasks:
         output.extend(task.get_display_lines())
