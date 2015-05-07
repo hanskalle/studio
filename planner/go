@@ -1,3 +1,2 @@
 ./createmodel.py > gen.mod
-#cp genplus.mod gen.mod
 ./generateschedule.py $1
