@@ -29,6 +29,8 @@ class Task:
         params.append("param %(name)s_rather_not_penalty, >=0;" % self.dict)
         params.append("param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;" % self.dict)
         params.append("param %(name)s_number_needed {w in weeks}, integer, >=0;" % self.dict)
+        params.append("param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
+        params.append("param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
         if self.in_teams:
             params.append("param %(name)s_member {t in %(name)s_teams, p in %(name)s_persons}, binary;" % self.dict)
             params.append("param %(name)s_essential {p in %(name)s_persons}, >= 0;" % self.dict)
@@ -73,6 +75,8 @@ class Task:
         rules = []
         rules.extend(self.get_rule_number_needed())
         rules.extend(self.get_rule_available())
+        rules.extend(self.get_rule_minimum())
+        rules.extend(self.get_rule_maximum())
         if self.in_teams:
             rules.extend(self.get_rule_missing())
 #            rules.extend(self.get_rule_maximum_missing())
@@ -81,8 +85,6 @@ class Task:
             rules.extend(self.get_rule_ritme_history())
             rules.extend(self.get_rule_rest())
             rules.extend(self.get_rule_rest_history())
-            rules.extend(self.get_rule_minimum())
-            rules.extend(self.get_rule_maximum())
         else:
             rules.extend(self.get_rule_prefered_pair())
         if self.succesive_count == 2:
@@ -164,7 +166,7 @@ class Task:
         rules.append("subject to minimum_%(name)s" % self.dict)
         rules.append("  {x in %(name)s_%(set)s}:" % self.dict)
         rules.append("  (sum {w in weeks} %(name)s[x,w])" % self.dict)
-        rules.append("    >= number_of_weeks/%(name)s_ritme[x]-2;" % self.dict)
+        rules.append("    >= %(name)s_min[x];" % self.dict)
         return rules
 
     def get_rule_maximum(self):
@@ -172,7 +174,7 @@ class Task:
         rules.append("subject to maximum_%(name)s" % self.dict)
         rules.append("  {x in %(name)s_%(set)s}:" % self.dict)
         rules.append("  (sum {w in weeks} %(name)s[x,w])" % self.dict)
-        rules.append("    <= number_of_weeks/%(name)s_ritme[x]+2;" % self.dict)
+        rules.append("    <= %(name)s_max[x];" % self.dict)
         return rules
 
     def get_rule_rest(self):
