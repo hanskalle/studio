@@ -105,9 +105,15 @@ def write_markup(filename, rooster):
         file.write('|')
         file.write(rooster[week]['datum'].strftime('%d %b'))
         file.write('|')
-        file.write("{:<9s}".format(rooster[week]['Zangleiding']))
+        if 'Zangleiding' in rooster[week]:
+            file.write("{:<9s}".format(rooster[week]['Zangleiding']))
+        else:
+            file.write("{:<9s}".format(''))
         file.write('|')
-        file.write("{:<8s}".format(rooster[week]['Muziek']))
+        if 'Muziek' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Muziek']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write('|')
         file.write("{:<8s}".format(rooster[week]['Geluid']))
         file.write('|')
