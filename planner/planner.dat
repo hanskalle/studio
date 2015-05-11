@@ -254,8 +254,8 @@ param Hulpkoster_max default 60;
 
 param Zangleiding_rest default 2;
 param Muziek_rest default 1 :=
-    Tim 3
-    Peter 3
+    Tim 2
+    Peter 2
 ;
 param Geluid_rest default 0;
 param Beamer_rest default 0;
@@ -270,12 +270,14 @@ param Welkom_rest default 1;
 param Hoofdkoster_rest default 2;
 param Hulpkoster_rest default 1;
 
-param Zangleiding_number_needed default 1;
+param Zangleiding_number_needed default 1 :=
+    31  0;
 param Zangleiding_offritme_penalty := 6;
 param Zangleiding_ritme default 5;
 param Zangleiding_rather_not_penalty := 10;
 
-param Muziek_number_needed default 1;
+param Muziek_number_needed default 1 :=
+    31  0;
 param Muziek_offritme_penalty 8;
 param Muziek_ritme default 3 :=
     Tim 6
