@@ -283,7 +283,8 @@ if __name__ == "__main__":
     for task in tasks:
         output.extend(task.get_rules())
     dont_exclude = [("Beamer", "Hulpkoster"), ("Beamer", "Ministry"), ("Groep_Blauw", "Welkom"), 
-                    ("Hulpkoster", "Welkom"), ("Leiding_Blauw", "Welkom"), ("Muziek", "Zangleiding")]
+                    ("Hulpkoster", "Welkom"), ("Leiding_Blauw", "Welkom"), ("Muziek", "Zangleiding"),
+                    ("Leiding_Rood", "Leiding_Wit")]
                     # ("Ministry", "Welkom"), 
     for task1, task2 in combinations(tasks, 2):
         if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
