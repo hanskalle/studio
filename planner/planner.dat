@@ -311,7 +311,7 @@ param Leiding_Wit_number_needed default 1 :=
     31  0
     32  0
     33  0
-    38  0
+    38  1
 ;
 param Leiding_Wit_ritme default 4 :=
     Yentl   8
@@ -328,7 +328,7 @@ param Groep_Wit_number_needed default 1 :=
     31  0
     32  0
     33  0
-    38  0
+    38  1
 ;
 param Groep_Wit_not_prefered_pair_penalty := 20;
 param Groep_Wit_rather_not_penalty := 10;
@@ -367,7 +367,7 @@ param Leiding_Rood_number_needed default 1
     31  0
     32  0
     33  0
-    38  0
+    38  1
 ;
 param Leiding_Rood_ritme default 4
     Nora 8
@@ -382,7 +382,7 @@ param Groep_Rood_number_needed default 1
     31  0
     32  0
     33  0
-    38  0
+    38  1
 ;
 param Groep_Rood_not_prefered_pair_penalty := 2;
 param Groep_Rood_rather_not_penalty := 10;
