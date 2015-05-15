@@ -100,78 +100,20 @@ def write_markup(filename, rooster):
     file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^koster^welkom^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
+        columns = [['Zangleiding'],['Muziek'],['Geluid'],['Beamer'],['Leiding Blauw','Groep Blauw'],['Leiding Wit','Groep Wit'],['Leiding Rood','Groep Rood'],['Koffie'],['Hoofdkoster','Hulpkoster'],['Welkom']] 
         file.write('|week ')
         file.write(week)
         file.write('|')
         file.write(rooster[week]['datum'].strftime('%d %b'))
         file.write('|')
-        if 'Zangleiding' in rooster[week]:
-            file.write("{:<9s}".format(rooster[week]['Zangleiding']))
-        else:
-            file.write("{:<9s}".format(''))
-        file.write('|')
-        if 'Muziek' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Muziek']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write('|')
-        if 'Geluid' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Geluid']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write('|')
-        if 'Beamer' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Beamer']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write('|')
-        if 'Leiding Blauw' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Leiding Blauw']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write(' & ')
-        if 'Groep Blauw' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Groep Blauw']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write('|')
-        if 'Leiding Wit' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Leiding Wit']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write(' & ')
-        if 'Groep Wit' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Groep Wit']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write('|')
-        if 'Leiding Wit' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Leiding Rood']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write(' & ')
-        if 'Groep Rood' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Groep Rood']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write('|')
-        if 'Koffie' in rooster[week]:
-            file.write("{:<9s}".format(rooster[week]['Koffie']))
-        else:
-            file.write("{:<9s}".format(''))
-        file.write('|')
-        if 'Hoofdkoster' in rooster[week]:
-            file.write("{:<8s}".format(rooster[week]['Hoofdkoster']))
-        else:
-            file.write("{:<8s}".format(''))
-        file.write(' & ')
-        if 'Hulpkoster' in rooster[week]:
-            file.write("{:<16s}".format(rooster[week]['Hulpkoster']))
-        else:
-            file.write("{:<16s}".format(''))
-        file.write('|')
-        file.write("{:<16s}".format(rooster[week]['Welkom']))
-        file.write('|')
+        for column in columns:
+            names = []
+            for task in column:
+                if task in rooster[week]:
+                    names.append(rooster[week][task])
+            width = 10 * len(column)
+            file.write(("{:<"+str(width)+"s}").format(", ".join(names)))
+            file.write('|')
         remarks = []
         if 'missing' in rooster[week]:
             remarks.append(rooster[week]['missing'] + ' mist')
