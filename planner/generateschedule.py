@@ -97,10 +97,10 @@ def get_results(persons, timlim):
     
 def write_markup(filename, rooster):
     file = open(filename, 'w')
-    file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^koster^welkom^opmerkingen^\n')
+    file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^koster^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
-        columns = [['Zangleiding'],['Muziek'],['Geluid'],['Beamer'],['Leiding Blauw','Groep Blauw'],['Leiding Wit','Groep Wit'],['Leiding Rood','Groep Rood'],['Koffie'],['Hoofdkoster','Hulpkoster'],['Welkom']] 
+        columns = [['Zangleiding'],['Muziek'],['Geluid'],['Beamer'],['Leiding Blauw','Groep Blauw'],['Leiding Wit','Groep Wit'],['Leiding Rood','Groep Rood'],['Koffie'],['Welkom'],['Hoofdkoster','Hulpkoster']] 
         file.write('|week ')
         file.write(week)
         file.write('|')

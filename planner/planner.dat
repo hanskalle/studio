@@ -333,12 +333,12 @@ param Groep_Wit_not_prefered_pair_penalty := 20;
 param Groep_Wit_rather_not_penalty := 10;
 
 param Leiding_Blauw_number_needed default 1 :=
-    28  0
-    29  0
-    30  0
+    28  1
+    29  1
+    30  1
     31  0
-    32  0
-    33  0
+    32  1
+    33  1
     38  0
 ;
 param Leiding_Blauw_ritme default 6 :=
@@ -348,12 +348,12 @@ param Leiding_Blauw_ritme default 6 :=
 param Leiding_Blauw_offritme_penalty := 4;
 param Leiding_Blauw_rather_not_penalty := 10;
 param Groep_Blauw_number_needed default 1
-    28  0
-    29  0
-    30  0
-    31  0
-    32  0
-    33  0
+    28  1
+    29  1
+    30  1
+    31  1
+    32  1
+    33  1
     38  0
 ;
 param Groep_Blauw_not_prefered_pair_penalty := 2;
