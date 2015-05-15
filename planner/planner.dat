@@ -266,7 +266,7 @@ param Leiding_Blauw_rest default 2 :=
     Lidian 5
     Wenny 5
 ;
-param Koffie_rest default 3;
+param Koffie_rest default 2;
 param Welkom_rest default 1;
 param Hoofdkoster_rest default 2;
 param Hulpkoster_rest default 5;
@@ -387,7 +387,7 @@ param Groep_Rood_not_prefered_pair_penalty := 2;
 param Groep_Rood_rather_not_penalty := 10;
 
 param Koffie_number_needed default 1
-    31  0
+    31  1
     38  0;
 param Koffie_ritme default 6;
 param Koffie_offritme_penalty := 3;
@@ -395,14 +395,14 @@ param Koffie_rather_not_penalty := 10;
 param Koffie_maximum_missing default 1;
 
 param Welkom_number_needed default 1
-    31  0
+    31  1
     38  0;
 param Welkom_ritme default 5;
 param Welkom_offritme_penalty := 2;
 param Welkom_rather_not_penalty := 10;
 
 param Hoofdkoster_number_needed default 1
-    31  0
+    31  1
     38  0;
 param Hoofdkoster_ritme default 12;
 param Hoofdkoster_offritme_penalty := 3;
