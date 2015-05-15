@@ -115,9 +115,15 @@ def write_markup(filename, rooster):
         else:
             file.write("{:<8s}".format(''))
         file.write('|')
-        file.write("{:<8s}".format(rooster[week]['Geluid']))
+        if 'Geluid' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Geluid']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write('|')
-        file.write("{:<8s}".format(rooster[week]['Beamer']))
+        if 'Beamer' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Beamer']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write('|')
         if 'Leiding Blauw' in rooster[week]:
             file.write("{:<8s}".format(rooster[week]['Leiding Blauw']))
@@ -149,9 +155,15 @@ def write_markup(filename, rooster):
         else:
             file.write("{:<8s}".format(''))
         file.write('|')
-        file.write("{:<9s}".format(rooster[week]['Koffie']))
+        if 'Koffie' in rooster[week]:
+            file.write("{:<9s}".format(rooster[week]['Koffie']))
+        else:
+            file.write("{:<9s}".format(''))
         file.write('|')
-        file.write("{:<8s}".format(rooster[week]['Hoofdkoster']))
+        if 'Hoofdkoster' in rooster[week]:
+            file.write("{:<8s}".format(rooster[week]['Hoofdkoster']))
+        else:
+            file.write("{:<8s}".format(''))
         file.write(' & ')
         if 'Hulpkoster' in rooster[week]:
             file.write("{:<16s}".format(rooster[week]['Hulpkoster']))
