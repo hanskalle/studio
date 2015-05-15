@@ -228,7 +228,7 @@ param Groep_Blauw_min default 1;
 param Koffie_min default 1;
 param Welkom_min default 1;
 param Hoofdkoster_min default 1;
-param Hulpkoster_min default 1;
+param Hulpkoster_min default 0;
 
 param Zangleiding_max default 3;
 param Muziek_max default 3 :=
@@ -248,11 +248,11 @@ param Leiding_Blauw_max default 2 :=
     Lidian  2
     Wenny   2
 ;
-param Groep_Blauw_max default 40;
-param Koffie_max default 40;
-param Welkom_max default 50;
-param Hoofdkoster_max default 50;
-param Hulpkoster_max default 60;
+param Groep_Blauw_max default 3;
+param Koffie_max default 2;
+param Welkom_max default 3;
+param Hoofdkoster_max default 2;
+param Hulpkoster_max default 1;
 
 param Zangleiding_rest default 2;
 param Muziek_rest default 1 :=
@@ -414,7 +414,8 @@ param Hulpkoster_number_needed default 2
     30  0
     31  0
     32  0
-    33  4
+    33  0
+    34  4
     38  0
 ;
 param Hulpkoster_ritme default 8;
