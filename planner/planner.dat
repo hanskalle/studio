@@ -8,7 +8,7 @@ set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
 set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
 set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl Vacature_Wit;
 set Groep_Wit_persons := Thirza Mattanja Esther Emma;
-set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst;
+set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
 set Groep_Rood_persons := Emmely Niemand;
 set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
                     Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
@@ -203,6 +203,7 @@ Jan_Martijn .       1
 Jolanda     1       .
 Tim         .       1
 In_de_dienst    .   1
+Yentl       .       1
 ;
 
 
