@@ -33,6 +33,7 @@ class Task:
         params.append("param %(name)s_number_needed {w in weeks}, integer, >=0;" % self.dict)
         params.append("param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
         params.append("param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
+        params.append("param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
         if self.in_teams:
             params.append("param %(name)s_member {t in %(name)s_teams, p in %(name)s_persons}, binary;" % self.dict)
             params.append("param %(name)s_essential {p in %(name)s_persons}, >= 0;" % self.dict)
@@ -42,7 +43,6 @@ class Task:
             params.append("param %(name)s_not_prefered_pair_penalty, >=0;" % self.dict)
         else:
             params.append("param %(name)s_ritme {p in %(name)s_%(set)s}, integer, >=1;" % self.dict)
-            params.append("param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
             params.append("param %(name)s_last {x in %(name)s_%(set)s}, integer, < first_week;" % self.dict)
         return params
 
@@ -79,13 +79,13 @@ class Task:
         rules.extend(self.get_rule_available())
         rules.extend(self.get_rule_minimum())
         rules.extend(self.get_rule_maximum())
+        rules.extend(self.get_rule_rest())
         if self.in_teams:
             rules.extend(self.get_rule_missing())
 #            rules.extend(self.get_rule_maximum_missing())
         if self.paired_task == None:
             rules.extend(self.get_rule_ritme())
             rules.extend(self.get_rule_ritme_history())
-            rules.extend(self.get_rule_rest())
             rules.extend(self.get_rule_rest_history())
         else:
             rules.extend(self.get_rule_prefered_pair())

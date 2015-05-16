@@ -189,7 +189,7 @@ param Groep_Wit_prefered_pair default 0:
                 Thirza  Mattanja    Esther  Emma    :=
 Jennifer        1       .           .       .       
 Xandra          .       1           1       .       
-Lianne          1       .           1       .       
+Lianne          1       .           .       .       
 Dieuwke         .       .           .       1       
 Yentl           .       .           1       .       
 ;
@@ -239,7 +239,8 @@ param Leiding_Rood_max default 2 :=
     Nora            2
     Tim             1
     In_de_dienst    0;
-param Groep_Rood_max default 13;
+param Groep_Rood_max default 13 :=
+    Emmely 2;
 param Leiding_Wit_max default 2;
 param Groep_Wit_max default 2;
 param Leiding_Blauw_max default 2 :=
@@ -265,6 +266,10 @@ param Leiding_Blauw_rest default 2 :=
     Lidian 5
     Wenny 5
 ;
+param Groep_Rood_rest default 1
+    Niemand 0;
+param Groep_Wit_rest default 1;
+param Groep_Blauw_rest default 2;
 param Koffie_rest default 2;
 param Welkom_rest default 1;
 param Hoofdkoster_rest default 2;
@@ -327,7 +332,7 @@ param Groep_Wit_number_needed default 1 :=
     33  0
     38  1
 ;
-param Groep_Wit_not_prefered_pair_penalty := 20;
+param Groep_Wit_not_prefered_pair_penalty := 100;
 param Groep_Wit_rather_not_penalty := 10;
 
 param Leiding_Blauw_number_needed default 1 :=

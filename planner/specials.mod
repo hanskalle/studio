@@ -49,6 +49,9 @@ subject to yentl_na_vakantie_rood
     {w in weeks: w < 34}:
     Leiding_Rood['Yentl',w] = 0;
     
+subject to yentl_green_vredesdienst:
+    Leiding_Rood['Yentl',38] = 0;
+    
 subject to witrood_combi
     {w in weeks: w >= 34}:
     Leiding_Rood['Yentl',w] = Leiding_Wit['Yentl',w];
