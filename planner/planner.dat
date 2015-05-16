@@ -6,7 +6,7 @@ set Geluid_persons := Hans_K Hans_D David;
 set Beamer_persons := David Jeroen Danny Jonathan; #Bas, Esther en Noa als in dienst; Albert nog vragen 
 set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
 set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
-set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl Vacature_Wit;
+set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl;
 set Groep_Wit_persons := Thirza Mattanja Esther Emma;
 set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
 set Groep_Rood_persons := Emmely Niemand;
@@ -60,7 +60,6 @@ param Leiding_Blauw_last default 0 :=
 ;
 
 param Leiding_Wit_last default 0 :=
-    Vacature_Wit 0
     Jennifer    25
     Xandra      26
     Lianne      22
@@ -188,7 +187,6 @@ Miranda     .           .       .       .       .       1
 
 param Groep_Wit_prefered_pair default 0:
                 Thirza  Mattanja    Esther  Emma    :=
-Vacature_Wit    1       .           .       .       
 Jennifer        1       .           .       .       
 Xandra          .       1           1       .       
 Lianne          1       .           1       .       
@@ -317,7 +315,6 @@ param Leiding_Wit_ritme default 4 :=
     Yentl   8
     Lianne  8
     Jennifer 8
-    Vacature_Wit 8
 ;
 param Leiding_Wit_offritme_penalty := 20;
 param Leiding_Wit_rather_not_penalty := 10;
