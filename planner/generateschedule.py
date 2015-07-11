@@ -1,5 +1,37 @@
 #!/usr/bin/env python
 from datetime import date, timedelta
+import json, requests
+from datetime import datetime, date, timedelta, time
+host = 'www.ichthusculemborg.nl'
+auth = ('username', 'password')
+
+def create_event(date, time, description, location, remark):
+    url = "http://"+host+"/services/events"
+    data = json.dumps({
+        "start": datetime.combine(date,time).isoformat(),
+        "description": description,
+        "location": location,
+        "remark": remark})
+    print data
+    r = requests.post(url, data, auth=auth)
+    assert(r.status_code == 200)
+    return r.json()
+
+def create_assignment(event, task, person, remark):
+    url = "http://"+host+"/services/events/"+event+"/assignments"
+    data = json.dumps({
+        "task": task,
+        "person": person,
+        "remark": remark})
+    print data
+    r = requests.post(url, data, auth=auth)
+    assert(r.status_code == 200)
+    return r.json()
+
+def update_availability():
+    persons = []
+    persons = get_persons()
+    write_beschikbaarheid('beschikbaarheid.dat', persons)
 
 def get_persons():
     import httplib, urllib, json, getpass
@@ -89,9 +121,8 @@ def parse_results(filename):
                 rooster[week][task] = person
     return rooster
 
-def get_results(persons, timlim):
+def get_results(timlim):
     import subprocess
-    write_beschikbaarheid('beschikbaarheid.dat', persons)
     subprocess.check_call(['glpsol','--tmlim',timlim,'--model','gen.mod','--data','planner.dat','--data','beschikbaarheid.dat','-y','results.txt'])
     return parse_results('results.txt')
     
@@ -128,12 +159,70 @@ def write_markup(filename, rooster):
     for line in open(filename, 'r'):
         print line[0:-1]
 
+def write_rest(rooster):
+    columns = {
+        'Zangleiding': ['Zangleiding'],
+        'Muziek': ['Muziek'],
+        'Geluid': ['Geluid'],
+        'Beamer': ['Beamer'],
+        'Blauw': ['Leiding Blauw','Groep Blauw'],
+        'Wit': ['Leiding Wit','Groep Wit'],
+        'Rood': ['Leiding Rood','Groep Rood'],
+        'Koffie': ['Koffie'],
+        'Welkom': ['Welkom'],
+        'Koster': ['Hoofdkoster','Hulpkoster']}
+    weeks = rooster.keys()
+    for week in sorted(weeks):
+        sunday = date(2015,1,1) + timedelta(days=7*int(week)) + timedelta(days=-4)
+        data = create_event(sunday, time(10,00,00), 'Samenkomst', 'KJS', '')
+        print data
+        event = data[0]['uid']
+        for assignment, tasks in columns.iteritems():
+            names = []
+            for task in tasks:
+                if task in rooster[week]:
+                    if rooster[week][task] != 'Niemand':
+                        names.append(rooster[week][task])
+            data = create_assignment(event, assignment, ", ".join(names) , '')
+
+def help():
+    print sys.argv[0], ' [-ap] [-o <filename>] [-t <time-limit>]'
+    print '\t-a\tGet availability from service.'
+    print '\t-o\tWrite output to this file. Default rooster.txt.'
+    print '\t-p\tPublish schedule on service.'
+    print '\t-s\tHostname. Default www.ichthusculemborg.nl.'
+    print '\t-t\tLimit search time in seconds. Default 300 seconds.'
+
 if __name__ == "__main__":
-    import sys
-    if len(sys.argv) == 2:
-        timlim = sys.argv[1]
-    else:
-        timlim = '300'
-    persons = get_persons()
-    rooster = get_results(persons, timlim)
-    write_markup('rooster.txt', rooster)
+    import sys, getopt, getpass
+    timlim = "300"
+    do_get_availability = False
+    do_publish = False
+    output_filename = 'rooster.txt'
+    try:
+        opts, args = getopt.getopt(sys.argv[1:],"aho:ps:t:")
+    except getopt.GetoptError:
+        print "Incorrect arguments."
+        help()
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt == "-a":
+            do_get_availability = True
+        elif opt == '-h':
+            help()
+            sys.exit()
+        elif opt == "-o":
+            output_filename = arg
+        elif opt == "-p":
+            do_publish = True
+        elif opt == "-s":
+            host = arg
+        elif opt == "-t":
+            timlim = arg
+    auth = ('hans', getpass.getpass('Password for hans: '))
+    if do_get_availability:
+        update_availability()
+    rooster = get_results(timlim)
+    write_markup(output_filename, rooster)
+    if do_publish:
+        write_rest(rooster)
