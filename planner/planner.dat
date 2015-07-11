@@ -1,53 +1,67 @@
+##### BEAMER
+
 set Beamer_persons := David Jeroen Danny;
-        #Bas, Esther en Noa als in dienst;
-        #David vraagt Albert nog
-set Geluid_persons := Hans_K Hans_D David;
-set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
-set Groep_Rood_persons := Emmely Niemand;
-set Groep_Wit_persons := Thirza Esther Emma;
-set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
-set Hulpkoster_persons := Hans_M Gerben Jeroen Peter Wilfred Ramon Puch Jaap
-                    Jef Ferdinand Johan Jonathan Hans_Z Wim_A Teus;
-set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
-set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
-set Leiding_Wit_persons := Xandra Lianne Dieuwke Yentl Jacolien;
-set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
-                    Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
-set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier Mertens;
-set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
-                    Jonathan Wendy Selicia Vena Hans_Z; #Andreas
-set Muziek_teams := Tim Inge Peter Johan;
-set Welkom_persons := Suki Wenny Vena Miranda Chantal Lianne;
-set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
-#set Ministry_persons := Andreas Fokkelien Xandra;
+    #Bas, Esther en Noa als in dienst
+    #David vraagt Albert nog
 
-param Zangleiding_last default 0 :=
-    Tim         22
-    Hans_K      23
-    Jolanda     24
-    Inge        25
-    Fokkelien   26
-;
-
-param Muziek_last default 0 :=
-    Tim         22
-    Peter       24
-    Inge        25
-    Johan       26
-;
-
-param Geluid_last default 0 :=
-    Hans_D      24
-    Hans_K      25
-    David       26
-;
+param Beamer_number_needed default 1 :=
+    31  0
+    38  0;
+param Beamer_min default 2;
+param Beamer_max default 3;
+param Beamer_rest default 1;
+param Beamer_ritme default 4;
+param Beamer_offritme_penalty := 3;
+param Beamer_rather_not_penalty := 10;
 
 param Beamer_last default 0 :=
     David       22
     Jeroen      24
-    Jonathan    25
-    Danny       26
+    Danny       26;
+    
+
+
+##### BLAUW
+
+set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
+set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
+
+param Groep_Blauw_prefered_pair default 0:
+            Vivianne    Anneke  Noa     Selicia David   Chiara :=
+Rachel      1           .       .       .       .       .
+Mieke       .           1       .       .       .       .
+Annelies    .           .       1       .       .       .
+Mirjam      .           .       .       1       .       .
+Lidian      .           .       .       .       1       .
+Wenny       .           .       .       .       1       .
+Miranda     .           .       .       .       .       1
 ;
+param Groep_Blauw_not_prefered_pair_penalty := 2;
+
+param Leiding_Blauw_number_needed default 1 :=
+    31  0
+    38  0;
+param Groep_Blauw_number_needed default 1
+    38  0;
+param Leiding_Blauw_max default 2 :=
+    Lidian  2
+    Wenny   2;
+param Leiding_Blauw_min default 1 :=
+    Lidian  0
+    Wenny   0;
+param Leiding_Blauw_rest default 2 :=
+    Lidian 5
+    Wenny 5;
+param Leiding_Blauw_ritme default 6 :=
+    Lidian  12
+    Wenny   12;
+param Leiding_Blauw_offritme_penalty := 4;
+param Leiding_Blauw_rather_not_penalty := 10;
+
+param Groep_Blauw_min default 1;
+param Groep_Blauw_max default 3;
+param Groep_Blauw_rest default 2;
+param Groep_Blauw_rather_not_penalty := 10;
 
 param Leiding_Blauw_last default 0 :=
     Mieke       16
@@ -56,42 +70,56 @@ param Leiding_Blauw_last default 0 :=
     Annelies    23
     Mirjam      24
     Miranda     25
-    Rachel      26
-;
+    Rachel      26;
 
-param Leiding_Wit_last default 0 :=
-    Xandra      26
-    Lianne      22
-    Dieuwke     23
-    Yentl       24
-;
 
-param Leiding_Rood_last default 0 :=
-    Nora        19
-    Jan_Martijn 23
-    Jolanda     26
-    Tim         25
-    In_de_dienst 24
-;
 
-param Koffie_last default 0 :=
-    Casson      25
-    Jacolien    24
-    Lydia       26
-    Vermeulen   23
-    Pigmans     22
-    Rosier      19
-    Mertens     0
-;
+##### GELUID
+    
+set Geluid_persons := Hans_K Hans_D David;
 
-param Welkom_last default 0 :=
-    Suki        26
-    Wenny       22
-    Vena        25
-    Miranda     23
-    Chantal     24
-    Lianne      16
-;
+param Geluid_number_needed default 1
+    31  0
+    38  0;
+param Geluid_min default 0;
+param Geluid_max default 4;
+param Geluid_rest default 1;
+param Geluid_ritme default 3;
+param Geluid_offritme_penalty := 5;
+param Geluid_rather_not_penalty := 10;
+
+param Geluid_last default 0 :=
+    Hans_D      24
+    Hans_K      25
+    David       26;
+
+
+
+##### KOSTERS
+
+set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
+set Hulpkoster_persons := Hans_M Gerben Jeroen Peter Wilfred Ramon Puch Jaap
+    Jef Ferdinand Johan Jonathan Hans_Z Wim_A Teus;
+
+param Hoofdkoster_number_needed default 1
+    31  1
+    38  0;
+param Hoofdkoster_min default 1;
+param Hoofdkoster_max default 2;
+param Hoofdkoster_rest default 2;
+param Hoofdkoster_ritme default 12;
+param Hoofdkoster_offritme_penalty := 3;
+param Hoofdkoster_rather_not_penalty := 10;
+
+param Hulpkoster_number_needed default 2
+    34  4
+    38  0;
+param Hulpkoster_min default 0;
+param Hulpkoster_max default 2;
+param Hulpkoster_rest default 5;
+param Hulpkoster_ritme default 8;
+param Hulpkoster_offritme_penalty := 2;
+param Hulpkoster_rather_not_penalty := 10;
 
 param Hoofdkoster_last default 0 :=
     Jose        18
@@ -99,16 +127,13 @@ param Hoofdkoster_last default 0 :=
     Herman      26
     Matthijs    16
     Andreas     22
-    Frank_K     24
-;
+    Frank_K     24;
 
 param Hulpkoster_last default 0 :=
-    Rinus       23
     Hans_M      24
     Gerben      24
     Jeroen      25
     Peter       25
-    Ad          26
     Wilfred     26
     Ramon       19
     Puch        19
@@ -119,8 +144,66 @@ param Hulpkoster_last default 0 :=
     Jonathan    22
     Hans_Z      0
     Wim_A       0
-    Teus        0
+    Teus        0;
+
+
+
+##### KOFFIE
+
+set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
+    Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
+set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier Mertens;
+
+param Koffie_member default 0 (tr) :
+            Casson  Jacolien    Lydia   Vermeulen   Pigmans Rosier  Mertens :=
+Lilian      1       .           .       .           .       .       .
+Emma        1       .           .       .           .       .       .
+Ailine      1       .           .       .           .       .       .
+Jacolien    .       1           .       .           .       .       .
+Miranda     .       1           .       .           .       .       .
+Lydia       .       .           1       .           .       .       .
+Emmely      .       .           1       .           .       .       .
+Mieke       .       .           1       .           .       .       .
+Ton         .       .           .       1           .       .       .
+Marieke     .       .           .       1           .       .       .
+Rinus       .       .           .       .           1       .       .
+Monika      .       .           .       .           1       .       .
+Nora        .       .           .       .           .       1       .
+Wim_R       .       .           .       .           .       1       .
+Dieuwke     .       .           .       .           .       .       1
+Hans_M      .       .           .       .           .       .       1
 ;
+
+param Koffie_essential default 0;
+param Koffie_maximum_missing default 1;
+
+param Koffie_number_needed default 1
+    31  1
+    38  0;
+
+param Koffie_min default 1;
+param Koffie_max default 2;
+param Koffie_rest default 2;
+param Koffie_ritme default 6;
+param Koffie_offritme_penalty := 3;
+param Koffie_rather_not_penalty := 10;
+
+param Koffie_last default 0 :=
+    Casson      25
+    Jacolien    24
+    Lydia       26
+    Vermeulen   23
+    Pigmans     22
+    Rosier      19
+    Mertens     0;
+
+
+
+##### MUZIEK
+
+set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
+    Jonathan Wendy Selicia Vena Hans_Z; #Andreas
+set Muziek_teams := Tim Inge Peter Johan;
 
 param Muziek_member default 0 (tr) :
             Inge    Peter   Johan   Tim :=
@@ -147,42 +230,129 @@ param Muziek_essential default 0 :=
     Rosalie 10
     Inge    10
     Xandra  10
-    Justin  15
+    Justin  15;
+param Muziek_maximum_missing default 3;
+
+param Muziek_number_needed default 1 :=
+    31  0
+    38  0;
+
+param Muziek_min default 0 :=
+    Tim     0
+    Peter   0;
+param Muziek_max default 3 :=
+    Tim     3
+    Peter   2;
+param Muziek_rest default 1 :=
+    Tim 2
+    Peter 2;
+param Muziek_ritme default 3 :=
+    Tim 6
+    Peter 6;
+param Muziek_offritme_penalty 8;
+param Muziek_rather_not_penalty := 10;
+
+param Muziek_last default 0 :=
+    Tim         22
+    Peter       24
+    Inge        25
+    Johan       26;
+
+
+
+##### ROOD
+
+set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
+set Groep_Rood_persons := Emmely Niemand;
+
+param Groep_Rood_prefered_pair default 0:
+                Emmely  Niemand :=
+Nora            .       1
+Jan_Martijn     .       1
+Jolanda         1       .
+Tim             .       1
+In_de_dienst    .       1
+Yentl           .       1
 ;
+param Groep_Rood_not_prefered_pair_penalty := 2;
 
-param Koffie_member default 0 (tr) :
-            Casson  Jacolien    Lydia   Vermeulen   Pigmans Rosier  Mertens :=
-Lilian      1       .           .       .           .       .       .
-Emma        1       .           .       .           .       .       .
-Ailine      1       .           .       .           .       .       .
-Jacolien    .       1           .       .           .       .       .
-Miranda     .       1           .       .           .       .       .
-Lydia       .       .           1       .           .       .       .
-Emmely      .       .           1       .           .       .       .
-Mieke       .       .           1       .           .       .       .
-Ton         .       .           .       1           .       .       .
-Marieke     .       .           .       1           .       .       .
-Rinus       .       .           .       .           1       .       .
-Monika      .       .           .       .           1       .       .
-Nora        .       .           .       .           .       1       .
-Wim_R       .       .           .       .           .       1       .
-Dieuwke     .       .           .       .           .       .       1
-Hans_M      .       .           .       .           .       .       1
-;
+param Leiding_Rood_number_needed default 1
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+    38  1;
+    
+param Groep_Rood_number_needed default 1
+    28  0
+    29  0
+    30  0
+    31  0
+    32  0
+    33  0
+    38  1;
 
-param Koffie_essential default 0;
+param Leiding_Rood_min default 1
+    Nora            0
+    In_de_dienst    0;
+param Leiding_Rood_max default 2 :=
+    Nora            2
+    Tim             1
+    In_de_dienst    0;
+param Leiding_Rood_rest default 2;
+param Leiding_Rood_ritme default 5
+    Nora 10
+    In_de_dienst 10;
+param Leiding_Rood_offritme_penalty := 4;
+param Leiding_Rood_rather_not_penalty := 10;
 
-param Groep_Blauw_prefered_pair default 0:
-            Vivianne    Anneke  Noa     Selicia David   Chiara :=
-Rachel      1           .       .       .       .       .
-Mieke       .           1       .       .       .       .
-Annelies    .           .       1       .       .       .
-Mirjam      .           .       .       1       .       .
-Lidian      .           .       .       .       1       .
-Wenny       .           .       .       .       1       .
-Miranda     .           .       .       .       .       1
-;
+param Groep_Rood_min default 1;
+param Groep_Rood_max default 13 :=
+    Emmely 2;
+param Groep_Rood_rest default 2
+    Niemand 0;
+param Groep_Rood_rather_not_penalty := 10;
 
+param Leiding_Rood_last default 0 :=
+    Nora        19
+    Jan_Martijn 23
+    Jolanda     26
+    Tim         25
+    In_de_dienst 24;
+
+
+
+##### WELKOM
+
+set Welkom_persons := Suki Wenny Vena Miranda Chantal Lianne;
+
+param Welkom_number_needed default 1
+    31  1
+    38  0;
+
+param Welkom_min default 1;
+param Welkom_max default 3;
+param Welkom_rest default 1;
+param Welkom_ritme default 5;
+param Welkom_offritme_penalty := 2;
+param Welkom_rather_not_penalty := 10;
+
+param Welkom_last default 0 :=
+    Suki        26
+    Wenny       22
+    Vena        25
+    Miranda     23
+    Chantal     24
+    Lianne      16;
+
+
+
+##### WIT
+
+set Leiding_Wit_persons := Xandra Lianne Dieuwke Yentl Jacolien;
+set Groep_Wit_persons := Thirza Esther Emma;
 
 param Groep_Wit_prefered_pair default 0:
                 Thirza  Esther  Emma    :=
@@ -192,119 +362,7 @@ Dieuwke         .       .       1
 Yentl           .       1       .       
 Jacolien        1       .       .
 ;
-
-param Groep_Rood_prefered_pair default 0:
-            Emmely  Niemand :=
-Nora        .       1
-Jan_Martijn .       1
-Jolanda     1       .
-Tim         .       1
-In_de_dienst    .   1
-Yentl       .       1
-;
-
-
-param Zangleiding_min default 0;
-param Muziek_min default 0 :=
-    Tim     0
-    Peter   0
-;
-param Geluid_min default 0;
-param Beamer_min default 2;
-param Leiding_Rood_min default 1
-    Nora            0
-    In_de_dienst    0;
-param Groep_Rood_min default 1;
-param Leiding_Wit_min default 1;
-param Groep_Wit_min default 1;
-param Leiding_Blauw_min default 1 :=
-    Lidian  0
-    Wenny   0
-;
-param Groep_Blauw_min default 1;
-param Koffie_min default 1;
-param Welkom_min default 1;
-param Hoofdkoster_min default 1;
-param Hulpkoster_min default 0;
-
-param Zangleiding_max default 3;
-param Muziek_max default 3 :=
-    Tim     3
-    Peter   2
-;
-param Geluid_max default 4;
-param Beamer_max default 3;
-param Leiding_Rood_max default 2 :=
-    Nora            2
-    Tim             1
-    In_de_dienst    0;
-param Groep_Rood_max default 13 :=
-    Emmely 2;
-param Leiding_Wit_max default 2;
-param Groep_Wit_max default 2;
-param Leiding_Blauw_max default 2 :=
-    Lidian  2
-    Wenny   2
-;
-param Groep_Blauw_max default 3;
-param Koffie_max default 2;
-param Welkom_max default 3;
-param Hoofdkoster_max default 2;
-param Hulpkoster_max default 2;
-
-param Zangleiding_rest default 2;
-param Muziek_rest default 1 :=
-    Tim 2
-    Peter 2
-;
-param Geluid_rest default 1;
-param Beamer_rest default 1;
-param Leiding_Rood_rest default 2;
-param Leiding_Wit_rest default 2;
-param Leiding_Blauw_rest default 2 :=
-    Lidian 5
-    Wenny 5
-;
-param Groep_Rood_rest default 2
-    Niemand 0;
-param Groep_Wit_rest default 1;
-param Groep_Blauw_rest default 2;
-param Koffie_rest default 2;
-param Welkom_rest default 1;
-param Hoofdkoster_rest default 2;
-param Hulpkoster_rest default 5;
-
-param Zangleiding_number_needed default 1 :=
-    31  0
-    38  0;
-param Zangleiding_offritme_penalty := 6;
-param Zangleiding_ritme default 5;
-param Zangleiding_rather_not_penalty := 10;
-
-param Muziek_number_needed default 1 :=
-    31  0
-    38  0;
-param Muziek_offritme_penalty 8;
-param Muziek_ritme default 3 :=
-    Tim 6
-    Peter 6
-;
-param Muziek_maximum_missing default 3;
-param Muziek_rather_not_penalty := 10;
-
-param Geluid_number_needed default 1
-    31  0
-    38  0;
-param Geluid_ritme default 3;
-param Geluid_offritme_penalty := 5;
-param Geluid_rather_not_penalty := 10;
-
-param Beamer_number_needed default 1 :=
-    31  0
-    38  0;
-param Beamer_ritme default 4;
-param Beamer_offritme_penalty := 3;
-param Beamer_rather_not_penalty := 10;
+param Groep_Wit_not_prefered_pair_penalty := 30;
 
 param Leiding_Wit_number_needed default 1 :=
     28  0
@@ -312,113 +370,61 @@ param Leiding_Wit_number_needed default 1 :=
     30  0
     31  0
     32  0
-    33  0
-    38  1
-;
-param Leiding_Wit_ritme default 4 :=
-    Yentl   8
-    Lianne  8
-;
-param Leiding_Wit_offritme_penalty := 20;
-param Leiding_Wit_rather_not_penalty := 10;
+    33  0;
 param Groep_Wit_number_needed default 1 :=
     28  0
     29  0
     30  0
     31  0
     32  0
-    33  0
-    38  1
-;
-param Groep_Wit_not_prefered_pair_penalty := 30;
+    33  0;
+
+param Leiding_Wit_min default 1;
+param Leiding_Wit_max default 2;
+param Leiding_Wit_rest default 2;
+param Leiding_Wit_ritme default 4 :=
+    Yentl   8
+    Lianne  8;
+param Leiding_Wit_offritme_penalty := 20;
+param Leiding_Wit_rather_not_penalty := 10;
+
+param Groep_Wit_min default 1;
+param Groep_Wit_max default 2;
+param Groep_Wit_rest default 1;
 param Groep_Wit_rather_not_penalty := 10;
 
-param Leiding_Blauw_number_needed default 1 :=
-    28  1
-    29  1
-    30  1
+param Leiding_Wit_last default 0 :=
+    Xandra      26
+    Lianne      22
+    Dieuwke     23
+    Yentl       24;
+
+
+
+##### ZANGLEIDERS
+
+set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
+
+param Zangleiding_number_needed default 1 :=
     31  0
-    32  1
-    33  1
-    38  0
-;
-param Leiding_Blauw_ritme default 6 :=
-    Lidian  12
-    Wenny   12
-;
-param Leiding_Blauw_offritme_penalty := 4;
-param Leiding_Blauw_rather_not_penalty := 10;
-param Groep_Blauw_number_needed default 1
-    28  1
-    29  1
-    30  1
-    31  1
-    32  1
-    33  1
-    38  0
-;
-param Groep_Blauw_not_prefered_pair_penalty := 2;
-param Groep_Blauw_rather_not_penalty := 10;
-
-param Leiding_Rood_number_needed default 1
-    28  0
-    29  0
-    30  0
-    31  0
-    32  0
-    33  0
-    38  1
-;
-param Leiding_Rood_ritme default 5
-    Nora 10
-    In_de_dienst 10
-;
-param Leiding_Rood_offritme_penalty := 4;
-param Leiding_Rood_rather_not_penalty := 10;
-param Groep_Rood_number_needed default 1
-    28  0
-    29  0
-    30  0
-    31  0
-    32  0
-    33  0
-    38  1
-;
-param Groep_Rood_not_prefered_pair_penalty := 2;
-param Groep_Rood_rather_not_penalty := 10;
-
-param Koffie_number_needed default 1
-    31  1
     38  0;
-param Koffie_ritme default 6;
-param Koffie_offritme_penalty := 3;
-param Koffie_rather_not_penalty := 10;
-param Koffie_maximum_missing default 1;
 
-param Welkom_number_needed default 1
-    31  1
-    38  0;
-param Welkom_ritme default 5;
-param Welkom_offritme_penalty := 2;
-param Welkom_rather_not_penalty := 10;
+param Zangleiding_min default 0;
+param Zangleiding_max default 3;
+param Zangleiding_rest default 2;
+param Zangleiding_ritme default 5;
+param Zangleiding_offritme_penalty := 6;
+param Zangleiding_rather_not_penalty := 10;
 
-param Hoofdkoster_number_needed default 1
-    31  1
-    38  0;
-param Hoofdkoster_ritme default 12;
-param Hoofdkoster_offritme_penalty := 3;
-param Hoofdkoster_rather_not_penalty := 10;
+param Zangleiding_last default 0 :=
+    Tim         22
+    Hans_K      23
+    Jolanda     24
+    Inge        25
+    Fokkelien   26;
 
-param Hulpkoster_number_needed default 2
-    29  2
-    30  2
-    31  2
-    32  2
-    33  2
-    34  4
-    38  0
-;
-param Hulpkoster_ritme default 8;
-param Hulpkoster_offritme_penalty := 2;
-param Hulpkoster_rather_not_penalty := 10;
+
+##### MINISTRY
+
+#set Ministry_persons := Andreas Fokkelien Xandra;
 end;
