@@ -1,25 +1,25 @@
-set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
-set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
-                    Jonathan Wendy Selicia Vena Hans_Z; #Andreas
-set Muziek_teams := Tim Inge Peter Johan;
+set Beamer_persons := David Jeroen Danny;
+        #Bas, Esther en Noa als in dienst;
+        #David vraagt Albert nog
 set Geluid_persons := Hans_K Hans_D David;
-set Beamer_persons := David Jeroen Danny Jonathan; #Bas, Esther en Noa als in dienst; Albert nog vragen 
-set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
 set Groep_Blauw_persons := Selicia David Chiara Anneke Noa Vivianne;
-set Leiding_Wit_persons := Jennifer Xandra Lianne Dieuwke Yentl Jacolien;
-set Groep_Wit_persons := Thirza Mattanja Esther Emma;
-set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
 set Groep_Rood_persons := Emmely Niemand;
+set Groep_Wit_persons := Thirza Esther Emma;
+set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
+set Hulpkoster_persons := Hans_M Gerben Jeroen Peter Wilfred Ramon Puch Jaap
+                    Jef Ferdinand Johan Jonathan Hans_Z Wim_A Teus;
+set Leiding_Blauw_persons := Rachel Mieke Annelies Mirjam Lidian Miranda Wenny;
+set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
+set Leiding_Wit_persons := Xandra Lianne Dieuwke Yentl Jacolien;
 set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
                     Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
 set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier Mertens;
+set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
+                    Jonathan Wendy Selicia Vena Hans_Z; #Andreas
+set Muziek_teams := Tim Inge Peter Johan;
 set Welkom_persons := Suki Wenny Vena Miranda Chantal Lianne;
-set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
-set Hulpkoster_persons := Rinus Hans_M Gerben Jeroen Peter
-                    Ad Wilfred Ramon Puch Jaap Jef Ferdinand Johan
-                    Jonathan Hans_Z Wim_A Teus;
-#set Ministry := Andreas Fokkelien Xandra;
-
+set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
+#set Ministry_persons := Andreas Fokkelien Xandra;
 
 param Zangleiding_last default 0 :=
     Tim         22
@@ -60,7 +60,6 @@ param Leiding_Blauw_last default 0 :=
 ;
 
 param Leiding_Wit_last default 0 :=
-    Jennifer    25
     Xandra      26
     Lianne      22
     Dieuwke     23
@@ -186,13 +185,12 @@ Miranda     .           .       .       .       .       1
 
 
 param Groep_Wit_prefered_pair default 0:
-                Thirza  Mattanja    Esther  Emma    :=
-Jennifer        1       .           .       .       
-Xandra          .       1           1       .       
-Lianne          1       .           .       .       
-Dieuwke         .       .           .       1       
-Yentl           .       .           1       .       
-Jacolien        1       .           .       .
+                Thirza  Esther  Emma    :=
+Xandra          .       1       .       
+Lianne          1       .       .       
+Dieuwke         .       .       1       
+Yentl           .       1       .       
+Jacolien        1       .       .
 ;
 
 param Groep_Rood_prefered_pair default 0:
@@ -217,8 +215,7 @@ param Leiding_Rood_min default 1
     Nora            0
     In_de_dienst    0;
 param Groep_Rood_min default 1;
-param Leiding_Wit_min default 1
-    Jennifer 0;
+param Leiding_Wit_min default 1;
 param Groep_Wit_min default 1;
 param Leiding_Blauw_min default 1 :=
     Lidian  0
