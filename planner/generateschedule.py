@@ -8,36 +8,43 @@ host = 'www.ichthusculemborg.nl'
 auth = ('username', 'password')
 state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
 
+
 def create_event(date, time, description, location, remark):
-    url = "http://"+host+"/services/events"
+    url = "http://" + host + "/services/events"
     data = json.dumps({
-        "start": datetime.combine(date,time).isoformat(),
+        "start": datetime.combine(date, time).isoformat(),
         "description": description,
         "location": location,
         "remark": remark})
     print data
     r = requests.post(url, data, auth=auth)
-    assert(r.status_code == 200)
+    assert (r.status_code == 200)
     return r.json()
 
+
 def create_assignment(event, task, person, remark):
-    url = "http://"+host+"/services/events/"+event+"/assignments"
+    url = "http://" + host + "/services/events/" + event + "/assignments"
     data = json.dumps({
         "task": task,
         "person": person,
         "remark": remark})
     print data
     r = requests.post(url, data, auth=auth)
-    assert(r.status_code == 200)
+    assert (r.status_code == 200)
     return r.json()
 
+
 def update_availability():
-    persons = []
     persons = get_persons()
     write_beschikbaarheid('beschikbaarheid.dat', persons)
 
+
 def get_persons():
-    import httplib, urllib, json, getpass
+    import httplib
+    import urllib
+    import json
+    import getpass
+
     params = urllib.urlencode({'email': 'hans.kalle@telfort.nl', 'wachtwoord': getpass.getpass()})
     headers = {"Content-type": "application/x-www-form-urlencoded",
                "Accept": "text/plain"}
@@ -54,12 +61,14 @@ def get_persons():
         response = conn.getresponse()
     else:
         return []
-    assert(response.status==200)
+    assert (response.status == 200)
     persons = response.read()
     return json.loads(persons)
-    
+
+
 def get_weeks(persons):
     return map(lambda x: x['week'], persons[0]['tasks'][0]['availability'])
+
 
 def get_tasks(persons):
     tasks = []
@@ -68,6 +77,7 @@ def get_tasks(persons):
             if not task['task'] in tasks:
                 tasks.append(task['task'])
     return sorted(tasks)
+
 
 def get_availability(person, taskname):
     for task in person['tasks']:
@@ -81,29 +91,31 @@ def get_availability(person, taskname):
                 return None
     return None
 
+
 def write_beschikbaarheid(filename, persons):
-    file = open(filename, 'w')
+    beschikbaarheids_file = open(filename, 'w')
     weeks = get_weeks(persons)
-    file.write('param first_week := ' + weeks[0] + ';\n')
-    file.write('param last_week := ' + weeks[-1] + ';\n')
+    beschikbaarheids_file.write('param first_week := ' + weeks[0] + ';\n')
+    beschikbaarheids_file.write('param last_week := ' + weeks[-1] + ';\n')
     for task in get_tasks(persons):
-        file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
+        beschikbaarheids_file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
         for week in weeks:
-            file.write(' ')
-            file.write(week)
-        file.write(':=\n')        
+            beschikbaarheids_file.write(' ')
+            beschikbaarheids_file.write(week)
+        beschikbaarheids_file.write(':=\n')
         for person in sorted(persons):
             availability = get_availability(person, task)
-            if availability != None:
-                file.write(person['name'].replace(' ', '_'))
+            if availability is not None:
+                beschikbaarheids_file.write(person['name'].replace(' ', '_'))
                 for available in availability:
-                    file.write(' ')
-                    file.write(state_value[available['state']])
-                file.write('\n')
-        file.write(';\n')
-    file.write('end;\n')
-    file.close()
-    
+                    beschikbaarheids_file.write(' ')
+                    beschikbaarheids_file.write(state_value[available['state']])
+                beschikbaarheids_file.write('\n')
+        beschikbaarheids_file.write(';\n')
+    beschikbaarheids_file.write('end;\n')
+    beschikbaarheids_file.close()
+
+
 def parse_results(filename):
     rooster = {}
     week = 0
@@ -120,13 +132,13 @@ def parse_results(filename):
 
 
 def add_week(rooster, week):
-    if not week in rooster:
+    if week not in rooster:
         rooster[week] = {}
-        rooster[week]['datum'] = getDateOfSundayOfWeek(week)
+        rooster[week]['datum'] = get_date_of_sunday_of_week(week)
 
 
-def getDateOfSundayOfWeek(week):
-    return date(2015, 1, 4) + timedelta((int(week) - 1) * 7)
+def get_date_of_sunday_of_week(week):
+    return date(2015, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=-4)
 
 
 def add_person(rooster, week, task, person):
@@ -138,28 +150,33 @@ def add_person(rooster, week, task, person):
 
 def get_results(timlim):
     import subprocess
-    subprocess.check_call(['glpsol','--tmlim',timlim,'--model','gen.mod','--data','planner.dat','--data','beschikbaarheid.dat','-y','results.txt'])
+    subprocess.check_call(
+        ['glpsol', '--tmlim', timlim, '--model', 'gen.mod', '--data', 'planner.dat', '--data', 'beschikbaarheid.dat',
+         '-y', 'results.txt'])
     return parse_results('results.txt')
-    
+
+
 def write_markup(filename, rooster):
-    file = open(filename, 'w')
-    file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^koster^opmerkingen^\n')
+    markup_file = open(filename, 'w')
+    markup_file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^koster^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
-        columns = [['Zangleiding'],['Muziek'],['Geluid'],['Beamer'],['Leiding Blauw','Groep Blauw'],['Leiding Wit','Groep Wit'],['Leiding Rood','Groep Rood'],['Koffie'],['Welkom'],['Hoofdkoster','Hulpkoster']] 
-        file.write('|week ')
-        file.write(week)
-        file.write('|')
-        file.write(rooster[week]['datum'].strftime('%d %b'))
-        file.write('|')
+        columns = [['Zangleiding'], ['Muziek'], ['Geluid'], ['Beamer'], ['Leiding Blauw', 'Groep Blauw'],
+                   ['Leiding Wit', 'Groep Wit'], ['Leiding Rood', 'Groep Rood'], ['Koffie'], ['Welkom'],
+                   ['Hoofdkoster', 'Hulpkoster']]
+        markup_file.write('|week ')
+        markup_file.write(week)
+        markup_file.write('|')
+        markup_file.write(rooster[week]['datum'].strftime('%d %b'))
+        markup_file.write('|')
         for column in columns:
             names = []
             for task in column:
                 if task in rooster[week]:
                     names.append(rooster[week][task])
             width = 10 * len(column)
-            file.write(("{:<"+str(width)+"s}").format(", ".join(names)))
-            file.write('|')
+            markup_file.write(("{:<" + str(width) + "s}").format(", ".join(names)))
+            markup_file.write('|')
         remarks = []
         if 'missing' in rooster[week]:
             remarks.append(rooster[week]['missing'] + ' mist')
@@ -168,9 +185,9 @@ def write_markup(filename, rooster):
         if 'not prefered pair' in rooster[week]:
             remarks.append(rooster[week]['not prefered pair'] + ' afwijkend paar')
         if len(remarks) > 0:
-            file.write(','.join(remarks))
-        file.write(' |\n')
-    file.close()
+            markup_file.write(','.join(remarks))
+        markup_file.write(' |\n')
+    markup_file.close()
     show_file(filename)
 
 
@@ -185,27 +202,27 @@ def write_rest(rooster):
         'Muziek': ['Muziek'],
         'Geluid': ['Geluid'],
         'Beamer': ['Beamer'],
-        'Blauw': ['Leiding Blauw','Groep Blauw'],
-        'Wit': ['Leiding Wit','Groep Wit'],
-        'Rood': ['Leiding Rood','Groep Rood'],
+        'Blauw': ['Leiding Blauw', 'Groep Blauw'],
+        'Wit': ['Leiding Wit', 'Groep Wit'],
+        'Rood': ['Leiding Rood', 'Groep Rood'],
         'Koffie': ['Koffie'],
         'Welkom': ['Welkom'],
-        'Koster': ['Hoofdkoster','Hulpkoster']}
+        'Koster': ['Hoofdkoster', 'Hulpkoster']}
     weeks = rooster.keys()
     for week in sorted(weeks):
-        sunday = date(2015,1,1) + timedelta(days=7*int(week)) + timedelta(days=-4)
-        data = create_event(sunday, time(10,00,00), 'Samenkomst', 'KJS', '')
-        print data
-        event = data[0]['uid']
+        sunday = get_date_of_sunday_of_week(week)
+        event = create_event(sunday, time(10, 00, 00), 'Samenkomst', 'KJS', '')
+        event_uid = event[0]['uid']
         for assignment, tasks in columns.iteritems():
             names = []
             for task in tasks:
                 if task in rooster[week]:
                     if rooster[week][task] != 'Niemand':
                         names.append(rooster[week][task])
-            data = create_assignment(event, assignment, ", ".join(names) , '')
+            create_assignment(event_uid, assignment, ", ".join(names), '')
 
-def help():
+
+def show_help():
     print sys.argv[0], ' [-ap] [-o <filename>] [-t <time-limit>]'
     print '\t-a\tGet availability from service.'
     print '\t-o\tWrite output to this file. Default rooster.txt.'
@@ -213,23 +230,27 @@ def help():
     print '\t-s\tHostname. Default www.ichthusculemborg.nl.'
     print '\t-t\tLimit search time in seconds. Default 300 seconds.'
 
+
 if __name__ == "__main__":
-    import sys, getopt, getpass
-    timlim = "300"
+    import sys
+    import getopt
+    import getpass
+
+    time_limit = "300"
     do_get_availability = False
     do_publish = False
     output_filename = 'rooster.txt'
     try:
-        opts, args = getopt.getopt(sys.argv[1:],"aho:ps:t:")
+        opts, args = getopt.getopt(sys.argv[1:], "aho:ps:t:")
     except getopt.GetoptError:
         print "Incorrect arguments."
-        help()
+        show_help()
         sys.exit(2)
     for opt, arg in opts:
         if opt == "-a":
             do_get_availability = True
         elif opt == '-h':
-            help()
+            show_help()
             sys.exit()
         elif opt == "-o":
             output_filename = arg
@@ -238,11 +259,11 @@ if __name__ == "__main__":
         elif opt == "-s":
             host = arg
         elif opt == "-t":
-            timlim = arg
+            time_limit = arg
     auth = ('hans', getpass.getpass('Password for hans: '))
     if do_get_availability:
         update_availability()
-    rooster = get_results(timlim)
-    write_markup(output_filename, rooster)
+    new_rooster = get_results(time_limit)
+    write_markup(output_filename, new_rooster)
     if do_publish:
-        write_rest(rooster)
+        write_rest(new_rooster)
