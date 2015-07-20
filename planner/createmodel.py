@@ -3,13 +3,14 @@ from itertools import combinations
 
 overrides = []
 
+
 class Task:
-    def __init__(self,name,in_teams=False,paired_task=None,succesive_count=1):
+    def __init__(self, name, in_teams=False, paired_task=None, succesive_count=1):
         self.succesive_count = succesive_count
-        self.name = name.replace(' ','_')
+        self.name = name.replace(' ', '_')
         self.in_teams = in_teams
-        if paired_task != None:
-            self.paired_task = paired_task.replace(' ','_')
+        if paired_task is not None:
+            self.paired_task = paired_task.replace(' ', '_')
         else:
             self.paired_task = None
         self.dict = {'name': self.name, 'paired_task': self.paired_task, 'succesive_count': self.succesive_count}
@@ -17,29 +18,29 @@ class Task:
             self.dict['set'] = "teams"
         else:
             self.dict['set'] = "persons"
-            
+
     def get_sets(self):
-        sets = []
-        sets.append("set %(name)s_persons;" % self.dict)
+        sets = ["set %(name)s_persons;" % self.dict]
         if self.in_teams:
             sets.append("set %(name)s_teams;" % self.dict)
         return sets
 
     def get_params(self):
-        params = []
-        params.append("param %(name)s_offritme_penalty, >=0;" % self.dict)
-        params.append("param %(name)s_rather_not_penalty, >=0;" % self.dict)
-        params.append("param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;" % self.dict)
-        params.append("param %(name)s_number_needed {w in weeks}, integer, >=0;" % self.dict)
-        params.append("param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
-        params.append("param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
-        params.append("param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;" % self.dict)
+        params = ["param %(name)s_offritme_penalty, >=0;" % self.dict,
+                  "param %(name)s_rather_not_penalty, >=0;" % self.dict,
+                  "param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;" % self.dict,
+                  "param %(name)s_number_needed {w in weeks}, integer, >=0;" % self.dict,
+                  "param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0;" % self.dict,
+                  "param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0;" % self.dict,
+                  "param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;" % self.dict]
         if self.in_teams:
             params.append("param %(name)s_member {t in %(name)s_teams, p in %(name)s_persons}, binary;" % self.dict)
             params.append("param %(name)s_essential {p in %(name)s_persons}, >= 0;" % self.dict)
             params.append("param %(name)s_maximum_missing {t in %(name)s_teams}, >= 0;" % self.dict)
-        if self.paired_task != None:
-            params.append("param %(name)s_prefered_pair {p1 in %(paired_task)s_persons, p2 in %(name)s_persons}, binary;" % self.dict)
+        if self.paired_task is not None:
+            params.append(
+                "param %(name)s_prefered_pair {p1 in %(paired_task)s_persons, p2 in %(name)s_persons}, "
+                "binary;" % self.dict)
             params.append("param %(name)s_not_prefered_pair_penalty, >=0;" % self.dict)
         else:
             params.append("param %(name)s_ritme {p in %(name)s_%(set)s}, integer, >=1;" % self.dict)
@@ -47,25 +48,23 @@ class Task:
         return params
 
     def get_vars(self):
-        variables = []
-        variables.append("var %(name)s {t in %(name)s_%(set)s, w in weeks}, binary;" % self.dict)
-        variables.append("var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;" % self.dict)
+        variables = ["var %(name)s {t in %(name)s_%(set)s, w in weeks}, binary;" % self.dict,
+                     "var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;" % self.dict]
         if self.in_teams:
             variables.append("var %(name)s_missing {p in %(name)s_persons, w in weeks}, binary;" % self.dict)
-        if self.paired_task != None:
+        if self.paired_task is not None:
             variables.append("var %(name)s_not_prefered_pair {w in weeks}, binary;" % self.dict)
         else:
             variables.append("var %(name)s_offritme {t in %(name)s_%(set)s, w in weeks_extended}, binary;" % self.dict)
         return variables
-        
+
     def get_objective_terms(self):
-        terms = []
-        terms.append("  + (sum {p in %(name)s_persons, w in weeks}" % self.dict)
-        terms.append("    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])" % self.dict)
+        terms = ["  + (sum {p in %(name)s_persons, w in weeks}" % self.dict,
+                 "    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])" % self.dict]
         if self.in_teams:
             terms.append("  + (sum {p in %(name)s_persons, w in weeks}" % self.dict)
             terms.append("    %(name)s_essential[p] * %(name)s_missing[p,w])" % self.dict)
-        if self.paired_task == None:
+        if self.paired_task is not None:
             terms.append("  + (sum {x in %(name)s_%(set)s, w in weeks_extended}" % self.dict)
             terms.append("    %(name)s_offritme_penalty * %(name)s_offritme[x,w])" % self.dict)
         else:
@@ -82,8 +81,8 @@ class Task:
         rules.extend(self.get_rule_rest())
         if self.in_teams:
             rules.extend(self.get_rule_missing())
-#            rules.extend(self.get_rule_maximum_missing())
-        if self.paired_task == None:
+        # rules.extend(self.get_rule_maximum_missing())
+        if self.paired_task is None:
             rules.extend(self.get_rule_ritme())
             rules.extend(self.get_rule_ritme_history())
             rules.extend(self.get_rule_rest_history())
@@ -92,35 +91,35 @@ class Task:
         if self.succesive_count == 2:
             rules.extend(self.get_rule_twice())
         return rules
-        
+
     def get_exclusion_rules(self, other_task):
         rules = []
         if not "%s_excludes_%s" % (self.name, other_task.name) in overrides:
             rules.append("subject to %s_excludes_%s" % (self.name, other_task.name))
             generator = ("  {w in weeks, p in %s_persons inter %s_persons" % (self.name, other_task.name))
             if self.in_teams:
-                generator += ", t1 in %s_teams" % (self.name)
+                generator += ", t1 in %s_teams" % self.name
             if other_task.in_teams:
-                generator += ", t2 in %s_teams" % (other_task.name)
+                generator += ", t2 in %s_teams" % other_task.name
             if self.in_teams or other_task.in_teams:
                 generator += ": "
             if self.in_teams:
-                generator += "%s_member[t1,p]=1" % (self.name)
+                generator += "%s_member[t1,p]=1" % self.name
             if self.in_teams and other_task.in_teams:
                 generator += " and "
             if other_task.in_teams:
-                generator += "%s_member[t2,p]=1" % (other_task.name)
+                generator += "%s_member[t2,p]=1" % other_task.name
             generator += "}:"
-            rules.append(generator)        
+            rules.append(generator)
             if self.in_teams:
-                expression = "  %s[t1,w]" % (self.name)
+                expression = "  %s[t1,w]" % self.name
             else:
-                expression = "  %s[p,w]" % (self.name)
+                expression = "  %s[p,w]" % self.name
             if other_task.in_teams:
-                expression += " + %s[t2,w]" % (other_task.name)
+                expression += " + %s[t2,w]" % other_task.name
             else:
-                expression += " + %s[p,w]" % (other_task.name)
-            expression += (" <= 1;")
+                expression += " + %s[p,w]" % other_task.name
+            expression += " <= 1;"
             rules.append(expression)
         return rules
 
@@ -163,7 +162,8 @@ class Task:
         rules = []
         if not "ritme_history_%(name)s" % self.dict in overrides:
             rules.append("subject to ritme_history_%(name)s" % self.dict)
-            rules.append("  {x in %(name)s_%(set)s, w1 in (first_week-%(name)s_ritme[x]+1)..%(name)s_last[x]}:" % self.dict)
+            rules.append(
+                "  {x in %(name)s_%(set)s, w1 in (first_week-%(name)s_ritme[x]+1)..%(name)s_last[x]}:" % self.dict)
             rules.append("  (sum {w2 in w1..(w1 + %(name)s_ritme[x]-1): w2 in weeks} %(name)s[x,w2])" % self.dict)
             rules.append("    <= %(name)s_offritme[x,w1];" % self.dict)
         return rules
@@ -191,7 +191,9 @@ class Task:
         if not "rest_%(name)s" % self.dict in overrides:
             rules.append("subject to rest_%(name)s" % self.dict)
             rules.append("  {x in %(name)s_%(set)s, w1 in weeks}:" % self.dict)
-            rules.append("  (sum {w2 in w1..(w1 + %(name)s_rest[x]+%(succesive_count)i-1): w2 in weeks} %(name)s[x,w2])" % self.dict)
+            rules.append(
+                "  (sum {w2 in w1..(w1 + %(name)s_rest[x]+%(succesive_count)i-1): "
+                "w2 in weeks} %(name)s[x,w2])" % self.dict)
             rules.append("  <= %(succesive_count)i;" % self.dict)
         return rules
 
@@ -199,26 +201,32 @@ class Task:
         rules = []
         if not "rest_history_%(name)s" % self.dict in overrides:
             rules.append("subject to rest_history_%(name)s" % self.dict)
-            rules.append("  {x in %(name)s_%(set)s, w in (%(name)s_last[x]+1)..(%(name)s_last[x]+%(name)s_rest[x]): w in weeks}:" % self.dict)
+            rules.append(
+                "  {x in %(name)s_%(set)s, w in (%(name)s_last[x]+1)..(%(name)s_last[x]+%(name)s_rest[x]): "
+                "w in weeks}:" % self.dict)
             rules.append("  %(name)s[x,w] == 0;" % self.dict)
         return rules
-        
+
     def get_rule_prefered_pair(self):
         rules = []
         if not "prefered_pair_%(name)s" % self.dict in overrides:
             rules.append("subject to prefered_pair_%(name)s" % self.dict)
             rules.append("  {w in weeks, p1 in %(paired_task)s_persons, p2 in %(name)s_persons}:" % self.dict)
-            rules.append("  %(paired_task)s[p1,w] + %(name)s[p2,w] <= 1 + %(name)s_prefered_pair[p1,p2] + %(name)s_not_prefered_pair[w];" % self.dict)
+            rules.append(
+                "  %(paired_task)s[p1,w] + %(name)s[p2,w] <= "
+                "1 + %(name)s_prefered_pair[p1,p2] + %(name)s_not_prefered_pair[w];" % self.dict)
         return rules
 
     def get_rule_missing(self):
         rules = []
         if not "missing_%(name)s" % self.dict in overrides:
             rules.append("subject to missing_%(name)s" % self.dict)
-            rules.append("  {w in weeks, t in %(name)s_teams, p in %(name)s_persons: %(name)s_member[t,p]=1 and %(name)s_essential[p]>=1}:" % self.dict)
+            rules.append(
+                "  {w in weeks, t in %(name)s_teams, p in %(name)s_persons: "
+                "%(name)s_member[t,p]=1 and %(name)s_essential[p]>=1}:" % self.dict)
             rules.append("  %(name)s[t,w] <= %(name)s_available[p,w] + %(name)s_missing[p,w];" % self.dict)
         return rules
-		
+
     def get_rule_maximum_missing(self):
         rules = []
         if not "maximum_missing_%(name)s" % self.dict in overrides:
@@ -232,20 +240,28 @@ class Task:
         rules = []
         if not "twice_%(name)s" % self.dict in overrides:
             rules.append("subject to twice_%(name)s" % self.dict)
-            rules.append("  {x in %(name)s_%(set)s, w in 0..(number_of_weeks/2-1): (first_week+2*w+1) in weeks}:" % self.dict)
+            rules.append(
+                "  {x in %(name)s_%(set)s, w in 0..(number_of_weeks/2-1): (first_week+2*w+1) in weeks}:" % self.dict)
             rules.append("  %(name)s[x,first_week+2*w] = %(name)s[x,first_week+2*w+1];" % self.dict)
         return rules
 
     def get_display_lines(self):
-        lines = []
-        lines.append("display {w in weeks, %(name)s_ in %(name)s_%(set)s: %(name)s[%(name)s_,w]=1}: w, %(name)s_;" % self.dict)
-        lines.append("display {w in weeks, rather_not_ in %(name)s_persons: %(name)s_rather_not[rather_not_,w]=1}: w, rather_not_;" % self.dict)
+        lines = [
+            "display {w in weeks, %(name)s_ in %(name)s_%(set)s: %(name)s[%(name)s_,w]=1}: w, %(name)s_;" % self.dict,
+            "display {w in weeks, rather_not_ in %(name)s_persons: %(name)s_rather_not[rather_not_,w]=1}: "
+            "w, rather_not_;" % self.dict]
         if self.in_teams:
-            lines.append("display {w in weeks, missing_ in %(name)s_persons: %(name)s_missing[missing_,w]=1}: w, missing_;" % self.dict)
-        if self.paired_task != None:
-            lines.append("display {w in weeks, not_prefered_pair_ in %(name)s_persons: %(name)s_not_prefered_pair[w]=1 and %(name)s[not_prefered_pair_,w]=1}: w, not_prefered_pair_;" % self.dict)
+            lines.append(
+                "display {w in weeks, missing_ in %(name)s_persons: %(name)s_missing[missing_,w]=1}: "
+                "w, missing_;" % self.dict)
+        if self.paired_task is not None:
+            lines.append(
+                "display {w in weeks, not_prefered_pair_ in %(name)s_persons: "
+                "%(name)s_not_prefered_pair[w]=1 and %(name)s[not_prefered_pair_,w]=1}: "
+                "w, not_prefered_pair_;" % self.dict)
         return lines
-    
+
+
 def read_from(filename, start):
     lines = []
     copy = False
@@ -258,7 +274,8 @@ def read_from(filename, start):
         if copy:
             lines.append(line)
     return lines
-    
+
+
 def read_overrides(filename):
     overrides = []
     for line in open(filename, "r"):
@@ -267,26 +284,17 @@ def read_overrides(filename):
             words = line.split()
             overrides.append(words[2])
     return overrides
-    
+
+
 if __name__ == "__main__":
 
     overrides = read_overrides("specials.mod")
-                    
-    tasks = []
-    tasks.append(Task("Zangleiding"))
-    tasks.append(Task("Muziek",True))
-    tasks.append(Task("Geluid"))
-    tasks.append(Task("Beamer"))
-    tasks.append(Task("Leiding Rood"))
-    tasks.append(Task("Groep Rood",paired_task="Leiding Rood"))
-    tasks.append(Task("Leiding Wit"))
-    tasks.append(Task("Groep Wit",paired_task="Leiding Wit"))
-    tasks.append(Task("Leiding Blauw"))
-    tasks.append(Task("Groep Blauw",paired_task="Leiding Blauw"))
-    tasks.append(Task("Koffie",True))
-    tasks.append(Task("Welkom"))
-    tasks.append(Task("Hoofdkoster",succesive_count=1))
-    tasks.append(Task("Hulpkoster"))
+
+    tasks = [Task("Zangleiding"), Task("Muziek", True), Task("Geluid"), Task("Beamer"), Task("Leiding Rood"),
+             Task("Groep Rood", paired_task="Leiding Rood"), Task("Leiding Wit"),
+             Task("Groep Wit", paired_task="Leiding Wit"), Task("Leiding Blauw"),
+             Task("Groep Blauw", paired_task="Leiding Blauw"), Task("Koffie", True), Task("Welkom"),
+             Task("Hoofdkoster", succesive_count=1), Task("Hulpkoster")]
 
     output = []
     for task in tasks:
@@ -308,10 +316,10 @@ if __name__ == "__main__":
     output.append(";")
     for task in tasks:
         output.extend(task.get_rules())
-    dont_exclude = [("Beamer", "Hulpkoster"), ("Beamer", "Ministry"), ("Groep_Blauw", "Welkom"), 
+    dont_exclude = [("Beamer", "Hulpkoster"), ("Beamer", "Ministry"), ("Groep_Blauw", "Welkom"),
                     ("Hulpkoster", "Welkom"), ("Leiding_Blauw", "Welkom"), ("Muziek", "Zangleiding"),
                     ("Leiding_Rood", "Leiding_Wit")]
-                    # ("Ministry", "Welkom"), 
+    # ("Ministry", "Welkom"),
     for task1, task2 in combinations(tasks, 2):
         if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
             output.extend(task1.get_exclusion_rules(task2))
