@@ -64,7 +64,7 @@ class Task:
         if self.in_teams:
             terms.append("  + (sum {p in %(name)s_persons, w in weeks}" % self.dict)
             terms.append("    %(name)s_essential[p] * %(name)s_missing[p,w])" % self.dict)
-        if self.paired_task is not None:
+        if self.paired_task is None:
             terms.append("  + (sum {x in %(name)s_%(set)s, w in weeks_extended}" % self.dict)
             terms.append("    %(name)s_offritme_penalty * %(name)s_offritme[x,w])" % self.dict)
         else:

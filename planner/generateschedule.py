@@ -84,7 +84,7 @@ def get_availability(person, taskname):
         if task['task'] == taskname:
             total = 0
             for week in task['availability']:
-                total += state_value[week['state']]
+                total += float(state_value[week['state']])
             if total > 0.0:
                 return task['availability']
             else:
