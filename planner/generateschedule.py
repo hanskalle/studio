@@ -43,9 +43,8 @@ def get_persons():
     import httplib
     import urllib
     import json
-    import getpass
 
-    params = urllib.urlencode({'email': 'hans.kalle@telfort.nl', 'wachtwoord': getpass.getpass()})
+    params = urllib.urlencode({'email': auth[0], 'wachtwoord': auth[1]})
     headers = {"Content-type": "application/x-www-form-urlencoded",
                "Accept": "text/plain"}
     conn = httplib.HTTPConnection("www.ichthusculemborg.nl")
@@ -138,6 +137,10 @@ def add_week(rooster, week):
 
 
 def get_date_of_sunday_of_week(week):
+    if week == "52":
+        return date(2015, 12, 25)
+    elif week == "53":
+        return date(2015, 1, 1) + timedelta(days=7 * (int(week) - 1)) + timedelta(days=-4)
     return date(2015, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=-4)
 
 
@@ -260,7 +263,7 @@ if __name__ == "__main__":
             host = arg
         elif opt == "-t":
             time_limit = arg
-    auth = ('hans', getpass.getpass('Password for hans: '))
+    auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     if do_get_availability:
         update_availability()
     new_rooster = get_results(time_limit)
