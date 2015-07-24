@@ -294,7 +294,7 @@ if __name__ == "__main__":
              Task("Groep Rood", paired_task="Leiding Rood"), Task("Leiding Wit"),
              Task("Groep Wit", paired_task="Leiding Wit"), Task("Leiding Blauw"),
              Task("Groep Blauw", paired_task="Leiding Blauw"), Task("Koffie", True), Task("Welkom"),
-             Task("Hoofdkoster", succesive_count=1), Task("Hulpkoster")]
+             Task("Hoofdkoster", succesive_count=2), Task("Hulpkoster")]
 
     output = []
     for task in tasks:
