@@ -215,10 +215,10 @@ param Muziek_essential default 0 :=
     Vena    5
 #   Andreas 5
     Rosalie 10
-    Inge    10
+    Inge    15
     Xandra  10
-    Justin  10;
-param Muziek_maximum_missing default 3;
+    Justin  15;
+param Muziek_maximum_missing default 15;
 
 param Muziek_number_needed default 1;
 
