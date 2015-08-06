@@ -3,7 +3,6 @@ var wijngaardenbreuk {weeks}, binary;
 var matthijszonderlianne, binary;
 var liannezondermatthijs, binary;
 var geenrustjolanda {weeks}, binary;
-var justinvrij {weeks}, binary;
 
 + (sum {w in weeks} 4 * wijngaardenbreuk[w])
 + 10*matthijszonderlianne + 20*liannezondermatthijs
