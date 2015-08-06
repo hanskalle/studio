@@ -81,7 +81,7 @@ class Task:
         rules.extend(self.get_rule_rest())
         if self.in_teams:
             rules.extend(self.get_rule_missing())
-        # rules.extend(self.get_rule_maximum_missing())
+            rules.extend(self.get_rule_maximum_missing())
         if self.paired_task is None:
             rules.extend(self.get_rule_ritme())
             rules.extend(self.get_rule_ritme_history())
@@ -327,6 +327,7 @@ if __name__ == "__main__":
     output.append("solve;")
     for task in tasks:
         output.extend(task.get_display_lines())
+    output.extend(read_from("specials.mod", "display"))
     output.append("end;")
 
     for line in output:
