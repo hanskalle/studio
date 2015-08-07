@@ -153,6 +153,8 @@ def add_person(rooster, week, task, person):
 
 def get_results(timlim):
     import subprocess
+    import createmodel
+    createmodel.Generator().write_model('gen.mod')
     subprocess.check_call(
         ['glpsol', '--tmlim', timlim, '--model', 'gen.mod', '--data', 'planner.dat', '--data', 'beschikbaarheid.dat',
          '-y', 'results.txt'])
@@ -263,7 +265,8 @@ if __name__ == "__main__":
             host = arg
         elif opt == "-t":
             time_limit = arg
-    auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
+    if do_get_availability or do_publish:
+        auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     if do_get_availability:
         update_availability()
     new_rooster = get_results(time_limit)
