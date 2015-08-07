@@ -6,9 +6,34 @@ class Generator:
     def __init__(self):
         pass
 
+    @staticmethod
+    def read_from(filename, start):
+        lines = []
+        copy = False
+        for line in open(filename, 'r'):
+            line = line.strip()
+            if len(line) == 0:
+                copy = False
+            if line.startswith(start):
+                copy = True
+            if copy:
+                lines.append(line)
+        return lines
+
+    @staticmethod
+    def read_overrides(filename):
+        overrides = []
+        for line in open(filename, 'r'):
+            line = line.strip()
+            if line.startswith('subject to '):
+                words = line.split()
+                overrides.append(words[2])
+        # overrides.extend(['minimum_Leiding_Rood'])
+        return overrides
+
     @property
     def model(self):
-        overrides = read_overrides('specials.mod')
+        overrides = self.read_overrides('specials.mod')
 
         tasks = [Task('Zangleiding'), Task('Muziek', True), Task('Geluid'), Task('Beamer'), Task('Leiding Rood'),
                  Task('Groep Rood', paired_task='Leiding Rood'), Task('Leiding Wit'),
@@ -28,11 +53,11 @@ class Generator:
             model.extend(task.get_params())
         for task in tasks:
             model.extend(task.get_vars())
-        model.extend(read_from('specials.mod', 'var'))
+        model.extend(self.read_from('specials.mod', 'var'))
         model.append('minimize penalties:')
         for task in tasks:
             model.extend(task.get_objective_terms())
-        model.extend(read_from('specials.mod', '+'))
+        model.extend(self.read_from('specials.mod', '+'))
         model.append(';')
         for task in tasks:
             model.extend(task.get_rules(overrides))
@@ -43,11 +68,11 @@ class Generator:
         for task1, task2 in combinations(tasks, 2):
             if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
-        model.extend(read_from('specials.mod', 'subject to'))
+        model.extend(self.read_from('specials.mod', 'subject to'))
         model.append('solve;')
         for task in tasks:
             model.extend(task.get_display_lines())
-        model.extend(read_from('specials.mod', 'display'))
+        model.extend(self.read_from('specials.mod', 'display'))
         model.append('end;')
         return model
 
@@ -140,8 +165,7 @@ class Task:
         if self.paired_task is None:
             rules.extend(self.get_rule_ritme(overrides))
             rules.extend(self.get_rule_ritme_history(overrides))
-            if self.name not in ['x']:
-                rules.extend(self.get_rule_rest_history(overrides))
+            rules.extend(self.get_rule_rest_history(overrides))
         else:
             rules.extend(self.get_rule_prefered_pair(overrides))
         if self.succesive_count == 2:
@@ -316,30 +340,6 @@ class Task:
                 '%(name)s_not_prefered_pair[w]=1 and %(name)s[not_prefered_pair_,w]=1}: '
                 'w, not_prefered_pair_;' % self.dict)
         return lines
-
-
-def read_from(filename, start):
-    lines = []
-    copy = False
-    for line in open(filename, 'r'):
-        line = line.strip()
-        if len(line) == 0:
-            copy = False
-        if line.startswith(start):
-            copy = True
-        if copy:
-            lines.append(line)
-    return lines
-
-
-def read_overrides(filename):
-    overrides = []
-    for line in open(filename, 'r'):
-        line = line.strip()
-        if line.startswith('subject to '):
-            words = line.split()
-            overrides.append(words[2])
-    return overrides
 
 
 if __name__ == '__main__':
