@@ -35,13 +35,6 @@ subject to witrood_combi
     {w in weeks}:
     Leiding_Rood['Yentl',w] = Leiding_Wit['Yentl',w];
 
-subject to Justin_eenmaal_vrij:
-    (sum {w in weeks} Muziek_missing['Justin',w]) >= 1;
-
-subject to Justin_alleen_vrij_van_Inges_team
-  {w in weeks}:
-  Muziek_missing['Justin',w] <= Muziek['Inge',w];
-
 subject to Justin_niet_vrij_als_Inge_zangleidt
   {w in weeks}:
   Muziek_missing['Justin',w] + Zangleiding['Inge',w] <= 1;
@@ -52,4 +45,4 @@ subject to Justin_minimum_3_weken_rust
 
 subject to Justin_minimum_3_weken_rust_historisch
   {w in (Muziek_last['Inge']+1)..(Muziek_last['Inge']+3): w in weeks}:
-  Muziek['Inge',w] - Muziek_missing['Justin',w] == 0;
+  Muziek['Inge',w] - Muziek_missing['Justin',w] = 0;
