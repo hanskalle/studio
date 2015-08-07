@@ -38,24 +38,24 @@ param Groep_Blauw_not_prefered_pair_penalty := 2;
 
 param Leiding_Blauw_number_needed default 1;
 param Groep_Blauw_number_needed default 1;
-param Leiding_Blauw_max default 13 :=
-    Lidian  13
-    Wenny   13;
-param Leiding_Blauw_min default 0 :=
-    Lidian  0
-    Wenny   0;
-param Leiding_Blauw_rest default 0 :=
-    Lidian 0
-    Wenny 0; # 4 6 6
+param Leiding_Blauw_min default 2 :=
+    Lidian  1
+    Wenny   1;
+param Leiding_Blauw_max default 3 :=
+    Lidian  2
+    Wenny   2;
+param Leiding_Blauw_rest default 4 :=
+    Lidian 6
+    Wenny 6;
 param Leiding_Blauw_ritme default 6 :=
     Lidian  12
     Wenny   12;
 param Leiding_Blauw_offritme_penalty := 4;
 param Leiding_Blauw_rather_not_penalty := 10;
 
-param Groep_Blauw_max default 13;
-param Groep_Blauw_min default 0;
-param Groep_Blauw_rest default 0; # 4
+param Groep_Blauw_min default 2;
+param Groep_Blauw_max default 3;
+param Groep_Blauw_rest default 4;
 param Groep_Blauw_rather_not_penalty := 10;
 
 param Leiding_Blauw_last default 0 :=
@@ -74,8 +74,8 @@ param Leiding_Blauw_last default 0 :=
 set Geluid_persons := Hans_K Hans_D David;
 
 param Geluid_number_needed default 1;
-param Geluid_max default 5;
 param Geluid_min default 4;
+param Geluid_max default 5;
 param Geluid_rest default 1;
 param Geluid_ritme default 3;
 param Geluid_offritme_penalty := 5;
@@ -168,9 +168,9 @@ param Koffie_maximum_missing default 1;
 
 param Koffie_number_needed default 1;
 
-param Koffie_min default 0;
-param Koffie_max default 13;
-param Koffie_rest default 0; # 4
+param Koffie_min default 2;
+param Koffie_max default 2;
+param Koffie_rest default 4;
 param Koffie_ritme default 7;
 param Koffie_offritme_penalty := 3;
 param Koffie_rather_not_penalty := 10;
@@ -259,30 +259,33 @@ Tim             .       1
 In_de_dienst    .       1
 Yentl           .       1
 ;
-param Groep_Rood_not_prefered_pair_penalty := 2;
+param Groep_Rood_not_prefered_pair_penalty := 1000;
 
 param Leiding_Rood_number_needed default 1;
     
 param Groep_Rood_number_needed default 1;
 
-param Leiding_Rood_min default 0
-    Nora            0
-    In_de_dienst    0;
-param Leiding_Rood_max default 13 :=
-    Nora            13
-    In_de_dienst    13;
-param Leiding_Rood_rest default 0; # 3
-param Leiding_Rood_ritme default 5
-    Nora 10
-    In_de_dienst 10;
+param Leiding_Rood_min default 2 :=
+    Nora            1
+    In_de_dienst    1;
+param Leiding_Rood_max default 3 :=
+    Nora            2
+    In_de_dienst    2;
+param Leiding_Rood_rest default 2 :=
+    Nora            4
+    In_de_dienst    4;
+param Leiding_Rood_ritme default 4
+    Nora            8
+    In_de_dienst    8;
 param Leiding_Rood_offritme_penalty := 4;
 param Leiding_Rood_rather_not_penalty := 10;
 
-param Groep_Rood_min default 0;
-param Groep_Rood_max default 13 :=
-    Emmely 13;
+param Groep_Rood_min default 10 :=
+    Emmely  3;
+param Groep_Rood_max default 14 :=
+    Emmely  4;
 param Groep_Rood_rest default 0
-    Niemand 0; # 3 0
+    Emmely  2;
 param Groep_Rood_rather_not_penalty := 10;
 
 param Leiding_Rood_last default 0 :=
@@ -335,13 +338,15 @@ param Groep_Wit_not_prefered_pair_penalty := 30;
 param Leiding_Wit_number_needed default 1;
 param Groep_Wit_number_needed default 1;
 
-param Leiding_Wit_min default 0 :=
-    Yentl   0
-    Lianne  0;
-param Leiding_Wit_max default 13 :=
-    Yentl   13
-    Lianne   13;
-param Leiding_Wit_rest default 0; # 3
+param Leiding_Wit_min default 3 :=
+    Yentl   1
+    Lianne  1;
+param Leiding_Wit_max default 4 :=
+    Yentl   2
+    Lianne  2;
+param Leiding_Wit_rest default 2 :=
+    Yentl   5
+    Lianne  5;
 param Leiding_Wit_ritme default 4 :=
     Yentl   8
     Lianne  8;
