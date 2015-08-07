@@ -36,7 +36,7 @@ subject to witrood_combi
     Leiding_Rood['Yentl',w] = Leiding_Wit['Yentl',w];
 
 subject to Justin_eenmaal_vrij:
-    (sum {w in weeks} Muziek_missing['Justin',w]) = 1;
+    (sum {w in weeks} Muziek_missing['Justin',w]) >= 1;
 
 subject to Justin_alleen_vrij_van_Inges_team
   {w in weeks}:
