@@ -20,6 +20,10 @@ subject to Jolanda_1_week_rust_tussen_zangleiding_en_rood
     {w in first_week..(last_week-1)}:
     Leiding_Rood['Jolanda',w] + Zangleiding['Jolanda',w+1] <= 1 + geenrustjolanda[w];
 
+subject to Jolanda_geen_zangleiding_tegelijkertijd_met_Wim_A_hulpkoster
+    {w in weeks}:
+    Zangleiding['Jolanda',w] + Hulpkoster['Wim_A',w] <= 1;
+
 subject to Rijswijk_special1
     {w in weeks}:
     Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne;
