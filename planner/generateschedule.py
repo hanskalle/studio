@@ -9,10 +9,10 @@ auth = ('username', 'password')
 state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
 
 
-def create_event(date, time, description, location, remark):
+def create_event(eventdate, eventtime, description, location, remark):
     url = "http://" + host + "/services/events"
     data = json.dumps({
-        "start": datetime.combine(date, time).isoformat(),
+        "start": datetime.combine(eventdate, eventtime).isoformat(),
         "description": description,
         "location": location,
         "remark": remark})
@@ -156,7 +156,12 @@ def get_results(timlim):
     import createmodel
     createmodel.Generator().write_model('gen.mod')
     subprocess.check_call(
-        ['glpsol', '--tmlim', timlim, '--model', 'gen.mod', '--data', 'planner.dat', '--data', 'last.dat', '--data', 'availability.dat',
+        ['glpsol',
+         '--tmlim', timlim,
+         '--model', 'gen.mod',
+         '--data', 'planner.dat',
+         '--data', 'last.dat',
+         '--data', 'availability.dat',
          '-y', 'results.txt'])
     return parse_results('results.txt')
 
