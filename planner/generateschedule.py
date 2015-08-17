@@ -34,6 +34,50 @@ def create_assignment(event, task, person, remark):
     return r.json()
 
 
+def update_last_assignments():
+    url = "http://" + host + "/services/events"
+    r = requests.get(url, auth=auth)
+    assert (r.status_code == 200)
+    last_assignments = {}
+    data = r.json()
+    for event in data:
+        for assignment in event['assignments']['list']:
+            eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
+            week, weekday = get_week_and_weekday_from_date(eventdate)
+            if weekday == 7:  # Only sunday-tasks
+                task = assignment['task']
+                person = assignment['person']
+                if ',' in person:
+                    persons = person
+                    for person in persons.split(','):
+                        person = person.strip()
+                        add_last_assigment(last_assignments, task, person, week)
+                else:
+                    add_last_assigment(last_assignments, task, person, week)
+    availability = get_persons()
+    for task in get_tasks(availability):
+        original_task = task
+        if task[:8] == 'Leiding ':
+            task = task[8:]
+        if task[:6] == 'Groep ':
+            task = task[6:]
+        if task[:5] == 'Hoofd':
+            task = 'Koster'
+        if task[:4] == 'Hulp':
+            task = 'Koster'
+        print '\nparam ' + original_task + ' default 0 :='
+        for person in sorted(last_assignments[task]):
+            print '\t', person.replace(' ', '_'), '\t', last_assignments[task][person]
+        print ';'
+    exit()
+
+
+def add_last_assigment(last_assignments, task, person, week):
+    if task not in last_assignments:
+        last_assignments[task] = {}
+    last_assignments[task][person] = week
+
+
 def update_availability():
     persons = get_persons()
     write_availability('availability.dat', persons)
@@ -137,11 +181,26 @@ def add_week(rooster, week):
 
 
 def get_date_of_sunday_of_week(week):
+    # Christmas hack
     if week == "52":
         return date(2015, 12, 25)
     elif week == "53":
         return date(2015, 1, 1) + timedelta(days=7 * (int(week) - 1)) + timedelta(days=-4)
+    # End Christmas hack
     return date(2015, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=-4)
+
+
+def get_week_and_weekday_from_date(eventdate):
+    # Christmas hack
+    if eventdate == datetime(eventdate.year, 12, 25):
+        return 52, 0
+    # End Christmas hack
+    year, week, weekday = eventdate.isocalendar()
+    # Christmas hack
+    if week >= 52:
+        week += 1
+    # End Christmas hack
+    return week, weekday
 
 
 def add_person(rooster, week, task, person):
@@ -233,10 +292,11 @@ def write_rest(rooster):
 
 
 def show_help():
-    print sys.argv[0], ' [-ap] [-o <filename>] [-t <time-limit>]'
+    print sys.argv[0], ' [-alp] [-o <filename>] [-h <hostname>] [-t <time-limit>]'
     print '\t-a\tGet availability from service.'
-    print '\t-o\tWrite output to this file. Default rooster.txt.'
+    print '\t-l\tGet last assignments from service.'
     print '\t-p\tPublish schedule on service.'
+    print '\t-o\tWrite output to this file. Default rooster.txt.'
     print '\t-s\tHostname. Default www.ichthusculemborg.nl.'
     print '\t-t\tLimit search time in seconds. Default 300 seconds.'
 
@@ -248,10 +308,11 @@ if __name__ == "__main__":
 
     time_limit = "300"
     do_get_availability = False
+    do_get_last_assignments = False
     do_publish = False
     output_filename = 'rooster.txt'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "aho:ps:t:")
+        opts, args = getopt.getopt(sys.argv[1:], "ahlo:ps:t:")
     except getopt.GetoptError:
         print "Incorrect arguments."
         show_help()
@@ -262,6 +323,8 @@ if __name__ == "__main__":
         elif opt == '-h':
             show_help()
             sys.exit()
+        elif opt == "-l":
+            do_get_last_assignments = True
         elif opt == "-o":
             output_filename = arg
         elif opt == "-p":
@@ -270,8 +333,10 @@ if __name__ == "__main__":
             host = arg
         elif opt == "-t":
             time_limit = arg
-    if do_get_availability or do_publish:
+    if do_get_availability or do_publish or do_get_last_assignments:
         auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
+    if do_get_last_assignments:
+        update_last_assignments()
     if do_get_availability:
         update_availability()
     new_rooster = get_results(time_limit)
