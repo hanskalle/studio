@@ -12,11 +12,6 @@ param Beamer_ritme default 3;
 param Beamer_offritme_penalty := 3;
 param Beamer_rather_not_penalty := 10;
 
-param Beamer_last default 0 :=
-    Jeroen      -36
-    Danny       -37
-    David       -39;
-
 
 
 ##### BLAUW
@@ -58,15 +53,6 @@ param Groep_Blauw_max default 3;
 param Groep_Blauw_rest default 4;
 param Groep_Blauw_rather_not_penalty := 10;
 
-param Leiding_Blauw_last default 0 :=
-    Wenny       -32
-    Mieke       -33
-    Miranda     -34
-    Mirjam      -35
-    Lidian      -36
-    Annelies    -37
-    Rachel      -39;
-
 
 
 ##### GELUID
@@ -80,11 +66,6 @@ param Geluid_rest default 1;
 param Geluid_ritme default 3;
 param Geluid_offritme_penalty := 5;
 param Geluid_rather_not_penalty := 10;
-
-param Geluid_last default 0 :=
-    Hans_K      36
-    David       37
-    Hans_D      39;
 
 
 
@@ -109,31 +90,6 @@ param Hulpkoster_rest default 5;
 param Hulpkoster_ritme default 7;
 param Hulpkoster_offritme_penalty := 2;
 param Hulpkoster_rather_not_penalty := 10;
-
-param Hoofdkoster_last default 0 :=
-    Matthijs    33
-    Andreas     34
-    Jose        35
-    Hans_D      36
-    Frank_K     37
-    Herman      39;
-
-param Hulpkoster_last default 0 :=
-    Teus        31
-    Gerben      32
-    Peter       32
-    Jeroen      33
-    Ramon       33
-    Wilfred     34
-    Puch        34
-    Hans_Z      34
-    Hans_M      35
-    Jaap        36
-    Ferdinand   36
-    Johan       37
-    Jonathan    37
-    Jef         39
-    Wim_A       39;
 
 
 
@@ -174,15 +130,6 @@ param Koffie_rest default 4;
 param Koffie_ritme default 7;
 param Koffie_offritme_penalty := 3;
 param Koffie_rather_not_penalty := 10;
-
-param Koffie_last default 0 :=
-    Lydia       32
-    Casson      33
-    Vermeulen   34
-    Pigmans     35
-    Rosier      36
-    Jacolien    37
-    Mertens     39;
 
 
 
@@ -237,12 +184,6 @@ param Muziek_ritme default 3 :=
 param Muziek_offritme_penalty 8;
 param Muziek_rather_not_penalty := 10;
 
-param Muziek_last default 0 :=
-    Peter       33
-    Inge        35
-    Tim         37
-    Johan       39;
-
 
 
 ##### ROOD
@@ -288,13 +229,6 @@ param Groep_Rood_rest default 0
     Emmely  2;
 param Groep_Rood_rather_not_penalty := 10;
 
-param Leiding_Rood_last default 0 :=
-    Jan_Martijn     35
-    Jolanda         36
-    Nora            37
-    In_de_dienst    38
-    Tim             39;
-
 
 
 ##### WELKOM
@@ -309,14 +243,6 @@ param Welkom_rest default 4;
 param Welkom_ritme default 6;
 param Welkom_offritme_penalty := 2;
 param Welkom_rather_not_penalty := 10;
-
-param Welkom_last default 0 :=
-    Wenny       32
-    Lianne      33
-    Vena        35
-    Suki        36
-    Chantal     37
-    Miranda     39;
 
 
 
@@ -358,13 +284,6 @@ param Groep_Wit_max default 13;
 param Groep_Wit_rest default 1;
 param Groep_Wit_rather_not_penalty := 10;
 
-param Leiding_Wit_last default 0 :=
-    Yentl       26
-    Lianne      34
-    Dieuwke     37
-    Xandra      38
-    Jacolien    39;
-
 
 
 ##### ZANGLEIDERS
@@ -380,12 +299,6 @@ param Zangleiding_ritme default 5;
 param Zangleiding_offritme_penalty := 6;
 param Zangleiding_rather_not_penalty := 10;
 
-param Zangleiding_last default 0 :=
-    Jolanda     33
-    Inge        35
-    Fokkelien   36
-    Tim         37
-    Hans_K      39;
 
 
 ##### MINISTRY

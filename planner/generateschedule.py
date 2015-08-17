@@ -36,7 +36,7 @@ def create_assignment(event, task, person, remark):
 
 def update_availability():
     persons = get_persons()
-    write_beschikbaarheid('beschikbaarheid.dat', persons)
+    write_availability('availability.dat', persons)
 
 
 def get_persons():
@@ -91,28 +91,28 @@ def get_availability(person, taskname):
     return None
 
 
-def write_beschikbaarheid(filename, persons):
-    beschikbaarheids_file = open(filename, 'w')
+def write_availability(filename, persons):
+    availability_file = open(filename, 'w')
     weeks = get_weeks(persons)
-    beschikbaarheids_file.write('param first_week := ' + weeks[0] + ';\n')
-    beschikbaarheids_file.write('param last_week := ' + weeks[-1] + ';\n')
+    availability_file.write('param first_week := ' + weeks[0] + ';\n')
+    availability_file.write('param last_week := ' + weeks[-1] + ';\n')
     for task in get_tasks(persons):
-        beschikbaarheids_file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
+        availability_file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
         for week in weeks:
-            beschikbaarheids_file.write(' ')
-            beschikbaarheids_file.write(week)
-        beschikbaarheids_file.write(':=\n')
+            availability_file.write(' ')
+            availability_file.write(week)
+        availability_file.write(':=\n')
         for person in sorted(persons):
             availability = get_availability(person, task)
             if availability is not None:
-                beschikbaarheids_file.write(person['name'].replace(' ', '_'))
+                availability_file.write(person['name'].replace(' ', '_'))
                 for available in availability:
-                    beschikbaarheids_file.write(' ')
-                    beschikbaarheids_file.write(state_value[available['state']])
-                beschikbaarheids_file.write('\n')
-        beschikbaarheids_file.write(';\n')
-    beschikbaarheids_file.write('end;\n')
-    beschikbaarheids_file.close()
+                    availability_file.write(' ')
+                    availability_file.write(state_value[available['state']])
+                availability_file.write('\n')
+        availability_file.write(';\n')
+    availability_file.write('end;\n')
+    availability_file.close()
 
 
 def parse_results(filename):
@@ -156,7 +156,7 @@ def get_results(timlim):
     import createmodel
     createmodel.Generator().write_model('gen.mod')
     subprocess.check_call(
-        ['glpsol', '--tmlim', timlim, '--model', 'gen.mod', '--data', 'planner.dat', '--data', 'beschikbaarheid.dat',
+        ['glpsol', '--tmlim', timlim, '--model', 'gen.mod', '--data', 'planner.dat', '--data', 'last.dat', '--data', 'availability.dat',
          '-y', 'results.txt'])
     return parse_results('results.txt')
 
