@@ -125,17 +125,12 @@ def get_tasks(persons):
 def get_availability(person, taskname):
     for task in person['tasks']:
         if task['task'] == taskname:
-            total = 0
-            for week in task['availability']:
-                total += float(state_value[week['state']])
-            if total > 0.0:
-                return task['availability']
-            else:
-                return None
+            return task['availability']
     return None
 
 
 def write_availability(filename, persons):
+    sets = get_sets()
     availability_file = open(filename, 'w')
     weeks = get_weeks(persons)
     availability_file.write('param first_week := ' + weeks[0] + ';\n')
@@ -148,12 +143,13 @@ def write_availability(filename, persons):
         availability_file.write(':=\n')
         for person in sorted(persons):
             availability = get_availability(person, task)
-            if availability is not None:
-                availability_file.write(person['name'].replace(' ', '_'))
-                for available in availability:
-                    availability_file.write(' ')
-                    availability_file.write(state_value[available['state']])
-                availability_file.write('\n')
+            if person['name'] in sets[task]:
+                if availability is not None:
+                    availability_file.write(person['name'].replace(' ', '_'))
+                    for available in availability:
+                        availability_file.write(' ')
+                        availability_file.write(state_value[available['state']])
+                    availability_file.write('\n')
         availability_file.write(';\n')
     availability_file.write('end;\n')
     availability_file.close()
@@ -208,6 +204,24 @@ def add_person(rooster, week, task, person):
         rooster[week][task] += ', ' + person
     else:
         rooster[week][task] = person
+
+
+def get_sets():
+    sets = {}
+    complete_line = ''
+    for line in open('planner.dat', 'r'):
+        if '#' in line:
+            line = line[0:line.find('#')]
+        complete_line = complete_line + ' ' + line
+        complete_line = complete_line.strip()
+        if len(complete_line) > 0:
+            if complete_line[-1] == ';':
+                if complete_line[0:3] == 'set':
+                    words = complete_line[4:-1].split()
+                    if words[0][-8:] == '_persons':
+                        sets[words[0][0:-8].replace('_', ' ')] = words[2:]
+                complete_line = ''
+    return sets
 
 
 def get_results(timlim):
