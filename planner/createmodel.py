@@ -25,10 +25,12 @@ class Generator:
         overrides = []
         for line in open(filename, 'r'):
             line = line.strip()
-            if line.startswith('subject to '):
+            if line.startswith('ignore '):
+                words = line.split()
+                overrides.append(words[1])
+            elif line.startswith('subject to '):
                 words = line.split()
                 overrides.append(words[2])
-        # overrides.extend(['minimum_Leiding_Rood'])
         return overrides
 
     @property
