@@ -233,11 +233,11 @@ param Groep_Rood_rather_not_penalty := 10;
 
 ##### WELKOM
 
-set Welkom_persons := Suki Wenny Vena Miranda Chantal; #Lianne
+set Welkom_persons := Suki Wenny Vena Miranda Marieke; #Lianne, Chantal
 
 param Welkom_number_needed default 1;
 
-param Welkom_min default 1;
+param Welkom_min default 2;
 param Welkom_max default 3;
 param Welkom_rest default 3;
 param Welkom_ritme default 5;
@@ -248,13 +248,13 @@ param Welkom_rather_not_penalty := 10;
 
 ##### WIT
 
-set Leiding_Wit_persons := Xandra Lianne Dieuwke Yentl Jacolien;
+set Leiding_Wit_persons := Xandra Dieuwke Yentl Jacolien; #Lianne
 set Groep_Wit_persons := Thirza Esther Emma;
 
 param Groep_Wit_prefered_pair default 0:
                 Thirza  Esther  Emma    :=
 Xandra          .       1       .       
-Lianne          1       .       .       
+#Lianne          1       .       .
 Dieuwke         .       .       1       
 Yentl           .       1       .       
 Jacolien        1       .       .
@@ -265,17 +265,17 @@ param Leiding_Wit_number_needed default 1;
 param Groep_Wit_number_needed default 1;
 
 param Leiding_Wit_min default 3 :=
-    Yentl   1
-    Lianne  1;
+#    Lianne  0
+    Yentl   1;
 param Leiding_Wit_max default 4 :=
-    Yentl   2
-    Lianne  2;
-param Leiding_Wit_rest default 2 :=
-    Yentl   5
-    Lianne  5;
-param Leiding_Wit_ritme default 4 :=
-    Yentl   8
-    Lianne  8;
+#    Lianne  0
+    Yentl   2;
+param Leiding_Wit_rest default 1 :=
+#    Lianne  5
+    Yentl   5;
+param Leiding_Wit_ritme default 3 :=
+#    Lianne  8
+    Yentl   6;
 param Leiding_Wit_offritme_penalty := 20;
 param Leiding_Wit_rather_not_penalty := 10;
 
