@@ -55,22 +55,23 @@ def update_last_assignments():
                 else:
                     add_last_assigment(last_assignments, task, person, week)
     availability = get_persons()
+    sets = get_sets()
+    f = open('last.dat', 'w')
     for task in get_tasks(availability):
-        original_task = task
-        if task[:8] == 'Leiding ':
-            task = task[8:]
-        if task[:6] == 'Groep ':
-            task = task[6:]
-        if task[:5] == 'Hoofd':
-            task = 'Koster'
-        if task[:4] == 'Hulp':
-            task = 'Koster'
-        print '\nparam ' + original_task + ' default 0 :='
-        for person in sorted(last_assignments[task]):
-            print '\t', person.replace(' ', '_'), '\t', last_assignments[task][person]
-        print ';'
-    exit()
-
+        if task[:6] != 'Groep ':
+            original_task = task
+            if task[:8] == 'Leiding ':
+                task = task[8:]
+            if task[:5] == 'Hoofd':
+                task = 'Koster'
+            if task[:4] == 'Hulp':
+                task = 'Koster'
+            f.write('param ' + original_task.replace(' ', '_') + '_last default -53 :=\n')
+            for person in sorted(last_assignments[task]):
+                if person in sets[original_task]:
+                    f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
+            f.write(';\n')
+    f.close()
 
 def add_last_assigment(last_assignments, task, person, week):
     if task not in last_assignments:
