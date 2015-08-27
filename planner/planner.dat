@@ -1,7 +1,8 @@
 ##### BEAMER
 
 set Beamer_persons := David Jeroen Danny;
-    #Bas, Esther en Noa als in dienst
+    #Bas als in dienst
+    #Esther
     #David vraagt Albert nog
 
 param Beamer_number_needed default 1;
@@ -175,9 +176,9 @@ param Muziek_min default 4 :=
 param Muziek_max default 4 :=
     Tim     3
     Peter   3;
-param Muziek_rest default 2 :=
-    Tim 3
-    Peter 3;
+param Muziek_rest default 1 :=
+    Tim 1
+    Peter 1;
 param Muziek_ritme default 3 :=
     Tim 6
     Peter 6;
@@ -233,14 +234,14 @@ param Groep_Rood_rather_not_penalty := 10;
 
 ##### WELKOM
 
-set Welkom_persons := Suki Wenny Vena Miranda Marieke; #Lianne, Chantal
+set Welkom_persons := Suki Wenny Vena Miranda Marieke Liesbeth_Z Helga; #Marieke valt in voor Lianne
 
 param Welkom_number_needed default 1;
 
 param Welkom_min default 2;
-param Welkom_max default 3;
-param Welkom_rest default 3;
-param Welkom_ritme default 5;
+param Welkom_max default 2;
+param Welkom_rest default 5;
+param Welkom_ritme default 7;
 param Welkom_offritme_penalty := 2;
 param Welkom_rather_not_penalty := 10;
 
@@ -279,8 +280,8 @@ param Leiding_Wit_ritme default 3 :=
 param Leiding_Wit_offritme_penalty := 20;
 param Leiding_Wit_rather_not_penalty := 10;
 
-param Groep_Wit_min default 0;
-param Groep_Wit_max default 13;
+param Groep_Wit_min default 4;
+param Groep_Wit_max default 5;
 param Groep_Wit_rest default 1;
 param Groep_Wit_rather_not_penalty := 10;
 
