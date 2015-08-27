@@ -147,7 +147,7 @@ if __name__ == "__main__":
     for setname in sets:
         for name in sets[setname]:
             if name not in ["In_de_dienst", "Niemand"]:
-                if True:  # not exists(availability, name, setname):
+                if not exists(availability, name, setname):
                     for week in range(from_week, till_week + 1):
                         print post_availability(uid_from_name[name], name.replace('_', ' '), setname.replace('_', ' '),
                                                 week, "yes")
