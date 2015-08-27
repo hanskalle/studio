@@ -9,6 +9,16 @@ auth = ('username', 'password')
 state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
 
 
+def delete_event(eventdate, eventtime, description, location, remark):
+    url = "http://" + host + "/services/events/" + \
+          datetime.combine(eventdate, eventtime).isoformat().replace(':', '.') + "/" + \
+          description + "/" + \
+          location
+    r = requests.delete(url, auth=auth)
+    print "DELETE", url, r.status_code
+    return
+
+
 def create_event(eventdate, eventtime, description, location, remark):
     url = "http://" + host + "/services/events"
     data = json.dumps({
@@ -44,7 +54,7 @@ def update_last_assignments():
         for assignment in event['assignments']['list']:
             eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
             week, weekday = get_week_and_weekday_from_date(eventdate)
-            if weekday == 7:  # Only sunday-tasks
+            if week < 40 and weekday == 7:  # Only sunday-tasks
                 task = assignment['task']
                 person = assignment['person']
                 if ',' in person:
@@ -72,6 +82,7 @@ def update_last_assignments():
                     f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
             f.write(';\n')
     f.close()
+
 
 def add_last_assigment(last_assignments, task, person, week):
     if task not in last_assignments:
@@ -144,9 +155,10 @@ def write_availability(filename, persons):
         availability_file.write(':=\n')
         for person in sorted(persons):
             availability = get_availability(person, task)
-            if person['name'] in sets[task]:
+            name = person['name'].replace(' ', '_')
+            if name in sets[task]:
                 if availability is not None:
-                    availability_file.write(person['name'].replace(' ', '_'))
+                    availability_file.write(name)
                     for available in availability:
                         availability_file.write(' ')
                         availability_file.write(state_value[available['state']])
@@ -282,7 +294,7 @@ def show_file(filename):
 
 def write_rest(rooster):
     columns = {
-        'Zangleiding': ['Zangleiding'],
+        'Leiding': ['Zangleiding'],
         'Muziek': ['Muziek'],
         'Geluid': ['Geluid'],
         'Beamer': ['Beamer'],
@@ -295,15 +307,14 @@ def write_rest(rooster):
     weeks = rooster.keys()
     for week in sorted(weeks):
         sunday = get_date_of_sunday_of_week(week)
+        delete_event(sunday, time(10, 00, 00), 'Samenkomst', 'KJS', '')
         event = create_event(sunday, time(10, 00, 00), 'Samenkomst', 'KJS', '')
         event_uid = event[0]['uid']
         for assignment, tasks in columns.iteritems():
-            names = []
             for task in tasks:
                 if task in rooster[week]:
                     if rooster[week][task] != 'Niemand':
-                        names.append(rooster[week][task])
-            create_assignment(event_uid, assignment, ", ".join(names), '')
+                        create_assignment(event_uid, assignment, rooster[week][task], '')
 
 
 def show_help():
