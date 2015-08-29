@@ -86,6 +86,7 @@ def update_last_assignments():
                 if person in sets[original_task]:
                     f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
             f.write(';\n')
+    f.write('end;\n')
     f.close()
 
 
@@ -395,8 +396,10 @@ if __name__ == "__main__":
         auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     if do_get_last_assignments:
         update_last_assignments()
+        print 'Laatste inzet opgehaald.'
     if do_get_availability:
         update_availability()
+        print 'Beschikbaarheid opgehaald.'
     new_rooster = get_results(time_limit)
     write_markup(output_filename, new_rooster)
     if do_publish:
