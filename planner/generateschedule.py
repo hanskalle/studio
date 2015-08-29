@@ -9,20 +9,16 @@ auth = ('username', 'password')
 state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
 
 
-def delete_event(eventdate, eventtime, description, location, remark):
-    url = "http://" + host + "/services/events/" + \
-          datetime.combine(eventdate, eventtime).isoformat().replace(':', '.') + "/" + \
-          description + "/" + \
-          location
+def delete_assignment(uid):
+    url = "http://" + host + "/services/assignments/" + uid
     r = requests.delete(url, auth=auth)
-    print "DELETE", url, r.status_code
     return
 
 
 def create_event(eventdate, eventtime, description, location, remark):
     url = "http://" + host + "/services/events"
     data = json.dumps({
-        "start": datetime.combine(eventdate, eventtime).isoformat(),
+        "start": create_start(eventdate, eventtime),
         "description": description,
         "location": location,
         "remark": remark})
@@ -30,6 +26,10 @@ def create_event(eventdate, eventtime, description, location, remark):
     r = requests.post(url, data, auth=auth)
     assert (r.status_code == 200)
     return r.json()
+
+
+def create_start(eventdate, eventtime):
+    return datetime.combine(eventdate, eventtime).isoformat()
 
 
 def create_assignment(event, task, person, remark):
@@ -44,16 +44,21 @@ def create_assignment(event, task, person, remark):
     return r.json()
 
 
-def update_last_assignments():
+def get_events():
     url = "http://" + host + "/services/events"
     r = requests.get(url, auth=auth)
     assert (r.status_code == 200)
+    return r.json()
+
+
+def update_last_assignments():
     last_assignments = {}
-    data = r.json()
-    for event in data:
+    events = get_events()
+    for event in events:
         for assignment in event['assignments']['list']:
             eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
             week, weekday = get_week_and_weekday_from_date(eventdate)
+            # TODO: alleen overige periode
             if week < 40 and weekday == 7:  # Only sunday-tasks
                 task = assignment['task']
                 person = assignment['person']
@@ -187,6 +192,9 @@ def add_week(rooster, week):
     if week not in rooster:
         rooster[week] = {}
         rooster[week]['datum'] = get_date_of_sunday_of_week(week)
+        rooster[week]['missing'] = []
+        rooster[week]['rather not'] = []
+        rooster[week]['not prefered pair'] = []
 
 
 def get_date_of_sunday_of_week(week):
@@ -213,10 +221,9 @@ def get_week_and_weekday_from_date(eventdate):
 
 
 def add_person(rooster, week, task, person):
-    if task in rooster[week]:
-        rooster[week][task] += ', ' + person
-    else:
-        rooster[week][task] = person
+    if task not in rooster[week]:
+        rooster[week][task] = []
+    rooster[week][task].append(person)
 
 
 def get_sets():
@@ -269,17 +276,17 @@ def write_markup(filename, rooster):
             names = []
             for task in column:
                 if task in rooster[week]:
-                    names.append(rooster[week][task])
+                    names.extend(rooster[week][task])
             width = 10 * len(column)
             markup_file.write(("{:<" + str(width) + "s}").format(", ".join(names)))
             markup_file.write('|')
         remarks = []
-        if 'missing' in rooster[week]:
-            remarks.append(rooster[week]['missing'] + ' mist')
-        if 'rather not' in rooster[week]:
-            remarks.append(rooster[week]['rather not'] + ' liever niet')
-        if 'not prefered pair' in rooster[week]:
-            remarks.append(rooster[week]['not prefered pair'] + ' afwijkend paar')
+        if len(rooster[week]['missing']) > 0:
+            remarks.append(', '.join(rooster[week]['missing']) + ' mist')
+        if len(rooster[week]['rather not']) > 0:
+            remarks.append(', '.join(rooster[week]['rather not']) + ' liever niet')
+        if len(rooster[week]['not prefered pair']):
+            remarks.append(', '.join(rooster[week]['not prefered pair']) + ' afwijkend paar')
         if len(remarks) > 0:
             markup_file.write(','.join(remarks))
         markup_file.write(' |\n')
@@ -292,9 +299,17 @@ def show_file(filename):
         print line[0:-1]
 
 
+def find_event(events, eventdate, eventtime):
+    start = create_start(eventdate, eventtime)
+    for event in events:
+        if event['start'] == start:
+            return event
+    return None
+
+
 def write_rest(rooster):
     columns = {
-        'Leiding': ['Zangleiding'],
+        'Zangleiding': ['Zangleiding'],
         'Muziek': ['Muziek'],
         'Geluid': ['Geluid'],
         'Beamer': ['Beamer'],
@@ -304,17 +319,34 @@ def write_rest(rooster):
         'Koffie': ['Koffie'],
         'Welkom': ['Welkom'],
         'Koster': ['Hoofdkoster', 'Hulpkoster']}
+    existing_events = get_events()
     weeks = rooster.keys()
+    eventtime = time(10, 00, 00)
     for week in sorted(weeks):
-        sunday = get_date_of_sunday_of_week(week)
-        delete_event(sunday, time(10, 00, 00), 'Samenkomst', 'KJS', '')
-        event = create_event(sunday, time(10, 00, 00), 'Samenkomst', 'KJS', '')
-        event_uid = event[0]['uid']
+        eventdate = get_date_of_sunday_of_week(week)
+        existing_event = find_event(existing_events, eventdate, eventtime)
+        if existing_event is None:
+            event = create_event(eventdate, time(10, 00, 00), 'Samenkomst', 'KJS', '')
+            event_uid = event[0]['uid']
+        else:
+            event_uid = existing_event['uid']
         for assignment, tasks in columns.iteritems():
+            if existing_event is not None:
+                for existing_assignment in existing_event['assignments']['list']:
+                    if existing_assignment['task'] == assignment:
+                        delete_assignment(existing_assignment['uid'])
             for task in tasks:
                 if task in rooster[week]:
-                    if rooster[week][task] != 'Niemand':
-                        create_assignment(event_uid, assignment, rooster[week][task], '')
+                    for person in rooster[week][task]:
+                        if person != 'Niemand':
+                            remarks = []
+                            if person in rooster[week]['missing']:
+                                remarks.append('mist')
+                            if person in rooster[week]['rather not']:
+                                remarks.append('liever niet')
+                            if person in rooster[week]['not prefered pair']:
+                                remarks.append('geen voorkeurspaar')
+                            create_assignment(event_uid, assignment, person, ', '.join(remarks))
 
 
 def show_help():
