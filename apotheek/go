@@ -1,0 +1,1 @@
+glpsol --tmlim 30 --model apotheek.mod --data apotheek.dat -y results.txt

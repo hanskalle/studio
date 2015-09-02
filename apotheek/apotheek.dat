@@ -1,0 +1,26 @@
+param eerste_week := 1;
+param laatste_week := 4;
+
+set medewerkers := petra ietke martine jacomien fokkelien;
+set taken := baxter balie cefi;
+
+param beschikbaar default 1:=
+petra 13  0  0
+petra 14  1  0
+petra 15  2  0
+;
+
+param voorkeur default 0:=
+petra 0 1
+;
+
+param werkdag default 1:=
+petra 1 0
+petra 4 0
+martine 2 0
+martine 3 0
+fokkelien 0 0
+fokkelien 2 0
+;
+
+end;
