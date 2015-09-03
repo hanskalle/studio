@@ -3,8 +3,12 @@ param laatste_week := 4;
 
 set dagen := ma di wo do vr;
 
-set medewerkers := petra ietke martine jacomien fokkelien;
-set taken := baxter balie cefi;
+set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
+set maos := mark miranda christa hayat;
+set stagiares := btissame;
+set taken := baxter balie cefi tellen;
+set voorkeurstaken_mao := cefi;
+
 
 param beschikbaar default 1:=
 petra 13  ma  0
