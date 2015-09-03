@@ -1,29 +1,28 @@
 param eerste_week := 1;
 param laatste_week := 4;
 
+set even_weken := 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52;
+set oneven_weken := 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53;
 set dagen := ma di wo do vr;
 set dagdelen := vm, nm;
 
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
 set maos := mark miranda christa;
 set stagiares := btissame;
-set taken := baxter balie baliebaxter cefi tellen;
-set voorkeurstaken_mao := cefi;
+set taken := baxter balie baliebaxter tellenbalie tellencbbc cefi typencito typenherhalingen bestelling kluisjes hhs;
+set voorkeurstaken_mao := cefi kluisjes;
 
-
-param voorkeur default 0:
-            ma  di  wo  do  vr :=
-petra       1   .   .   .   .
-fokkelien   .   1   .   .   .
+param verlof :=
+mark    1   ma  1
+mark    1   di  1
+mark    1   wo  1
+mark    1   do  1
+mark    1   vr  1
+mark    2   di  1
+mark    3   di  1
 ;
 
-param beschikbaar :=
-petra 13  ma  0
-petra 14  di  0
-petra 15  wo  0
-;
-
-param werktijd :=
+param aanwezigheid :=
 ietke       ma  vm  0   
 ietke       ma  nm  0
 ietke       vr  vm  0 
@@ -78,45 +77,51 @@ bernadette  do  nm  0
 ;
 
 param competentie:
-            baxter  balie   baliebaxter tellen  cefi :=
-petra       1       1       1           1       1
-ietke       1       1       1           1       1
-martine     .       1       .           1       1
-jacomien    .       1       .           .       1
-fokkelien   1       1       1           1       1
-mark        .       .       .           1       1
-miranda     .       .       .           1       1
-kirsten     .       1       .           1       1
-jeanette    1       1       1           1       .
-marylon     1       1       1           1       .
-silvia      .       1       .           1       1
-alinoesh    .       1       .           1       1
-christa     .       .       .           1       1
-btissame    .       .       .           .       .
-bernadette  .       1       .           1       1
+            baxter  balie   baliebaxter tellenbalie tellencbbc  cefi    typencito   typenherhalingen    bestelling  kluisjes    hhs :=
+petra       1       1       1           1           1           1       1           1                   1           1           1
+ietke       1       1       1           1           1           1       1           1                   1           1           1
+martine     .       1       .           1           1           1       1           1                   1           1           1
+jacomien    .       1       .           .           1           1       .           1                   .           1           1
+fokkelien   1       1       1           1           1           1       1           1                   1           1           .
+mark        .       .       .           .           1           1       .           .                   1           1           .
+miranda     .       .       .           .           1           1       .           .                   1           1           .
+firdous     .       1       .           1           1           1       1           1                   1           1           1
+kirsten     .       1       .           1           1           1       1           1                   1           1           1
+jeanette    1       1       1           1           .           .       .           .                   .           1           .
+marylon     1       1       1           1           .           1       1           1                   1           1           1
+silvia      .       1       .           1           1           1       .           1                   1           1           .
+alinoesh    .       1       .           1           1           1       .           1                   1           1           1
+christa     .       .       .           .           1           1       .           .                   1           1           .
+btissame    .       .       .           .           .           .       .           .                   .           1           .
+bernadette  .       1       .           1           1           1       1           1                   1           1           .
 ;
 
 param bezetting :=
-ma  vm  baxter  0
+ma  vm  baxter      0
+ma  vm  cefi        2
 ma  vm  baliebaxter 0
-ma  vm  balie  2
-ma  nm  balie  3
-di  vm  baxter  0
+ma  vm  balie       2
+ma  nm  balie       3
+di  vm  baxter      0
+di  vm  cefi        2
 di  vm  baliebaxter 0
-di  vm  balie  4
-di  nm  balie  3
-wo  vm  baxter  2
+di  vm  balie       4
+di  nm  balie       3
+wo  vm  baxter      2
+wo  vm  cefi        2
 wo  vm  baliebaxter 0
-wo  vm  balie  3
-wo  nm  balie  4
-do  vm  baxter  0
+wo  vm  balie       3
+wo  nm  balie       4
+do  vm  baxter      0
+do  vm  cefi        2
 do  vm  baliebaxter 0
-do  vm  balie  3
-do  nm  balie  2
-vr  vm  baxter  0
+do  vm  balie       3
+do  nm  balie       2
+vr  vm  baxter      0
+vr  vm  cefi        2
 vr  vm  baliebaxter 0
-vr  vm  balie  4
-vr  nm  balie  4
+vr  vm  balie       4
+vr  nm  balie       4
 ;
 
 end;
