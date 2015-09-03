@@ -2,6 +2,7 @@ param eerste_week := 1;
 param laatste_week := 4;
 
 set dagen := ma di wo do vr;
+set dagdelen := vm, nm;
 
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
 set maos := mark miranda christa hayat;
@@ -10,22 +11,70 @@ set taken := baxter balie cefi tellen;
 set voorkeurstaken_mao := cefi;
 
 
-param beschikbaar default 1:=
+param voorkeur default 0:
+            ma  di  wo  do  vr :=
+petra       1   .   .   .   .
+fokkelien   .   1   .   .   .
+;
+
+param beschikbaar :=
 petra 13  ma  0
 petra 14  di  0
 petra 15  wo  0
 ;
 
-param voorkeur default 0:=
-[petra,*] ma 1
-[fokkelien,*] di 1
-;
-
-param werkdag default 1:
-                ma  di  wo  do  vr:=
-petra           .   0   .   .   0
-martine         .   .   0   0   .
-fokkelien       0   .   0   .   .
+param werktijd :=
+ietke       ma  vm  0   
+ietke       ma  nm  0
+ietke       vr  vm  0 
+ietke       vr  nm  0
+martine     di  nm  0
+martine     do  vm  0
+martine     do  nm  0
+jacomien    ma  vm  0
+jacomien    ma  nm  0
+jacomien    do  vm  0
+jacomien    do  nm  0
+fokkelien   ma  vm  0
+fokkelien   ma  nm  0
+fokkelien   wo  vm  0
+fokkelien   wo  nm  0
+mark        ma  vm  0
+miranda     ma  vm  0
+miranda     ma  nm  0
+miranda     di  nm  0
+miranda     wo  nm  0
+miranda     do  vm  0
+miranda     do  nm  0
+miranda     vr  nm  0
+kirsten     di  vm  0
+kirsten     di  nm  0
+kirsten     vr  vm  0
+kirsten     vr  nm  0
+jeanette    di  vm  0
+jeanette    di  nm  0
+jeanette    do  vm  0
+jeanette    do  nm  0
+silvia      vr  vm  0
+silvia      vr  nm  0
+alinoesh    di  vm  0
+alinoesh    di  nm  0
+christa     ma  vm  0
+christa     ma  nm  0
+christa     wo  vm  0
+christa     wo  nm  0
+btissame    ma  vm  0
+btissame    ma  nm  0
+btissame    di  vm  0
+btissame    di  nm  0
+btissame    wo  vm  0
+btissame    wo  nm  0
+bernadette  ma  vm  0
+bernadette  ma  nm  0
+bernadette  wo  vm  0
+bernadette  wo  nm  0
+bernadette  do  vm  0
+bernadette  do  nm  0
 ;
 
 end;
