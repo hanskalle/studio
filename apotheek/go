@@ -1,1 +1,3 @@
 glpsol --tmlim 30 --model apotheek.mod --data apotheek.dat -y results.txt
+grep '= 1' < results.txt | sort > rooster.txt
+cat rooster.txt

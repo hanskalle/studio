@@ -7,7 +7,7 @@ set dagdelen := vm, nm;
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
 set maos := mark miranda christa;
 set stagiares := btissame;
-set taken := baxter balie cefi tellen;
+set taken := baxter balie baliebaxter cefi tellen;
 set voorkeurstaken_mao := cefi;
 
 
@@ -78,45 +78,45 @@ bernadette  do  nm  0
 ;
 
 param competentie:
-            baxter  balie   tellen  cefi :=
-petra       1       1       1       1
-ietke       1       1       1       1
-martine     .       1       1       1
-jacomien    .       1       .       1
-fokkelien   1       1       1       1
-mark        .       .       1       1
-miranda     .       .       1       1
-kirsten     .       1       1       1
-jeanette    1       1       1       .
-marylon     1       1       1       .
-silvia      .       1       1       1
-alinoesh    .       1       1       1
-christa     .       .       1       1
-btissame    .       .       .       .
-bernadette  .       1       1       1
+            baxter  balie   baliebaxter tellen  cefi :=
+petra       1       1       1           1       1
+ietke       1       1       1           1       1
+martine     .       1       .           1       1
+jacomien    .       1       .           .       1
+fokkelien   1       1       1           1       1
+mark        .       .       .           1       1
+miranda     .       .       .           1       1
+kirsten     .       1       .           1       1
+jeanette    1       1       1           1       .
+marylon     1       1       1           1       .
+silvia      .       1       .           1       1
+alinoesh    .       1       .           1       1
+christa     .       .       .           1       1
+btissame    .       .       .           .       .
+bernadette  .       1       .           1       1
 ;
 
 param bezetting :=
-ma  vm  baxter  1
-ma  nm  baxter  2
-di  vm  baxter  1
-di  nm  baxter  2
-wo  vm  baxter  1
-wo  nm  baxter  2
-do  vm  baxter  1
-do  nm  baxter  2
-vr  vm  baxter  1
-vr  nm  baxter  2
-ma  vm  balie  3
+ma  vm  baxter  0
+ma  vm  baliebaxter 0
+ma  vm  balie  2
 ma  nm  balie  3
-di  vm  balie  3
+di  vm  baxter  0
+di  vm  baliebaxter 0
+di  vm  balie  4
 di  nm  balie  3
+wo  vm  baxter  2
+wo  vm  baliebaxter 0
 wo  vm  balie  3
-wo  nm  balie  3
+wo  nm  balie  4
+do  vm  baxter  0
+do  vm  baliebaxter 0
 do  vm  balie  3
-do  nm  balie  3
-vr  vm  balie  3
-vr  nm  balie  3
+do  nm  balie  2
+vr  vm  baxter  0
+vr  vm  baliebaxter 0
+vr  vm  balie  4
+vr  nm  balie  4
 ;
 
 end;
