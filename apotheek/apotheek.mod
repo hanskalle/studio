@@ -1,13 +1,6 @@
 set medewerkers;
-
 set taken;
-
-param ma := 0;
-param di := 1;
-param wo := 2;
-param do := 3;
-param vr := 4;
-set dagen := ma..vr;
+set dagen;
 
 param eerste_week, integer, >= 1;
 param laatste_week, integer, <= 53;
@@ -23,7 +16,8 @@ var toedeling {w in weken, d in dagen, t in taken, m in medewerkers}, binary;
 
 maximize voorkeuren:
   + (sum {w in weken, d in dagen, t in taken, m in medewerkers}
-    toedeling[w,d,t,m] * voorkeur[m,d]);
+    toedeling[w,d,t,m] * voorkeur[m,d])
+;
 
 subject to een_per_taak {w in weken, d in dagen, t in taken}:
     (sum {m in medewerkers} toedeling[w,d,t,m]) = 1;
