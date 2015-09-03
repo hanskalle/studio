@@ -15,6 +15,7 @@ set weken := eerste_week .. laatste_week;
 param beschikbaar {m in medewerkers, w in weken, d in dagen}, binary, default 1;
 param werktijd {m in medewerkers, d in dagen, l in dagdelen}, binary, default 1;
 param voorkeur {m in medewerkers, d in dagen}, binary;
+param competentie {m in medewerkers, t in taken}, binary, default 0;
 
 var toedeling {w in weken, d in dagen, l in dagdelen, t in taken, m in medewerkers}, binary;
 
@@ -30,11 +31,14 @@ maximize voorkeuren:
 subject to een_per_taak {w in weken, d in dagen, l in dagdelen, t in taken}:
     (sum {m in medewerkers} toedeling[w,d,l,t,m]) = 1;
 
-subject to maar_een_taak_per_medewerker_per_dag {w in weken, d in dagen, l in dagdelen, m in medewerkers}:
+subject to maar_een_taak_per_medewerker_per_dagdeel {w in weken, d in dagen, l in dagdelen, m in medewerkers}:
     (sum {t in taken} toedeling[w,d,l,t,m]) <= 1;
 
 subject to niet_toedelen_op_niet_werktijden {m in medewerkers, d in dagen, l in dagdelen: werktijd[m,d,l]=0}:
     (sum {w in weken, t in taken} toedeling[w,d,l,t,m]) = 0;
+    
+subject to niet_toedelen_als_competentie_ontbreekt {m in medewerkers, t in taken: competentie[m,t]=0}:
+    (sum {w in weken, d in dagen, l in dagdelen} toedeling[w,d,l,t,m]) = 0;
     
 subject to jeanette_niet_tellen_op_vrijdag {w in weken, d in dagen, l in dagdelen}:
     toedeling[w,d,l,'tellen','jeanette'] = 0;

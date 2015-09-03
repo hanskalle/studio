@@ -5,7 +5,7 @@ set dagen := ma di wo do vr;
 set dagdelen := vm, nm;
 
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
-set maos := mark miranda christa hayat;
+set maos := mark miranda christa;
 set stagiares := btissame;
 set taken := baxter balie cefi tellen;
 set voorkeurstaken_mao := cefi;
@@ -75,6 +75,25 @@ bernadette  wo  vm  0
 bernadette  wo  nm  0
 bernadette  do  vm  0
 bernadette  do  nm  0
+;
+
+param competentie:
+            baxter  balie   tellen  cefi :=
+petra       1       1       1       1
+ietke       1       1       1       1
+martine     .       1       1       1
+jacomien    .       1       .       1
+fokkelien   1       1       1       1
+mark        .       .       1       1
+miranda     .       .       1       1
+kirsten     .       1       1       1
+jeanette    1       1       1       .
+marylon     1       1       1       .
+silvia      .       1       1       1
+alinoesh    .       1       1       1
+christa     .       .       1       1
+btissame    .       .       .       .
+bernadette  .       1       1       1
 ;
 
 end;
