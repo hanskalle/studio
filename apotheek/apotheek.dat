@@ -21,10 +21,11 @@ param voorkeur default 0:=
 [fokkelien,*] di 1
 ;
 
-param werkdag default 1:=
-[petra,*]       di 0 vr 0
-[martine,*]     wo 0 do 0
-[fokkelien,*]   ma 0 wo 0
+param werkdag default 1:
+                ma  di  wo  do  vr:=
+petra           .   0   .   .   0
+martine         .   .   0   0   .
+fokkelien       0   .   0   .   .
 ;
 
 end;

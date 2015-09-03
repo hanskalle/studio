@@ -29,7 +29,7 @@ maximize voorkeuren:
 subject to een_per_taak {w in weken, d in dagen, t in taken}:
     (sum {m in medewerkers} toedeling[w,d,t,m]) = 1;
 
-subject to ma_een_taak_per_medewerker_per_dag {w in weken, d in dagen, m in medewerkers}:
+subject to maar_een_taak_per_medewerker_per_dag {w in weken, d in dagen, m in medewerkers}:
     (sum {t in taken} toedeling[w,d,t,m]) <= 1;
 
 subject to niet_toedelen_op_niet_werkdagen {m in medewerkers, d in dagen: werkdag[m,d]=0}:
@@ -40,6 +40,6 @@ subject to jeanette_niet_tellen_op_vrijdag {w in weken, d in dagen}:
 
 solve;
 
-display {w in weken, d in dagen, t in taken, m in medewerkers: toedeling[w,d,t,m]=1}: w, d, t, m;
+display toedeling;
 
 end;
