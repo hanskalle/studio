@@ -97,26 +97,26 @@ bernadette  .       1       1       1
 ;
 
 param bezetting :=
-ma  vm  baxter  2
+ma  vm  baxter  1
 ma  nm  baxter  2
-di  vm  baxter  2
+di  vm  baxter  1
 di  nm  baxter  2
-wo  vm  baxter  2
+wo  vm  baxter  1
 wo  nm  baxter  2
-do  vm  baxter  2
+do  vm  baxter  1
 do  nm  baxter  2
-vr  vm  baxter  2
+vr  vm  baxter  1
 vr  nm  baxter  2
 ma  vm  balie  3
 ma  nm  balie  3
-di  vm  balie  4
-di  nm  balie  4
-wo  vm  balie  5
-wo  nm  balie  5
-do  vm  balie  5
-do  nm  balie  5
-vr  vm  balie  5
-vr  nm  balie  5
+di  vm  balie  3
+di  nm  balie  3
+wo  vm  balie  3
+wo  nm  balie  3
+do  vm  balie  3
+do  nm  balie  3
+vr  vm  balie  3
+vr  nm  balie  3
 ;
 
 end;

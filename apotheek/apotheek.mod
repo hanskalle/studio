@@ -41,6 +41,9 @@ subject to niet_toedelen_op_niet_werktijden {m in medewerkers, d in dagen, l in 
 subject to niet_toedelen_als_competentie_ontbreekt {m in medewerkers, t in taken: competentie[m,t]=0}:
     (sum {w in weken, d in dagen, l in dagdelen} toedeling[w,d,l,t,m]) = 0;
     
+subject to niet_voor_en_namiddag_dezelfde_taak {w in weken, d in dagen, t in taken, m in medewerkers}:
+    (sum {l in dagdelen} toedeling[w,d,l,t,m]) <= 1;
+    
 subject to fokkelien_niet_baxter_in_haar_eentje {d in dagen, l in dagdelen: bezetting[d,l,'baxter']<2}:
     (sum {w in weken} toedeling[w,d,l,'baxter','fokkelien']) = 0;
     
