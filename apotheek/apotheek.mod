@@ -94,6 +94,9 @@ subject to medewerker_hoogstens_in_een_shift {w in weken, d in dagen, m in medew
 subject to medewerker_alleen_in_shift_als_aanwezig {w in weken, d in dagen, m in medewerkers: (sum {l in dagdelen} aanwezigheid[m,d,l])=0}:
     (sum {s in shifts} shift[w,d,s,m]) = 0;
 
+subject to als_toegedeeld_dan_ook_shift {w in weken, d in dagen, m in medewerkers: (sum {l in dagdelen} aanwezigheid[m,d,l])>0}:
+    (sum {s in shifts} shift[w,d,s,m]) = 1;
+
 subject to extras_alleen_standaard_shift {w in weken, d in dagen, m in extras}:
     (sum {s in shifts: s!='standaard'} shift[w,d,s,m]) = 0;
 
