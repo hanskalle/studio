@@ -104,6 +104,26 @@ extra5      1       1       1           1           1       1           1       
 extra6      1       1       1           1           1       1           1       1           1           1
 ;
 
+param minimale_inzet:
+            baxter  balie   tellenbalie tellencbbc  cefi    typencito   typenhh bestelling  kluisjes    hhs :=
+petra       1       1       .           .           .       1           .       .           .           .
+ietke       1       1       .           .           .       1           .       .           .           .
+martine     .       1       .           .           .       1           .       .           .           .
+jacomien    .       1       .           .           .       .           .       .           .           .
+fokkelien   1       1       .           .           .       1           .       .           .           .
+mark        .       .       .           1           1       .           .       .           .           .
+miranda     .       .       .           1           1       .           .       .           .           .
+firdous     .       1       .           .           .       1           .       .           .           .
+kirsten     .       1       .           .           .       1           .       .           .           .
+jeanette    1       1       .           .           .       .           .       .           .           .
+marylon     1       1       .           .           .       1           .       .           .           .
+silvia      .       1       .           .           .       .           .       .           .           .
+alinoesh    .       1       .           .           .       .           .       .           .           .
+christa     .       .       .           .           .       .           .       .           .           .
+btissame    .       .       .           .           .       .           .       .           .           .
+bernadette  .       1       .           .           .       .           .       .           .           .
+;
+
 param bezetting
 [ma,vm,*,*]:
             start   daarna :=
@@ -155,38 +175,38 @@ kluisjes    0       0
 hhs         0       0
 [wo,vm,*,*]:
             start   daarna :=
-baxter      0       0
-balie       2       2
-tellenbalie 0       1
-tellencbbc  1       1
+baxter      2       1
+balie       3       3
+tellenbalie 1       1
+tellencbbc  0       0
 typencito   1       1
 typenhh     0       0
-cefi        0       0
+cefi        2       2
 bestelling  1       1
 kluisjes    0       0
-hhs         1       0
+hhs         0       0
 [wo,nm,*,*]:
             start   daarna :=
 baxter      1       2
-balie       3       3
-tellenbalie 0       1
-tellencbbc  1       0
+balie       4       5
+tellenbalie 1       0
+tellencbbc  2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       1
+kluisjes    0       0
 hhs         0       0
 [do,vm,*,*]:
             start   daarna :=
 baxter      0       0
-balie       2       2
+balie       3       2
 tellenbalie 0       1
 tellencbbc  1       1
 typencito   1       1
-typenhh     0       0
-cefi        0       0
-bestelling  1       1
+typenhh     0       1
+cefi        2       1
+bestelling  1       2
 kluisjes    0       0
 hhs         1       0
 [do,nm,*,*]:
@@ -194,36 +214,36 @@ hhs         1       0
 baxter      1       2
 balie       3       3
 tellenbalie 0       1
-tellencbbc  1       0
+tellencbbc  2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       1
+kluisjes    0       0
 hhs         0       0
 [vr,vm,*,*]:
             start   daarna :=
 baxter      0       0
-balie       2       2
+balie       5       4
 tellenbalie 0       1
-tellencbbc  1       1
+tellencbbc  1       0
 typencito   1       1
-typenhh     0       0
-cefi        0       0
-bestelling  1       1
+typenhh     1       1
+cefi        2       2
+bestelling  0       1
 kluisjes    0       0
-hhs         1       0
+hhs         0       0
 [vr,nm,*,*]:
             start   daarna :=
 baxter      1       2
-balie       3       3
-tellenbalie 0       1
-tellencbbc  1       0
+balie       4       4
+tellenbalie 1       1
+tellencbbc  2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       1
+kluisjes    1       1
 hhs         0       0
 ;
 
