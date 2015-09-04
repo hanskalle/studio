@@ -6,11 +6,12 @@ set oneven_weken := 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43
 set dagen := ma di wo do vr;
 set dagdelen := vm, nm;
 set fases := start, daarna;
+set shifts := vroeg, standaard, laat;
 
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
 set maos := mark miranda christa;
 set stagiares := btissame;
-set extras := extra1 extra2 extra3 extra4 extra5 extra6;
+set extras := onbezet1 onbezet2 onbezet3 onbezet4 onbezet5 onbezet6;
 set taken := baxter balie tellenbalie tellencbbc cefi typencito typenhh bestelling kluisjes hhs;
 set voorkeurstaken_mao := cefi kluisjes;
 
@@ -22,6 +23,20 @@ mark    1   do  1
 mark    1   vr  1
 mark    2   di  1
 mark    3   di  1
+;
+
+
+param shiftvoorkeur
+[*,*,vroeg]:
+            ma  di  wo  do  vr :=
+petra       1   1   1   1   1
+fokkelien   .   .   .   .   1
+[*,*,standaard]:
+            ma  di  wo  do  vr :=
+mark        1   1   1   1   1
+[*,*,laat]:
+            ma  di  wo  do  vr :=
+fokkelien   .   1   .   1   .
 ;
 
 param aanwezigheid :=
@@ -96,12 +111,12 @@ alinoesh    .       1       .           1           1       .           1       
 christa     .       .       .           1           1       .           .       1           1           .
 btissame    .       .       .           .           .       .           .       .           1           .
 bernadette  .       1       .           1           1       1           1       1           1           .
-extra1      1       1       1           1           1       1           1       1           1           1
-extra2      1       1       1           1           1       1           1       1           1           1
-extra3      1       1       1           1           1       1           1       1           1           1
-extra4      1       1       1           1           1       1           1       1           1           1
-extra5      1       1       1           1           1       1           1       1           1           1
-extra6      1       1       1           1           1       1           1       1           1           1
+onbezet1    1       1       1           1           1       1           1       1           1           1
+onbezet2    1       1       1           1           1       1           1       1           1           1
+onbezet3    1       1       1           1           1       1           1       1           1           1
+onbezet4    1       1       1           1           1       1           1       1           1           1
+onbezet5    1       1       1           1           1       1           1       1           1           1
+onbezet6    1       1       1           1           1       1           1       1           1           1
 ;
 
 param minimale_inzet:
@@ -109,9 +124,9 @@ param minimale_inzet:
 petra       1       1       .           .           .       1           .       .           .           .
 ietke       1       1       .           .           .       1           .       .           .           .
 martine     .       1       .           .           .       1           .       .           .           .
-jacomien    .       1       .           .           .       .           .       .           .           .
+jacomien    .       1       .           1           .       .           .       .           .           .
 fokkelien   1       1       .           .           .       1           .       .           .           .
-mark        .       .       .           1           1       .           .       .           .           .
+mark        .       .       .           1           1       .           .       .           1           .
 miranda     .       .       .           1           1       .           .       .           .           .
 firdous     .       1       .           .           .       1           .       .           .           .
 kirsten     .       1       .           .           .       1           .       .           .           .
@@ -122,6 +137,15 @@ alinoesh    .       1       .           .           .       .           .       
 christa     .       .       .           .           .       .           .       .           .           .
 btissame    .       .       .           .           .       .           .       .           .           .
 bernadette  .       1       .           .           .       .           .       .           .           .
+;
+
+param minimum_per_shift:
+    vroeg   standaard   laat :=
+ma  2       .           2
+di  3       .           3
+wo  4       .           2
+do  1       .           3
+vr  3       .           3
 ;
 
 param bezetting

@@ -10,6 +10,7 @@ set dagdelen;
 set fases;
 set even_weken;
 set oneven_weken;
+set shifts;
 
 param eerste_week, integer, >= 1;
 param laatste_week, integer, <= 53;
@@ -21,20 +22,23 @@ param aanwezigheid {m in medewerkers, d in dagen, l in dagdelen}, binary, defaul
 param competentie {m in medewerkers, t in taken}, binary, default 0;
 param minimale_inzet {m in medewerkers, t in taken}, default 0;
 param bezetting {d in dagen, l in dagdelen, t in taken, f in fases}, integer, >=0, default 1;
+param minimum_per_shift {d in dagen, s in shifts}, integer, >=0, default 0;
+param shiftvoorkeur {m in medewerkers, d in dagen, s in shifts}, binary, default 0;
 
 var toedeling {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in medewerkers}, binary;
+var shift {w in weken, d in dagen, s in shifts, m in medewerkers}, binary;
 
 maximize voorkeuren:
 # Mensen inzetten op de shifts waarvoor ze de voorkeur hebben
-#  + (sum {w in weken, d in dagen, l in dagdelen, t in taken, m in medewerkers}
-#    toedeling[w,d,l,f,t,m] * voorkeur[m,d])
+  + (sum {w in weken, d in dagen, m in medewerkers, s in shifts}
+    shift[w,d,s,m] * shiftvoorkeur[m,d,s])
 # Liever maos in voorkeurstaken voor mao's
   + (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in voorkeurstaken_mao, m in maos}
     toedeling[w,d,l,f,t,m])
 # Liever Jeanette niet op tellen
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
     (toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbc','jeanette']))
-# Zo min mogelijk extras inzetten
+# Zo min mogelijk onbezet laten
   - 10 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras}
     toedeling[w,d,l,f,t,m])
 ;
@@ -81,8 +85,21 @@ subject to fokkelien_niet_starten_met_baxter {w in weken, d in dagen, l in dagde
 subject to jeanette_niet_tellen_op_vrijdag {w in weken, d in dagen, l in dagdelen, f in fases}:
     toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbc','jeanette'] = 0;
 
+subject to minimaal_aantal_per_shifts {w in weken, d in dagen, s in shifts}:
+    (sum {m in medewerkers} shift[w,d,s,m]) >= minimum_per_shift[d,s];
+    
+subject to medewerker_hoogstens_in_een_shift {w in weken, d in dagen, m in medewerkers}:
+    (sum {s in shifts} shift[w,d,s,m]) <= 1;
+
+subject to medewerker_alleen_in_shift_als_aanwezig {w in weken, d in dagen, m in medewerkers: (sum {l in dagdelen} aanwezigheid[m,d,l])=0}:
+    (sum {s in shifts} shift[w,d,s,m]) = 0;
+
+subject to extras_alleen_standaard_shift {w in weken, d in dagen, m in extras}:
+    (sum {s in shifts: s!='standaard'} shift[w,d,s,m]) = 0;
+
 solve;
 
 display toedeling;
+display shift;
 
 end;
