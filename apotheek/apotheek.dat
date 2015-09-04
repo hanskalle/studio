@@ -5,11 +5,13 @@ set even_weken := 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 
 set oneven_weken := 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53;
 set dagen := ma di wo do vr;
 set dagdelen := vm, nm;
+set fases := start, daarna;
 
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
 set maos := mark miranda christa;
 set stagiares := btissame;
-set taken := baxter balie baliebaxter tellenbalie tellencbbc cefi typencito typenherhalingen bestelling kluisjes hhs;
+set extras := extra1 extra2 extra3 extra4 extra5 extra6;
+set taken := baxter balie tellenbalie tellencbbc cefi typencito typenhh bestelling kluisjes hhs;
 set voorkeurstaken_mao := cefi kluisjes;
 
 param verlof :=
@@ -77,51 +79,152 @@ bernadette  do  nm  0
 ;
 
 param competentie:
-            baxter  balie   baliebaxter tellenbalie tellencbbc  cefi    typencito   typenherhalingen    bestelling  kluisjes    hhs :=
-petra       1       1       1           1           1           1       1           1                   1           1           1
-ietke       1       1       1           1           1           1       1           1                   1           1           1
-martine     .       1       .           1           1           1       1           1                   1           1           1
-jacomien    .       1       .           .           1           1       .           1                   .           1           1
-fokkelien   1       1       1           1           1           1       1           1                   1           1           .
-mark        .       .       .           .           1           1       .           .                   1           1           .
-miranda     .       .       .           .           1           1       .           .                   1           1           .
-firdous     .       1       .           1           1           1       1           1                   1           1           1
-kirsten     .       1       .           1           1           1       1           1                   1           1           1
-jeanette    1       1       1           1           .           .       .           .                   .           1           .
-marylon     1       1       1           1           .           1       1           1                   1           1           1
-silvia      .       1       .           1           1           1       .           1                   1           1           .
-alinoesh    .       1       .           1           1           1       .           1                   1           1           1
-christa     .       .       .           .           1           1       .           .                   1           1           .
-btissame    .       .       .           .           .           .       .           .                   .           1           .
-bernadette  .       1       .           1           1           1       1           1                   1           1           .
+            baxter  balie   tellenbalie tellencbbc  cefi    typencito   typenhh bestelling  kluisjes    hhs :=
+petra       1       1       1           1           1       1           1       1           1           1
+ietke       1       1       1           1           1       1           1       1           1           1
+martine     .       1       .           1           1       1           1       1           1           1
+jacomien    .       1       .           1           1       .           1       .           1           1
+fokkelien   1       1       1           1           1       1           1       1           1           .
+mark        .       .       .           1           1       .           .       1           1           .
+miranda     .       .       .           1           1       .           .       1           1           .
+firdous     .       1       .           1           1       1           1       1           1           1
+kirsten     .       1       .           1           1       1           1       1           1           1
+jeanette    1       1       1           .           .       .           .       .           1           .
+marylon     1       1       1           .           1       1           1       1           1           1
+silvia      .       1       .           1           1       .           1       1           1           .
+alinoesh    .       1       .           1           1       .           1       1           1           1
+christa     .       .       .           1           1       .           .       1           1           .
+btissame    .       .       .           .           .       .           .       .           1           .
+bernadette  .       1       .           1           1       1           1       1           1           .
+extra1      1       1       1           1           1       1           1       1           1           1
+extra2      1       1       1           1           1       1           1       1           1           1
+extra3      1       1       1           1           1       1           1       1           1           1
+extra4      1       1       1           1           1       1           1       1           1           1
+extra5      1       1       1           1           1       1           1       1           1           1
+extra6      1       1       1           1           1       1           1       1           1           1
 ;
 
-param bezetting :=
-ma  vm  baxter      0
-ma  vm  cefi        2
-ma  vm  baliebaxter 0
-ma  vm  balie       2
-ma  nm  balie       3
-di  vm  baxter      0
-di  vm  cefi        2
-di  vm  baliebaxter 0
-di  vm  balie       4
-di  nm  balie       3
-wo  vm  baxter      2
-wo  vm  cefi        2
-wo  vm  baliebaxter 0
-wo  vm  balie       3
-wo  nm  balie       4
-do  vm  baxter      0
-do  vm  cefi        2
-do  vm  baliebaxter 0
-do  vm  balie       3
-do  nm  balie       2
-vr  vm  baxter      0
-vr  vm  cefi        2
-vr  vm  baliebaxter 0
-vr  vm  balie       4
-vr  nm  balie       4
+param bezetting
+[ma,vm,*,*]:
+            start   daarna :=
+baxter      0       0
+balie       2       2
+tellenbalie 0       1
+tellencbbc  1       1
+typencito   1       1
+typenhh     0       0
+cefi        0       0
+bestelling  1       1
+kluisjes    0       0
+hhs         1       0
+[ma,nm,*,*]:
+            start   daarna :=
+baxter      1       2
+balie       3       3
+tellenbalie 0       1
+tellencbbc  1       0
+typencito   1       1
+typenhh     1       0
+cefi        0       0
+bestelling  0       0
+kluisjes    0       1
+hhs         0       0
+[di,vm,*,*]:
+            start   daarna :=
+baxter      0       0
+balie       4       4
+tellenbalie 1       1
+tellencbbc  1       0
+typencito   1       1
+typenhh     1       1
+cefi        2       1
+bestelling  0       1
+kluisjes    0       1
+hhs         0       0
+[di,nm,*,*]:
+            start   daarna :=
+baxter      1       2
+balie       4       4
+tellenbalie 1       1
+tellencbbc  1       1
+typencito   1       1
+typenhh     1       0
+cefi        0       0
+bestelling  0       0
+kluisjes    0       0
+hhs         0       0
+[wo,vm,*,*]:
+            start   daarna :=
+baxter      0       0
+balie       2       2
+tellenbalie 0       1
+tellencbbc  1       1
+typencito   1       1
+typenhh     0       0
+cefi        0       0
+bestelling  1       1
+kluisjes    0       0
+hhs         1       0
+[wo,nm,*,*]:
+            start   daarna :=
+baxter      1       2
+balie       3       3
+tellenbalie 0       1
+tellencbbc  1       0
+typencito   1       1
+typenhh     1       0
+cefi        0       0
+bestelling  0       0
+kluisjes    0       1
+hhs         0       0
+[do,vm,*,*]:
+            start   daarna :=
+baxter      0       0
+balie       2       2
+tellenbalie 0       1
+tellencbbc  1       1
+typencito   1       1
+typenhh     0       0
+cefi        0       0
+bestelling  1       1
+kluisjes    0       0
+hhs         1       0
+[do,nm,*,*]:
+            start   daarna :=
+baxter      1       2
+balie       3       3
+tellenbalie 0       1
+tellencbbc  1       0
+typencito   1       1
+typenhh     1       0
+cefi        0       0
+bestelling  0       0
+kluisjes    0       1
+hhs         0       0
+[vr,vm,*,*]:
+            start   daarna :=
+baxter      0       0
+balie       2       2
+tellenbalie 0       1
+tellencbbc  1       1
+typencito   1       1
+typenhh     0       0
+cefi        0       0
+bestelling  1       1
+kluisjes    0       0
+hhs         1       0
+[vr,nm,*,*]:
+            start   daarna :=
+baxter      1       2
+balie       3       3
+tellenbalie 0       1
+tellencbbc  1       0
+typencito   1       1
+typenhh     1       0
+cefi        0       0
+bestelling  0       0
+kluisjes    0       1
+hhs         0       0
 ;
 
 end;

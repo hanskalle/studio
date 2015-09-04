@@ -1,3 +1,10 @@
-glpsol --tmlim 30 --model apotheek.mod --data apotheek.dat -y results.txt
-grep '= 1' < results.txt | sort > rooster.txt
-cat rooster.txt
+glpsol --tmlim 300 --model apotheek.mod --data apotheek.dat -y results.txt
+if [ -e results.txt ]; then
+    if [ `stat --format=%s results.txt` -ne 0 ]; then
+        mv results.bak~ results.bak
+        cp results.txt results.bak~
+        mv rooster.txt rooster.bak
+        grep '= 1' < results.txt | sort > rooster.txt
+        diff rooster.txt rooster.bak
+    fi
+fi
