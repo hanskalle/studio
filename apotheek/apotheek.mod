@@ -28,6 +28,7 @@ param shiftvoorkeur {m in medewerkers, d in dagen, s in shifts}, binary, default
 var toedeling {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in medewerkers}, binary;
 var shift {w in weken, d in dagen, s in shifts, m in medewerkers}, binary;
 var taakbreuk {w in weken, d in dagen, l in dagdelen, m in medewerkers}, binary;
+var niet_vroege_woensdagbaxter {w in weken, m in medewerkers}, binary;
 
 maximize voorkeuren:
 # Zoveel mogelijk toedelen
@@ -48,7 +49,7 @@ maximize voorkeuren:
   - 6 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
     toedeling[w,d,l,f,'balie',m])
 # Zo min mogelijk taakbreuken
-  - 3 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
+  - 1 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
     taakbreuk[w,d,l,m])
 ;
 
@@ -92,12 +93,53 @@ subject to niet_toedelen_als_competentie_ontbreekt {m in medewerkers, t in taken
 subject to niet_voor_en_namiddag_dezelfde_taak {w in weken, d in dagen, f in fases, t in taken, m in medewerkers}:
     (sum {l in dagdelen} toedeling[w,d,l,f,t,m]) <= 1;
 
-subject to een_gestarte_taak_wordt_dezelfde_medewerker_ook_daarna_gedaan
-    {w in weken, d in dagen, l in dagdelen, t in taken, m in medewerkers: bezetting[d,l,t,'start'] <= bezetting[d,l,t,'daarna']}:
+subject to een_gestarte_taak_wordt_het_liefst_door_dezelfde_medewerker_ook_daarna_gedaan
+    {w in weken, d in dagen, l in dagdelen, t in taken, m in medewerkers}:
     toedeling[w,d,l,'start',t,m] <= toedeling[w,d,l,'daarna',t,m] + taakbreuk[w,d,l,m];
+
+subject to starten_op_de_balie_wordt_daarna_ook_gedaan
+    {w in weken, d in dagen, l in dagdelen, m in medewerkers: bezetting[d,l,'balie','start'] <= bezetting[d,l,'balie','daarna']}:
+    toedeling[w,d,l,'start','balie',m] <= toedeling[w,d,l,'daarna','balie',m];
 
 subject to herhalingtypen_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers: bezetting[d,'vm','typenhh','start']=0}:
     toedeling[w,d,'vm','daarna','typenhh',m] <= toedeling[w,d,'vm','start','bestelling',m];
+    
+subject to na_typencito_geen_tellenbalie1 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typencito',m] + toedeling[w,d,'vm','daarna','tellenbalie',m] <= 1;
+
+subject to na_typencito_geen_tellenbalie2 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typencito',m] + toedeling[w,d,'nm','start','tellenbalie',m] <= 1;
+
+subject to na_typencito_geen_tellenbalie3 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typencito',m] + toedeling[w,d,'nm','daarna','tellenbalie',m] <= 1;
+
+subject to na_typencito_geen_tellenbalie4 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','daarna','typencito',m] + toedeling[w,d,'nm','start','tellenbalie',m] <= 1;
+
+subject to na_typencito_geen_tellenbalie5 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','daarna','typencito',m] + toedeling[w,d,'nm','daarna','tellenbalie',m] <= 1;
+
+subject to na_typencito_geen_tellenbalie6 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'nm','start','typencito',m] + toedeling[w,d,'nm','daarna','tellenbalie',m] <= 1;
+    
+subject to na_typenhh_geen_tellenbalie1 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typenhh',m] + toedeling[w,d,'vm','daarna','tellenbalie',m] <= 1;
+
+subject to na_typenhh_geen_tellenbalie2 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typenhh',m] + toedeling[w,d,'nm','start','tellenbalie',m] <= 1;
+
+subject to na_typenhh_geen_tellenbalie3 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typenhh',m] + toedeling[w,d,'nm','daarna','tellenbalie',m] <= 1;
+
+subject to na_typenhh_geen_tellenbalie4 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','daarna','typenhh',m] + toedeling[w,d,'nm','start','tellenbalie',m] <= 1;
+
+subject to na_typenhh_geen_tellenbalie5 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','daarna','typenhh',m] + toedeling[w,d,'nm','daarna','tellenbalie',m] <= 1;
+
+subject to na_typenhh_geen_tellenbalie6 {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'nm','start','typenhh',m] + toedeling[w,d,'nm','daarna','tellenbalie',m] <= 1;
+
 
 # Shifts    
 subject to aantal_in_vroege_en_late_shifts {w in weken, d in dagen, s in shifts: s!='standaard'}:
@@ -112,17 +154,21 @@ subject to medewerker_alleen_in_shift_als_aanwezig {w in weken, d in dagen, m in
 subject to als_toegedeeld_dan_ook_shift {w in weken, d in dagen, m in medewerkers: (sum {l in dagdelen} aanwezigheid[m,d,l])>0}:
     (sum {s in shifts} shift[w,d,s,m]) = 1;
 
-#subject to extras_alleen_standaard_shift {w in weken, d in dagen, m in extras}:
-#    (sum {s in shifts: s!='standaard'} shift[w,d,s,m]) = 0;
-    
 subject to minimaal_twee_assisten_in_vroege_shift {w in weken, d in dagen}:
     (sum {m in assistenten} shift[w,d,'vroeg',m]) >= 2;
 
 subject to minimaal_twee_assisten_in_late_shift {w in weken, d in dagen}:
     (sum {m in assistenten} shift[w,d,'laat',m]) >= 2;
 
-subject to alleen_als_je_vroeg_begint_mag_je_starten_met_bestelling {w in weken, d in dagen, m in medewerkers}:
+subject to als_starten_met_bestelling_dan_vroeg_beginnen {w in weken, d in dagen, m in medewerkers}:
     toedeling[w,d,'vm','start','bestelling',m] <= shift[w,d,'vroeg',m];
+
+subject to noteer_baxters_die_op_woensdag_niet_vroeg_beginnen {w in weken, m in medewerkers}:
+    toedeling[w,'wo','vm','start','baxter',m] <= shift[w,'wo','vroeg',m] + niet_vroege_woensdagbaxter[w,m];
+
+subject to minstens_1_vroege_baxters_op_woensdag {w in weken}:
+    (sum {m in medewerkers} niet_vroege_woensdagbaxter[w,m]) + 1 = bezetting['wo','vm','baxter','start'];
+
 
 # Speciale regels
 subject to fokkelien_niet_starten_met_baxter {w in weken, d in dagen, l in dagdelen}:
