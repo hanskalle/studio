@@ -29,11 +29,14 @@ var toedeling {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m 
 var shift {w in weken, d in dagen, s in shifts, m in medewerkers}, binary;
 
 maximize voorkeuren:
+# Zoveel mogelijk toedelen
+  + (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in medewerkers}
+    toedeling[w,d,l,f,t,m])
 # Mensen inzetten op de shifts waarvoor ze de voorkeur hebben
-  + (sum {w in weken, d in dagen, m in medewerkers, s in shifts}
+  + 5 * (sum {w in weken, d in dagen, m in medewerkers, s in shifts}
     shift[w,d,s,m] * shiftvoorkeur[m,d,s])
 # Liever maos in voorkeurstaken voor mao's
-  + (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in voorkeurstaken_mao, m in maos}
+  + 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in voorkeurstaken_mao, m in maos}
     toedeling[w,d,l,f,t,m])
 # Liever Jeanette niet op tellen
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
@@ -45,7 +48,7 @@ maximize voorkeuren:
 
 
 # Bezetting
-subject to bezetting_per_taak {w in weken, d in dagen, l in dagdelen, f in fases, t in taken}:
+subject to bezetting_per_taak {w in weken, d in dagen, l in dagdelen, f in fases, t in taken: t != 'extra'}:
     (sum {m in medewerkers} toedeling[w,d,l,f,t,m]) = bezetting[d,l,t,f];
 
 subject to maximaal_1_taak_per_medewerker_per_dagdeel_en_fase

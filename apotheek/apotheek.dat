@@ -12,8 +12,8 @@ set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanet
 set maos := mark miranda christa;
 set stagiares := btissame;
 set extras := onbezet1 onbezet2 onbezet3 onbezet4 onbezet5 onbezet6;
-set taken := baxter balie tellenbalie tellencbbc cefi typencito typenhh bestelling kluisjes hhs;
-set voorkeurstaken_mao := cefi kluisjes;
+set taken := baxter balie tellenbalie tellencbbc cefi typencito typenhh bestelling extra hhs;
+set voorkeurstaken_mao := cefi;
 
 param verlof :=
 mark    1   ma  1
@@ -30,13 +30,23 @@ param shiftvoorkeur
 [*,*,vroeg]:
             ma  di  wo  do  vr :=
 petra       1   1   1   1   1
-fokkelien   .   .   .   .   1
+martine     1   1   1   1   1
+kirsten     1   1   1   1   1
 [*,*,standaard]:
             ma  di  wo  do  vr :=
-mark        1   1   1   1   1
+fokkelien   1   1   1   1   1
 [*,*,laat]:
             ma  di  wo  do  vr :=
-fokkelien   .   1   .   1   .
+petra       .   1   .   1   .
+ietke       .   1   .   1   .
+martine     .   .   .   .   1
+jacomien    .   .   .   .   1
+fokkelien   .   .   .   1   .
+kirsten     .   .   1   .   .
+jeanette    .   .   1   .   .
+silvia      1   .   .   .   .
+christa     .   1   .   .   1
+bernadette  .   1   .   .   1
 ;
 
 param aanwezigheid :=
@@ -94,49 +104,49 @@ bernadette  do  nm  0
 ;
 
 param competentie:
-            baxter  balie   tellenbalie tellencbbc  cefi    typencito   typenhh bestelling  kluisjes    hhs :=
-petra       1       1       1           1           1       1           1       1           1           1
+            baxter  balie   tellenbalie tellencbbc  cefi    typencito   typenhh bestelling  extra       hhs :=
+petra       1       1       1           1           1       1           1       1           .           1
 ietke       1       1       1           1           1       1           1       1           1           1
 martine     .       1       .           1           1       1           1       1           1           1
-jacomien    .       1       .           1           1       .           1       .           1           1
+jacomien    .       1       .           1           1       .           1       .           .           1
 fokkelien   1       1       1           1           1       1           1       1           1           .
 mark        .       .       .           1           1       .           .       1           1           .
-miranda     .       .       .           1           1       .           .       1           1           .
-firdous     .       1       .           1           1       1           1       1           1           1
+miranda     .       .       .           1           1       .           .       1           .           .
+firdous     .       1       .           1           1       1           1       1           .           1
 kirsten     .       1       .           1           1       1           1       1           1           1
-jeanette    1       1       1           .           .       .           .       .           1           .
-marylon     .       1       1           .           1       1           1       1           1           1
-silvia      .       1       .           1           1       .           1       1           1           .
-alinoesh    .       1       .           1           1       .           1       1           1           1
-christa     .       .       .           1           1       .           .       1           1           .
-btissame    .       .       .           .           .       .           .       .           1           .
+jeanette    1       1       1           .           .       .           .       .           .           .
+marylon     .       1       1           .           1       1           1       1           .           1
+silvia      .       1       .           1           1       .           1       1           .           .
+alinoesh    .       1       .           1           1       .           1       1           .           1
+christa     .       .       .           1           1       .           .       1           .           .
+btissame    .       .       .           .           .       .           .       .           .           .
 bernadette  .       1       .           1           1       1           1       1           1           .
-onbezet1    1       1       1           1           1       1           1       1           1           1
-onbezet2    1       1       1           1           1       1           1       1           1           1
-onbezet3    1       1       1           1           1       1           1       1           1           1
-onbezet4    1       1       1           1           1       1           1       1           1           1
-onbezet5    1       1       1           1           1       1           1       1           1           1
-onbezet6    1       1       1           1           1       1           1       1           1           1
+onbezet1    1       1       1           1           1       1           1       1           .           1
+onbezet2    1       1       1           1           1       1           1       1           .           1
+onbezet3    1       1       1           1           1       1           1       1           .           1
+onbezet4    1       1       1           1           1       1           1       1           .           1
+onbezet5    1       1       1           1           1       1           1       1           .           1
+onbezet6    1       1       1           1           1       1           1       1           .           1
 ;
 
 param minimale_inzet:
-            baxter  balie   tellenbalie tellencbbc  cefi    typencito   typenhh bestelling  kluisjes    hhs :=
+            baxter  balie   tellenbalie tellencbbc  cefi    typencito   typenhh bestelling  extra       hhs :=
 petra       1       1       .           .           .       1           .       .           .           .
-ietke       1       1       .           .           .       1           .       .           .           .
-martine     .       1       .           .           .       1           .       .           .           .
+ietke       1       1       .           .           .       1           .       .           1           .
+martine     .       1       .           .           .       1           .       .           1           .
 jacomien    .       1       .           1           .       .           .       .           .           .
-fokkelien   1       1       .           .           .       1           .       .           .           .
+fokkelien   1       1       .           .           .       1           .       .           1           .
 mark        .       .       .           1           1       .           .       .           1           .
 miranda     .       .       .           1           1       .           .       .           .           .
 firdous     .       1       .           .           .       1           .       .           .           .
-kirsten     .       1       .           .           .       1           .       .           .           .
+kirsten     .       1       .           .           .       1           .       .           1           .
 jeanette    1       1       .           .           .       .           .       .           .           .
 marylon     .       1       .           .           .       1           .       .           .           .
 silvia      .       1       .           .           .       .           .       .           .           .
 alinoesh    .       1       .           .           .       .           .       .           .           .
 christa     .       .       .           .           .       .           .       .           .           .
 btissame    .       .       .           .           .       .           .       .           .           .
-bernadette  .       1       .           .           .       .           .       .           .           .
+bernadette  .       1       .           .           .       .           .       .           1           .
 ;
 
 param aantal_per_shift:
@@ -159,7 +169,6 @@ typencito   1       1
 typenhh     0       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       0
 hhs         1       0
 [ma,nm,*,*]:
             start   daarna :=
@@ -171,7 +180,6 @@ typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       1
 hhs         0       0
 [di,vm,*,*]:
             start   daarna :=
@@ -183,7 +191,6 @@ typencito   1       1
 typenhh     1       1
 cefi        2       1
 bestelling  1       1
-kluisjes    0       1
 hhs         0       0
 [di,nm,*,*]:
             start   daarna :=
@@ -195,7 +202,6 @@ typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       0
 hhs         0       0
 [wo,vm,*,*]:
             start   daarna :=
@@ -207,7 +213,6 @@ typencito   1       1
 typenhh     0       0
 cefi        2       2
 bestelling  1       1
-kluisjes    0       0
 hhs         0       0
 [wo,nm,*,*]:
             start   daarna :=
@@ -219,7 +224,6 @@ typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       0
 hhs         0       0
 [do,vm,*,*]:
             start   daarna :=
@@ -231,7 +235,6 @@ typencito   1       1
 typenhh     0       1
 cefi        2       1
 bestelling  1       1
-kluisjes    0       0
 hhs         1       0
 [do,nm,*,*]:
             start   daarna :=
@@ -243,7 +246,6 @@ typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    0       0
 hhs         0       0
 [vr,vm,*,*]:
             start   daarna :=
@@ -255,7 +257,6 @@ typencito   1       1
 typenhh     1       1
 cefi        2       2
 bestelling  1       1
-kluisjes    0       0
 hhs         0       0
 [vr,nm,*,*]:
             start   daarna :=
@@ -267,7 +268,6 @@ typencito   1       1
 typenhh     1       0
 cefi        0       0
 bestelling  0       0
-kluisjes    1       1
 hhs         0       0
 ;
 
