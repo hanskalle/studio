@@ -27,6 +27,7 @@ param shiftvoorkeur {m in medewerkers, d in dagen, s in shifts}, binary, default
 
 var toedeling {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in medewerkers}, binary;
 var shift {w in weken, d in dagen, s in shifts, m in medewerkers}, binary;
+var taakbreuk {w in weken, d in dagen, l in dagdelen, m in medewerkers}, binary;
 
 maximize voorkeuren:
 # Zoveel mogelijk toedelen
@@ -41,9 +42,14 @@ maximize voorkeuren:
 # Liever Jeanette niet op tellen
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
     (toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbct','jeanette']))
-# Zo min mogelijk onbezet laten
-  - 10 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras}
+# Zo min mogelijk onbezet laten, maar als het dan moet, dan maar balie
+  - 12 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras: t!='balie'}
     toedeling[w,d,l,f,t,m])
+  - 6 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
+    toedeling[w,d,l,f,'balie',m])
+# Zo min mogelijk taakbreuken
+  - 3 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
+    taakbreuk[w,d,l,m])
 ;
 
 
@@ -88,10 +94,10 @@ subject to niet_voor_en_namiddag_dezelfde_taak {w in weken, d in dagen, f in fas
 
 subject to een_gestarte_taak_wordt_dezelfde_medewerker_ook_daarna_gedaan
     {w in weken, d in dagen, l in dagdelen, t in taken, m in medewerkers: bezetting[d,l,t,'start'] <= bezetting[d,l,t,'daarna']}:
-    toedeling[w,d,l,'start',t,m] <= toedeling[w,d,l,'daarna',t,m];
+    toedeling[w,d,l,'start',t,m] <= toedeling[w,d,l,'daarna',t,m] + taakbreuk[w,d,l,m];
 
-#subject to herhalingtypen_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers}:
-#    toedeling[w,d,'vm','daarna','typenhh',m] <= toedeling[w,d,'vm','start','bestelling',m];
+subject to herhalingtypen_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers: bezetting[d,'vm','typenhh','start']=0}:
+    toedeling[w,d,'vm','daarna','typenhh',m] <= toedeling[w,d,'vm','start','bestelling',m];
 
 # Shifts    
 subject to aantal_in_vroege_en_late_shifts {w in weken, d in dagen, s in shifts: s!='standaard'}:
