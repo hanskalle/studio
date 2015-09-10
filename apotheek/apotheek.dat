@@ -105,7 +105,7 @@ miranda     .       .       .           1           1       .           .       
 firdous     .       1       .           1           1       1           1       1           1           1
 kirsten     .       1       .           1           1       1           1       1           1           1
 jeanette    1       1       1           .           .       .           .       .           1           .
-marylon     1       1       1           .           1       1           1       1           1           1
+marylon     .       1       1           .           1       1           1       1           1           1
 silvia      .       1       .           1           1       .           1       1           1           .
 alinoesh    .       1       .           1           1       .           1       1           1           1
 christa     .       .       .           1           1       .           .       1           1           .
@@ -131,7 +131,7 @@ miranda     .       .       .           1           1       .           .       
 firdous     .       1       .           .           .       1           .       .           .           .
 kirsten     .       1       .           .           .       1           .       .           .           .
 jeanette    1       1       .           .           .       .           .       .           .           .
-marylon     1       1       .           .           .       1           .       .           .           .
+marylon     .       1       .           .           .       1           .       .           .           .
 silvia      .       1       .           .           .       .           .       .           .           .
 alinoesh    .       1       .           .           .       .           .       .           .           .
 christa     .       .       .           .           .       .           .       .           .           .
@@ -139,13 +139,13 @@ btissame    .       .       .           .           .       .           .       
 bernadette  .       1       .           .           .       .           .       .           .           .
 ;
 
-param minimum_per_shift:
-    vroeg   standaard   laat :=
-ma  2       .           2
-di  3       .           3
-wo  4       .           2
-do  1       .           3
-vr  3       .           3
+param aantal_per_shift:
+    vroeg   laat :=
+ma  2       2
+di  3       3
+wo  3       2
+do  2       3
+vr  3       3
 ;
 
 param bezetting
@@ -158,13 +158,13 @@ tellencbbc  1       1
 typencito   1       1
 typenhh     0       0
 cefi        0       0
-bestelling  1       1
+bestelling  0       0
 kluisjes    0       0
 hhs         1       0
 [ma,nm,*,*]:
             start   daarna :=
 baxter      1       2
-balie       3       3
+balie       3       4
 tellenbalie 0       1
 tellencbbc  1       0
 typencito   1       1
@@ -176,19 +176,19 @@ hhs         0       0
 [di,vm,*,*]:
             start   daarna :=
 baxter      0       0
-balie       4       4
+balie       3       3
 tellenbalie 1       1
 tellencbbc  1       0
 typencito   1       1
 typenhh     1       1
 cefi        2       1
-bestelling  0       1
+bestelling  1       1
 kluisjes    0       1
 hhs         0       0
 [di,nm,*,*]:
             start   daarna :=
 baxter      1       2
-balie       4       4
+balie       3       4
 tellenbalie 1       1
 tellencbbc  1       1
 typencito   1       1
@@ -199,7 +199,7 @@ kluisjes    0       0
 hhs         0       0
 [wo,vm,*,*]:
             start   daarna :=
-baxter      2       1
+baxter      3       1
 balie       3       3
 tellenbalie 1       1
 tellencbbc  0       0
@@ -224,19 +224,19 @@ hhs         0       0
 [do,vm,*,*]:
             start   daarna :=
 baxter      0       0
-balie       3       2
+balie       3       3
 tellenbalie 0       1
 tellencbbc  1       1
 typencito   1       1
 typenhh     0       1
 cefi        2       1
-bestelling  1       2
+bestelling  1       1
 kluisjes    0       0
 hhs         1       0
 [do,nm,*,*]:
             start   daarna :=
 baxter      1       2
-balie       3       3
+balie       3       4
 tellenbalie 0       1
 tellencbbc  2       2
 typencito   1       1
@@ -248,19 +248,19 @@ hhs         0       0
 [vr,vm,*,*]:
             start   daarna :=
 baxter      0       0
-balie       5       4
+balie       4       4
 tellenbalie 0       1
 tellencbbc  1       0
 typencito   1       1
 typenhh     1       1
 cefi        2       2
-bestelling  0       1
+bestelling  1       1
 kluisjes    0       0
 hhs         0       0
 [vr,nm,*,*]:
             start   daarna :=
 baxter      1       2
-balie       4       4
+balie       5       4
 tellenbalie 1       1
 tellencbbc  2       2
 typencito   1       1
