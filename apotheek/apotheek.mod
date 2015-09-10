@@ -40,7 +40,7 @@ maximize voorkeuren:
     toedeling[w,d,l,f,t,m])
 # Liever Jeanette niet op tellen
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
-    (toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbc','jeanette']))
+    (toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbct','jeanette']))
 # Zo min mogelijk onbezet laten
   - 10 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras}
     toedeling[w,d,l,f,t,m])
@@ -90,6 +90,8 @@ subject to een_gestarte_taak_wordt_dezelfde_medewerker_ook_daarna_gedaan
     {w in weken, d in dagen, l in dagdelen, t in taken, m in medewerkers: bezetting[d,l,t,'start'] <= bezetting[d,l,t,'daarna']}:
     toedeling[w,d,l,'start',t,m] <= toedeling[w,d,l,'daarna',t,m];
 
+#subject to herhalingtypen_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers}:
+#    toedeling[w,d,'vm','daarna','typenhh',m] <= toedeling[w,d,'vm','start','bestelling',m];
 
 # Shifts    
 subject to aantal_in_vroege_en_late_shifts {w in weken, d in dagen, s in shifts: s!='standaard'}:
@@ -107,19 +109,21 @@ subject to als_toegedeeld_dan_ook_shift {w in weken, d in dagen, m in medewerker
 #subject to extras_alleen_standaard_shift {w in weken, d in dagen, m in extras}:
 #    (sum {s in shifts: s!='standaard'} shift[w,d,s,m]) = 0;
     
-subject to vroege_shifts_starten_op_balie {w in weken, d in dagen, m in medewerkers}:
-    shift[w,d,'vroeg',m] <= toedeling[w,d,'vm','start','balie',m];
+subject to minimaal_twee_assisten_in_vroege_shift {w in weken, d in dagen}:
+    (sum {m in assistenten} shift[w,d,'vroeg',m]) >= 2;
 
-subject to late_shifts_eindigen_op_balie  {w in weken, d in dagen, m in medewerkers}:
-    shift[w,d,'laat',m] <= toedeling[w,d,'nm','daarna','balie',m];
+subject to minimaal_twee_assisten_in_late_shift {w in weken, d in dagen}:
+    (sum {m in assistenten} shift[w,d,'laat',m]) >= 2;
 
+subject to alleen_als_je_vroeg_begint_mag_je_starten_met_bestelling {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','bestelling',m] <= shift[w,d,'vroeg',m];
 
 # Speciale regels
 subject to fokkelien_niet_starten_met_baxter {w in weken, d in dagen, l in dagdelen}:
     toedeling[w,d,l,'start','baxter','fokkelien'] = 0;
     
 subject to jeanette_niet_tellen_op_vrijdag {w in weken, d in dagen, l in dagdelen, f in fases}:
-    toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbc','jeanette'] = 0;
+    toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbct','jeanette'] = 0;
 
 solve;
 
