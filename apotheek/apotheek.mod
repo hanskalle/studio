@@ -80,6 +80,11 @@ subject to partimedag_firdous {w in weken: w in oneven_weken}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'vr',l,f,t,'firdous']) = 0;
 
 
+# Vaste taken
+#subject to martine_op_do_vm_even_weken_extra_taak {w in weken, f in fases: w in even_weken}:
+#    toedeling[w,'di','vm',f,'extra','martine'] >= 1;
+
+
 # Competenties en het actief houden daarvan
 subject to minimale_inzet_bewaken
     {m in medewerkers, t in taken}:
