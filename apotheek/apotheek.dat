@@ -157,8 +157,8 @@ param bezetting
 baxter      0       0
 extrabaxter 0       0
 balie       2       2
-tellenbalie 0       1
-tellencbbct  1       1
+tellenbalie 1       1
+tellencbbct 1       1
 typencito   1       1
 typenhh     0       0
 cefi        0       0
@@ -169,8 +169,8 @@ hhs         1       0
 baxter      1       2
 extrabaxter 0       0
 balie       3       4
-tellenbalie 0       1
-tellencbbct  1       0
+tellenbalie 1       1
+tellencbbct 1       0
 typencito   1       1
 typenhh     1       0
 cefi        0       0
@@ -182,7 +182,7 @@ baxter      0       0
 extrabaxter 0       0
 balie       3       3
 tellenbalie 1       1
-tellencbbct  1       0
+tellencbbct 1       0
 typencito   1       1
 typenhh     1       1
 cefi        2       1
@@ -194,7 +194,7 @@ baxter      1       2
 extrabaxter 0       0
 balie       3       4
 tellenbalie 1       1
-tellencbbct  1       1
+tellencbbct 1       1
 typencito   1       1
 typenhh     1       0
 cefi        0       0
@@ -206,7 +206,7 @@ baxter      2       1
 extrabaxter 1       0
 balie       3       3
 tellenbalie 1       1
-tellencbbct  0       0
+tellencbbct 0       0
 typencito   1       1
 typenhh     0       0
 cefi        2       2
@@ -217,8 +217,8 @@ hhs         0       0
 baxter      1       2
 extrabaxter 0       0
 balie       4       5
-tellenbalie 1       0
-tellencbbct  2       2
+tellenbalie 1       1
+tellencbbct 2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
@@ -229,8 +229,8 @@ hhs         0       0
 baxter      0       0
 extrabaxter 0       0
 balie       3       3
-tellenbalie 0       1
-tellencbbct  1       1
+tellenbalie 1       1
+tellencbbct 1       1
 typencito   1       1
 typenhh     0       1
 cefi        2       1
@@ -241,8 +241,8 @@ hhs         1       0
 baxter      1       2
 extrabaxter 0       0
 balie       3       4
-tellenbalie 0       1
-tellencbbct  2       2
+tellenbalie 1       1
+tellencbbct 2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
@@ -253,8 +253,8 @@ hhs         0       0
 baxter      0       0
 extrabaxter 0       0
 balie       4       4
-tellenbalie 0       1
-tellencbbct  1       0
+tellenbalie 1       1
+tellencbbct 1       0
 typencito   1       1
 typenhh     1       1
 cefi        2       2
@@ -266,7 +266,7 @@ baxter      1       2
 extrabaxter 0       0
 balie       5       4
 tellenbalie 1       1
-tellencbbct  2       2
+tellencbbct 2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
