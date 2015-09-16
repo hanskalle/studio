@@ -80,11 +80,6 @@ subject to partimedag_firdous {w in weken: w in oneven_weken}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'vr',l,f,t,'firdous']) = 0;
 
 
-# Vaste taken
-#subject to martine_op_do_vm_even_weken_extra_taak {w in weken, f in fases: w in even_weken}:
-#    toedeling[w,'di','vm',f,'extra','martine'] >= 1;
-
-
 # Competenties en het actief houden daarvan
 subject to minimale_inzet_bewaken
     {m in medewerkers, t in taken}:
@@ -173,6 +168,18 @@ subject to noteer_baxters_die_op_woensdag_niet_vroeg_beginnen {w in weken, m in 
 
 subject to minstens_1_vroege_baxters_op_woensdag {w in weken}:
     (sum {m in medewerkers} niet_vroege_woensdagbaxter[w,m]) + 1 = bezetting['wo','vm','baxter','start'];
+
+subject to als_starten_met_typencito_dan_vroeg_of_standaard_beginnen {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typencito',m] <= shift[w,d,'vroeg',m] + shift[w,d,'standaard',m];
+
+
+# Vaste taken
+subject to martine_op_di_vm_even_weken_extra_taak {w in weken, f in fases: w in even_weken}:
+    toedeling[w,'di','vm',f,'extra','martine'] >= 1 - verlof['martine',w,'di'];
+
+subject to silvia_eens_per_4_weken_in_oneven_week_extra_taak {w in weken, f in fases: (w+1) mod 4 = 0}:
+    (sum {d in dagen, l in dagdelen}
+    (toedeling[w,d,l,f,'extra','silvia'] + verlof['silvia',w,d])) >= 1;
 
 
 # Speciale regels
