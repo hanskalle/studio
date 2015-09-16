@@ -44,9 +44,9 @@ maximize voorkeuren:
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
     (toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbct','jeanette']))
 # Zo min mogelijk onbezet laten, maar als het dan moet, dan maar balie
-  - 12 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras: t!='balie'}
+  - 20 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras: t!='balie'}
     toedeling[w,d,l,f,t,m])
-  - 6 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
+  - 8 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
     toedeling[w,d,l,f,'balie',m])
 # Zo min mogelijk taakbreuken
   - 1 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
@@ -83,7 +83,7 @@ subject to partimedag_firdous {w in weken: w in oneven_weken}:
 # Competenties en het actief houden daarvan
 subject to minimale_inzet_bewaken
     {m in medewerkers, t in taken}:
-    (sum {w in weken, d in dagen, l in dagdelen, f in fases} toedeling[w,d,l,f,t,m]) >= minimale_inzet[m,t]*aantal_weken/2;
+    (sum {w in weken, d in dagen, l in dagdelen, f in fases} toedeling[w,d,l,f,t,m]) >= (minimale_inzet[m,t] * aantal_weken) div 2;
 
 subject to niet_toedelen_als_competentie_ontbreekt {m in medewerkers, t in taken: competentie[m,t]=0}:
     (sum {w in weken, d in dagen, l in dagdelen, f in fases} toedeling[w,d,l,f,t,m]) = 0;
@@ -169,17 +169,19 @@ subject to noteer_baxters_die_op_woensdag_niet_vroeg_beginnen {w in weken, m in 
 subject to minstens_1_vroege_baxters_op_woensdag {w in weken}:
     (sum {m in medewerkers} niet_vroege_woensdagbaxter[w,m]) + 1 = bezetting['wo','vm','baxter','start'];
 
-subject to als_starten_met_typencito_dan_vroeg_of_standaard_beginnen {w in weken, d in dagen, m in medewerkers}:
-    toedeling[w,d,'vm','start','typencito',m] <= shift[w,d,'vroeg',m] + shift[w,d,'standaard',m];
+subject to als_starten_met_typencito_dan_geen_late_shift {w in weken, d in dagen, m in medewerkers}:
+    toedeling[w,d,'vm','start','typencito',m] <= 1 - shift[w,d,'laat',m];
 
 
 # Vaste taken
 subject to martine_op_di_vm_even_weken_extra_taak {w in weken, f in fases: w in even_weken}:
     toedeling[w,'di','vm',f,'extra','martine'] >= 1 - verlof['martine',w,'di'];
 
-subject to silvia_eens_per_4_weken_in_oneven_week_extra_taak {w in weken, f in fases: (w+1) mod 4 = 0}:
-    (sum {d in dagen, l in dagdelen}
-    (toedeling[w,d,l,f,'extra','silvia'] + verlof['silvia',w,d])) >= 1;
+subject to silvia_eens_per_4_weken_in_oneven_week_op_do_extra_taak {w in weken, f in fases: (w+1) mod 4 = 0}:
+    toedeling[w,'do','vm',f,'extra','silvia'] >= 1 - verlof['silvia',w,'do'];
+
+subject to kirsten_eens_per_4_weken_in_oneven_week_op_do_extra_taak {w in weken, f in fases: (w+3) mod 4 = 0}:
+    toedeling[w,'do','vm',f,'extra','kirsten'] >= 1 - verlof['kirsten',w,'do'];
 
 
 # Speciale regels
@@ -188,6 +190,7 @@ subject to fokkelien_niet_starten_met_baxter {w in weken, d in dagen, l in dagde
     
 subject to jeanette_niet_tellen_op_vrijdag {w in weken, d in dagen, l in dagdelen, f in fases}:
     toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbct','jeanette'] = 0;
+
 
 solve;
 
