@@ -28,6 +28,7 @@ param shiftvoorkeur {m in medewerkers, d in dagen, s in shifts}, binary, default
 var toedeling {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in medewerkers}, binary;
 var shift {w in weken, d in dagen, s in shifts, m in medewerkers}, binary;
 var taakbreuk {w in weken, d in dagen, l in dagdelen, m in medewerkers}, binary;
+var taakbreukbalie {w in weken, d in dagen, l in dagdelen, m in medewerkers}, binary;
 var niet_vroege_woensdagbaxter {w in weken, m in medewerkers}, binary;
 
 maximize voorkeuren:
@@ -44,13 +45,16 @@ maximize voorkeuren:
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
     (toedeling[w,d,l,f,'tellenbalie','jeanette'] + toedeling[w,d,l,f,'tellencbbct','jeanette']))
 # Zo min mogelijk onbezet laten, maar als het dan moet, dan maar balie
-  - 20 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras: t!='balie'}
+  - 40 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in extras: t!='balie'}
     toedeling[w,d,l,f,t,m])
-  - 8 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
+  - 20 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
     toedeling[w,d,l,f,'balie',m])
 # Zo min mogelijk taakbreuken
   - 1 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
     taakbreuk[w,d,l,m])
+# En nog minder taakbreuken bij balie
+  - 5 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
+    taakbreukbalie[w,d,l,m])
 ;
 
 
@@ -77,7 +81,7 @@ subject to partimedag_marylon {w in weken: w in even_weken}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'do',l,f,t,'marylon']) = 0;
 
 subject to partimedag_firdous {w in weken: w in oneven_weken}:
-    (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'vr',l,f,t,'firdous']) = 0;
+    (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'do',l,f,t,'firdous']) = 0;
 
 
 # Competenties en het actief houden daarvan
@@ -98,10 +102,13 @@ subject to een_gestarte_taak_wordt_het_liefst_door_dezelfde_medewerker_ook_daarn
     toedeling[w,d,l,'start',t,m] <= toedeling[w,d,l,'daarna',t,m] + taakbreuk[w,d,l,m];
 
 subject to starten_op_de_balie_wordt_daarna_ook_gedaan
-    {w in weken, d in dagen, l in dagdelen, m in medewerkers: bezetting[d,l,'balie','start'] <= bezetting[d,l,'balie','daarna']}:
-    toedeling[w,d,l,'start','balie',m] <= toedeling[w,d,l,'daarna','balie',m];
+    {w in weken, d in dagen, l in dagdelen, m in medewerkers: (m not in extras) and (bezetting[d,l,'balie','start'] <= bezetting[d,l,'balie','daarna'])}:
+    toedeling[w,d,l,'start','balie',m] <= toedeling[w,d,l,'daarna','balie',m] + taakbreukbalie[w,d,l,m];
 
-subject to herhalingtypen_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers: bezetting[d,'vm','typenhh','start']=0}:
+subject to tellencbbct_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers: bezetting[d,'vm','tellencbbct','start'] < bezetting[d,'vm','tellencbbct','daarna']}:
+    toedeling[w,d,'vm','daarna','tellencbbct',m] <= toedeling[w,d,'vm','start','bestelling',m];
+
+subject to typenhh_vm_start_met_bestelling {w in weken, d in dagen, m in medewerkers: bezetting[d,'vm','typenhh','start'] < bezetting[d,'vm','typenhh','daarna']}:
     toedeling[w,d,'vm','daarna','typenhh',m] <= toedeling[w,d,'vm','start','bestelling',m];
     
 subject to na_typencito_geen_tellenbalie1 {w in weken, d in dagen, m in medewerkers}:

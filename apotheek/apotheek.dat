@@ -1,5 +1,5 @@
-param eerste_week := 1;
-param laatste_week := 4;
+param eerste_week := 39;
+param laatste_week := 42;
 
 set even_weken := 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52;
 set oneven_weken := 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53;
@@ -9,15 +9,15 @@ set fases := start, daarna;
 set shifts := vroeg, standaard, laat;
 
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
-set maos := mark miranda christa;
+set maos := mark miranda christa hayat; #aom
 set stagiares := btissame;
 set extras := onbezet1 onbezet2 onbezet3 onbezet4 onbezet5 onbezet6;
 set taken := baxter extrabaxter balie tellenbalie tellencbbct cefi typencito typenhh bestelling extra hhs;
 set voorkeurstaken_mao := cefi;
 
 param verlof :=
+jeanette 39 vr 1
 ;
-
 
 param shiftvoorkeur
 [*,*,vroeg]:
@@ -43,7 +43,14 @@ bernadette  .   1   .   .   1
 ;
 
 param aanwezigheid :=
-ietke       ma  vm  0   
+hayat       ma  nm  0
+hayat       di  nm  0
+hayat       wo  nm  0
+hayat       do  vm  0
+hayat       do  nm  0
+hayat       vr  vm  0
+hayat       vr  nm  0
+ietke       ma  vm  0
 ietke       ma  nm  0
 ietke       vr  vm  0 
 ietke       vr  nm  0
@@ -97,7 +104,7 @@ bernadette  do  nm  0
 ;
 
 param competentie:
-            baxter  extrabaxter balie   tellenbalie tellencbbct  cefi    typencito   typenhh bestelling  extra       hhs :=
+            baxter  extrabaxter balie   tellenbalie tellencbbct cefi    typencito   typenhh bestelling  extra       hhs :=
 petra       1       1           1       1           1           1       1           1       1           1           1
 ietke       1       1           1       1           1           1       1           1       1           1           1
 martine     .       .           1       .           1           1       1           1       1           1           1
@@ -114,6 +121,7 @@ alinoesh    .       .           1       .           1           1       .       
 christa     .       1           .       .           1           1       .           .       1           1           .
 btissame    .       .           .       .           .           .       .           .       .           1           .
 bernadette  .       .           1       .           1           1       1           1       1           1           .
+hayat       .       .           .       .           1           .       .           .       1           1           .
 onbezet1    1       1           1       1           1           1       1           1       1           1           1
 onbezet2    1       1           1       1           1           1       1           1       1           1           1
 onbezet3    1       1           1       1           1           1       1           1       1           1           1
@@ -158,11 +166,11 @@ baxter      0       0
 extrabaxter 0       0
 balie       2       2
 tellenbalie 1       1
+bestelling  0       0
 tellencbbct 1       1
 typencito   1       1
 typenhh     0       0
 cefi        0       0
-bestelling  0       0
 hhs         1       0
 [ma,nm,*,*]:
             start   daarna :=
@@ -170,11 +178,11 @@ baxter      1       2
 extrabaxter 0       0
 balie       3       4
 tellenbalie 1       1
+bestelling  0       0
 tellencbbct 1       0
 typencito   1       1
 typenhh     1       0
 cefi        0       0
-bestelling  0       0
 hhs         0       0
 [di,vm,*,*]:
             start   daarna :=
@@ -182,11 +190,11 @@ baxter      0       0
 extrabaxter 0       0
 balie       3       3
 tellenbalie 1       1
-tellencbbct 1       0
+bestelling  1       0
+tellencbbct 0       1
 typencito   1       1
 typenhh     1       1
 cefi        2       1
-bestelling  1       1
 hhs         0       0
 [di,nm,*,*]:
             start   daarna :=
@@ -194,11 +202,11 @@ baxter      1       2
 extrabaxter 0       0
 balie       3       4
 tellenbalie 1       1
+bestelling  0       0
 tellencbbct 1       1
 typencito   1       1
 typenhh     1       0
 cefi        0       0
-bestelling  0       0
 hhs         0       0
 [wo,vm,*,*]:
             start   daarna :=
@@ -206,11 +214,11 @@ baxter      2       1
 extrabaxter 1       0
 balie       3       3
 tellenbalie 1       1
-tellencbbct 0       0
+bestelling  1       0
+tellencbbct 0       1
 typencito   1       1
-typenhh     0       0
+typenhh     1       0
 cefi        2       2
-bestelling  1       1
 hhs         0       0
 [wo,nm,*,*]:
             start   daarna :=
@@ -218,11 +226,11 @@ baxter      1       2
 extrabaxter 0       0
 balie       4       5
 tellenbalie 1       1
+bestelling  0       0
 tellencbbct 2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
-bestelling  0       0
 hhs         0       0
 [do,vm,*,*]:
             start   daarna :=
@@ -230,11 +238,11 @@ baxter      0       0
 extrabaxter 0       0
 balie       3       3
 tellenbalie 1       1
-tellencbbct 1       1
+bestelling  2       0
+tellencbbct 0       1
 typencito   1       1
 typenhh     0       1
 cefi        2       1
-bestelling  1       1
 hhs         1       0
 [do,nm,*,*]:
             start   daarna :=
@@ -242,11 +250,11 @@ baxter      1       2
 extrabaxter 0       0
 balie       3       4
 tellenbalie 1       1
+bestelling  0       0
 tellencbbct 2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
-bestelling  0       0
 hhs         0       0
 [vr,vm,*,*]:
             start   daarna :=
@@ -254,11 +262,11 @@ baxter      0       0
 extrabaxter 0       0
 balie       4       4
 tellenbalie 1       1
-tellencbbct 1       0
+bestelling  1       0
+tellencbbct 0       1
 typencito   1       1
 typenhh     1       1
 cefi        2       2
-bestelling  1       1
 hhs         0       0
 [vr,nm,*,*]:
             start   daarna :=
@@ -266,11 +274,11 @@ baxter      1       2
 extrabaxter 0       0
 balie       5       4
 tellenbalie 1       1
+bestelling  0       0
 tellencbbct 2       2
 typencito   1       1
 typenhh     1       0
 cefi        0       0
-bestelling  0       0
 hhs         0       0
 ;
 
