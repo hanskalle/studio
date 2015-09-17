@@ -1,15 +1,13 @@
 set assistenten;
-set maos;
+set aoms;
 set stagiares;
 set extras;
-set medewerkers := assistenten union maos union stagiares union extras;
+set medewerkers := assistenten union aoms union stagiares union extras;
 set taken;
-set voorkeurstaken_mao;
+set voorkeurstaken_aom;
 set dagen;
 set dagdelen;
 set fases;
-set even_weken;
-set oneven_weken;
 set shifts;
 
 param eerste_week, integer, >= 1;
@@ -21,7 +19,7 @@ param verlof {m in medewerkers, w in weken, d in dagen}, binary, default 0;
 param aanwezigheid {m in medewerkers, d in dagen, l in dagdelen}, binary, default 1;
 param competentie {m in medewerkers, t in taken}, binary, default 0;
 param minimale_inzet {m in medewerkers, t in taken}, default 0;
-param bezetting {d in dagen, l in dagdelen, t in taken, f in fases}, integer, >=0, default 1;
+param bezetting {d in dagen, l in dagdelen, t in taken, f in fases}, integer, >=0, default 0;
 param aantal_per_shift {d in dagen, s in shifts}, integer, >=0, default 0;
 param shiftvoorkeur {m in medewerkers, d in dagen, s in shifts}, binary, default 0;
 
@@ -36,10 +34,10 @@ maximize voorkeuren:
   + (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in taken, m in medewerkers}
     toedeling[w,d,l,f,t,m])
 # Mensen inzetten op de shifts waarvoor ze de voorkeur hebben
-  + 5 * (sum {w in weken, d in dagen, m in medewerkers, s in shifts}
+  + 5 * (sum {w in weken, d in dagen, m in medewerkers, s in shifts: m not in extras}
     shift[w,d,s,m] * shiftvoorkeur[m,d,s])
-# Liever maos in voorkeurstaken voor mao's
-  + 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in voorkeurstaken_mao, m in maos}
+# Liever aoms in voorkeurstaken voor aom's
+  + 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, t in voorkeurstaken_aom, m in aoms}
     toedeling[w,d,l,f,t,m])
 # Liever Jeanette niet op tellen
   - 2 * (sum {w in weken, d in dagen, l in dagdelen, f in fases}
@@ -50,10 +48,10 @@ maximize voorkeuren:
   - 20 * (sum {w in weken, d in dagen, l in dagdelen, f in fases, m in extras}
     toedeling[w,d,l,f,'balie',m])
 # Zo min mogelijk taakbreuken
-  - 1 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
+  - 1 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers: m not in extras}
     taakbreuk[w,d,l,m])
 # En nog minder taakbreuken bij balie
-  - 5 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers}
+  - 3 * (sum {w in weken, d in dagen, l in dagdelen, m in medewerkers: m not in extras}
     taakbreukbalie[w,d,l,m])
 ;
 
@@ -74,13 +72,13 @@ subject to niet_toedelen_wanneer_niet_aanwezig {m in medewerkers, d in dagen, l 
 subject to niet_toedelen_op_wanneer_verlof {m in medewerkers, w in weken, d in dagen: verlof[m,w,d]=1}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,d,l,f,t,m]) = 0;
     
-subject to partimedag_petra {w in weken: w in oneven_weken}:
+subject to partimedag_petra {w in weken: w mod 2 = 1}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'do',l,f,t,'petra']) = 0;
 
-subject to partimedag_marylon {w in weken: w in even_weken}:
+subject to partimedag_marylon {w in weken: w mod 2 = 0}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'do',l,f,t,'marylon']) = 0;
 
-subject to partimedag_firdous {w in weken: w in oneven_weken}:
+subject to partimedag_firdous {w in weken: w mod 2 = 1}:
     (sum {l in dagdelen, f in fases, t in taken} toedeling[w,'do',l,f,t,'firdous']) = 0;
 
 
@@ -181,13 +179,13 @@ subject to als_starten_met_typencito_dan_geen_late_shift {w in weken, d in dagen
 
 
 # Vaste taken
-subject to martine_op_di_vm_even_weken_extra_taak {w in weken, f in fases: w in even_weken}:
+subject to martine_op_di_vm_even_weken_extra_taak {w in weken, f in fases: w mod 2 = 0}:
     toedeling[w,'di','vm',f,'extra','martine'] >= 1 - verlof['martine',w,'di'];
 
-subject to silvia_eens_per_4_weken_in_oneven_week_op_do_extra_taak {w in weken, f in fases: (w+1) mod 4 = 0}:
+subject to silvia_eens_per_4_weken_in_oneven_week_op_do_extra_taak {w in weken, f in fases: w mod 4 = 1}:
     toedeling[w,'do','vm',f,'extra','silvia'] >= 1 - verlof['silvia',w,'do'];
 
-subject to kirsten_eens_per_4_weken_in_oneven_week_op_do_extra_taak {w in weken, f in fases: (w+3) mod 4 = 0}:
+subject to kirsten_eens_per_4_weken_in_oneven_week_op_do_extra_taak {w in weken, f in fases: w mod 4 = 3}:
     toedeling[w,'do','vm',f,'extra','kirsten'] >= 1 - verlof['kirsten',w,'do'];
 
 
