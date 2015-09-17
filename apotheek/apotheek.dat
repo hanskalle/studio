@@ -1,285 +1,457 @@
 param eerste_week := 39;
 param laatste_week := 42;
-
-set even_weken := 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36 38 40 42 44 46 48 50 52;
-set oneven_weken := 1 3 5 7 9 11 13 15 17 19 21 23 25 27 29 31 33 35 37 39 41 43 45 47 49 51 53;
 set dagen := ma di wo do vr;
 set dagdelen := vm, nm;
 set fases := start, daarna;
 set shifts := vroeg, standaard, laat;
-
 set assistenten := petra ietke martine jacomien fokkelien firdous kirsten jeanette marylon silvia alinoesh bernadette;
-set maos := mark miranda christa hayat; #aom
+set aoms := mark miranda christa hayat;
 set stagiares := btissame;
 set extras := onbezet1 onbezet2 onbezet3 onbezet4 onbezet5 onbezet6;
 set taken := baxter extrabaxter balie tellenbalie tellencbbct cefi typencito typenhh bestelling extra hhs;
-set voorkeurstaken_mao := cefi;
-
-param verlof :=
-jeanette 39 vr 1
-;
-
-param shiftvoorkeur
-[*,*,vroeg]:
-            ma  di  wo  do  vr :=
-petra       1   1   1   1   1
-martine     1   1   1   1   1
-kirsten     1   1   1   1   1
-[*,*,standaard]:
-            ma  di  wo  do  vr :=
-fokkelien   1   1   1   1   1
-[*,*,laat]:
-            ma  di  wo  do  vr :=
-petra       .   1   .   1   .
-ietke       .   1   .   1   .
-martine     .   .   .   .   1
-jacomien    .   .   .   .   1
-fokkelien   .   .   .   1   .
-kirsten     .   .   1   .   .
-jeanette    .   .   1   .   .
-silvia      1   .   .   .   .
-christa     .   1   .   .   1
-bernadette  .   1   .   .   1
-;
-
+set voorkeurstaken_aom := cefi;
 param aanwezigheid :=
-hayat       ma  nm  0
-hayat       di  nm  0
-hayat       wo  nm  0
-hayat       do  vm  0
-hayat       do  nm  0
-hayat       vr  vm  0
-hayat       vr  nm  0
-ietke       ma  vm  0
-ietke       ma  nm  0
-ietke       vr  vm  0 
-ietke       vr  nm  0
-martine     di  nm  0
-martine     do  vm  0
-martine     do  nm  0
-jacomien    ma  vm  0
-jacomien    ma  nm  0
-jacomien    do  vm  0
-jacomien    do  nm  0
-fokkelien   ma  vm  0
-fokkelien   ma  nm  0
-fokkelien   wo  vm  0
-fokkelien   wo  nm  0
-mark        ma  vm  0
-miranda     ma  vm  0
-miranda     ma  nm  0
-miranda     di  nm  0
-miranda     wo  nm  0
-miranda     do  vm  0
-miranda     do  nm  0
-miranda     vr  nm  0
-kirsten     di  vm  0
-kirsten     di  nm  0
-kirsten     vr  vm  0
-kirsten     vr  nm  0
-jeanette    di  vm  0
-jeanette    di  nm  0
-jeanette    do  vm  0
-jeanette    do  nm  0
-silvia      vr  vm  0
-silvia      vr  nm  0
-alinoesh    di  vm  0
-alinoesh    di  nm  0
-christa     ma  vm  0
-christa     ma  nm  0
-christa     wo  vm  0
-christa     wo  nm  0
-btissame    ma  vm  0
-btissame    ma  nm  0
-btissame    di  vm  0
-btissame    di  nm  0
-btissame    wo  vm  0
-btissame    wo  nm  0
-bernadette  ma  vm  0
-bernadette  ma  nm  0
-bernadette  wo  vm  0
-bernadette  wo  nm  0
-bernadette  do  vm  0
-bernadette  do  nm  0
+alinoesh      di            vm             0 
+alinoesh      di            nm             0 
+bernadette    ma            vm             0 
+bernadette    ma            nm             0 
+bernadette    wo            vm             0 
+bernadette    wo            nm             0 
+bernadette    do            vm             0 
+bernadette    do            nm             0 
+btissame      ma            vm             0 
+btissame      ma            nm             0 
+btissame      di            vm             0 
+btissame      di            nm             0 
+btissame      wo            vm             0 
+btissame      wo            nm             0 
+christa       ma            vm             0 
+christa       ma            nm             0 
+christa       wo            vm             0 
+christa       wo            nm             0 
+fokkelien     ma            vm             0 
+fokkelien     ma            nm             0 
+fokkelien     wo            vm             0 
+fokkelien     wo            nm             0 
+hayat         ma            nm             0 
+hayat         di            nm             0 
+hayat         wo            nm             0 
+hayat         do            vm             0 
+hayat         do            nm             0 
+hayat         vr            vm             0 
+hayat         vr            nm             0 
+ietke         ma            vm             0 
+ietke         ma            nm             0 
+ietke         vr            vm             0 
+ietke         vr            nm             0 
+jacomien      ma            vm             0 
+jacomien      ma            nm             0 
+jacomien      do            vm             0 
+jacomien      do            nm             0 
+jeanette      di            vm             0 
+jeanette      di            nm             0 
+jeanette      do            vm             0 
+jeanette      do            nm             0 
+kirsten       di            vm             0 
+kirsten       di            nm             0 
+kirsten       vr            vm             0 
+kirsten       vr            nm             0 
+mark          ma            vm             0 
+martine       di            nm             0 
+martine       do            vm             0 
+martine       do            nm             0 
+miranda       ma            vm             0 
+miranda       ma            nm             0 
+miranda       di            nm             0 
+miranda       wo            nm             0 
+miranda       do            vm             0 
+miranda       do            nm             0 
+miranda       vr            nm             0 
+silvia        vr            vm             0 
+silvia        vr            nm             0 
 ;
-
-param competentie:
-            baxter  extrabaxter balie   tellenbalie tellencbbct cefi    typencito   typenhh bestelling  extra       hhs :=
-petra       1       1           1       1           1           1       1           1       1           1           1
-ietke       1       1           1       1           1           1       1           1       1           1           1
-martine     .       .           1       .           1           1       1           1       1           1           1
-jacomien    .       .           1       .           1           1       .           1       .           1           1
-fokkelien   1       1           1       1           1           1       1           1       1           1           .
-mark        .       1           .       .           1           1       .           .       1           1           .
-miranda     .       1           .       .           1           1       .           .       1           1           .
-firdous     .       .           1       .           1           1       1           1       1           1           1
-kirsten     .       .           1       .           1           1       1           1       1           1           1
-jeanette    1       1           1       1           .           .       .           .       .           1           .
-marylon     .       .           1       1           .           1       1           1       1           1           1
-silvia      .       .           1       .           1           1       .           1       1           1           .
-alinoesh    .       .           1       .           1           1       .           1       1           1           1
-christa     .       1           .       .           1           1       .           .       1           1           .
-btissame    .       .           .       .           .           .       .           .       .           1           .
-bernadette  .       .           1       .           1           1       1           1       1           1           .
-hayat       .       .           .       .           1           .       .           .       1           1           .
-onbezet1    1       1           1       1           1           1       1           1       1           1           1
-onbezet2    1       1           1       1           1           1       1           1       1           1           1
-onbezet3    1       1           1       1           1           1       1           1       1           1           1
-onbezet4    1       1           1       1           1           1       1           1       1           1           1
-onbezet5    1       1           1       1           1           1       1           1       1           1           1
-onbezet6    1       1           1       1           1           1       1           1       1           1           1
+param shiftvoorkeur :=
+bernadette    di            laat           1 
+bernadette    vr            laat           1 
+christa       di            laat           1 
+christa       vr            laat           1 
+fokkelien     ma            standaard      1 
+fokkelien     di            standaard      1 
+fokkelien     wo            standaard      1 
+fokkelien     do            standaard      1 
+fokkelien     do            laat           1 
+fokkelien     vr            standaard      1 
+ietke         di            laat           1 
+ietke         do            laat           1 
+jacomien      vr            laat           1 
+jeanette      wo            laat           1 
+kirsten       ma            vroeg          1 
+kirsten       di            vroeg          1 
+kirsten       wo            vroeg          1 
+kirsten       wo            laat           1 
+kirsten       do            vroeg          1 
+kirsten       vr            vroeg          1 
+martine       ma            vroeg          1 
+martine       di            vroeg          1 
+martine       wo            vroeg          1 
+martine       do            vroeg          1 
+martine       vr            vroeg          1 
+martine       vr            laat           1 
+petra         ma            vroeg          1 
+petra         di            vroeg          1 
+petra         di            laat           1 
+petra         wo            vroeg          1 
+petra         do            vroeg          1 
+petra         do            laat           1 
+petra         vr            vroeg          1 
+silvia        ma            laat           1 
 ;
-
-param minimale_inzet:
-            baxter  extrabaxter balie   tellenbalie tellencbbct  cefi    typencito   typenhh bestelling  extra       hhs :=
-petra       1       .           1       .           .           .       1           .       .           .           .
-ietke       1       .           1       .           .           .       1           .       .           1           .
-martine     .       .           1       .           .           .       1           .       .           1           .
-jacomien    .       .           1       .           1           .       .           .       .           .           .
-fokkelien   1       .           1       .           .           .       1           .       .           1           .
-mark        .       .           .       .           1           1       .           .       .           1           .
-miranda     .       .           .       .           1           1       .           .       .           .           .
-firdous     .       .           1       .           .           .       1           .       .           .           .
-kirsten     .       .           1       .           .           .       1           .       .           1           .
-jeanette    1       .           1       .           .           .       .           .       .           .           .
-marylon     .       .           1       .           .           .       1           .       .           .           .
-silvia      .       .           1       .           .           .       .           .       .           .           .
-alinoesh    .       .           1       .           .           .       .           .       .           .           .
-christa     .       .           .       .           .           .       .           .       .           .           .
-btissame    .       .           .       .           .           .       .           .       .           .           .
-bernadette  .       .           1       .           .           .       .           .       .           1           .
+param verlof :=
+petra         39            vr             1 
 ;
-
-param aantal_per_shift:
-    vroeg   laat :=
-ma  2       2
-di  3       3
-wo  3       2
-do  2       3
-vr  3       3
+param bezetting :=
+ma            nm            baxter        start         1
+ma            nm            baxter        daarna        2
+di            nm            baxter        start         1
+di            nm            baxter        daarna        2
+wo            vm            baxter        start         2
+wo            vm            baxter        daarna        1
+wo            nm            baxter        start         1
+wo            nm            baxter        daarna        2
+do            nm            baxter        start         1
+do            nm            baxter        daarna        2
+vr            nm            baxter        start         1
+vr            nm            baxter        daarna        2
+wo            vm            extrabaxter   start         1
+ma            vm            balie         start         2
+ma            vm            balie         daarna        2
+ma            nm            balie         start         3
+ma            nm            balie         daarna        4
+di            vm            balie         start         3
+di            vm            balie         daarna        3
+di            nm            balie         start         3
+di            nm            balie         daarna        4
+wo            vm            balie         start         3
+wo            vm            balie         daarna        3
+wo            nm            balie         start         4
+wo            nm            balie         daarna        5
+do            vm            balie         start         3
+do            vm            balie         daarna        3
+do            nm            balie         start         3
+do            nm            balie         daarna        4
+vr            vm            balie         start         4
+vr            vm            balie         daarna        4
+vr            nm            balie         start         5
+vr            nm            balie         daarna        4
+ma            vm            tellenbalie   start         1
+ma            vm            tellenbalie   daarna        1
+ma            nm            tellenbalie   start         1
+ma            nm            tellenbalie   daarna        1
+di            vm            tellenbalie   start         1
+di            vm            tellenbalie   daarna        1
+di            nm            tellenbalie   start         1
+di            nm            tellenbalie   daarna        1
+wo            vm            tellenbalie   start         1
+wo            vm            tellenbalie   daarna        1
+wo            nm            tellenbalie   start         1
+wo            nm            tellenbalie   daarna        1
+do            vm            tellenbalie   start         1
+do            vm            tellenbalie   daarna        1
+do            nm            tellenbalie   start         1
+do            nm            tellenbalie   daarna        1
+vr            vm            tellenbalie   start         1
+vr            vm            tellenbalie   daarna        1
+vr            nm            tellenbalie   start         1
+vr            nm            tellenbalie   daarna        1
+di            vm            bestelling    start         1
+wo            vm            bestelling    start         1
+do            vm            bestelling    start         2
+vr            vm            bestelling    start         1
+ma            vm            tellencbbct   start         1
+ma            vm            tellencbbct   daarna        1
+ma            nm            tellencbbct   start         1
+di            vm            tellencbbct   daarna        1
+di            nm            tellencbbct   start         1
+di            nm            tellencbbct   daarna        1
+wo            vm            tellencbbct   daarna        1
+wo            nm            tellencbbct   start         2
+wo            nm            tellencbbct   daarna        2
+do            vm            tellencbbct   daarna        1
+do            nm            tellencbbct   start         2
+do            nm            tellencbbct   daarna        2
+vr            vm            tellencbbct   daarna        1
+vr            nm            tellencbbct   start         2
+vr            nm            tellencbbct   daarna        2
+ma            vm            typencito     start         1
+ma            vm            typencito     daarna        1
+ma            nm            typencito     start         1
+ma            nm            typencito     daarna        1
+di            vm            typencito     start         1
+di            vm            typencito     daarna        1
+di            nm            typencito     start         1
+di            nm            typencito     daarna        1
+wo            vm            typencito     start         1
+wo            vm            typencito     daarna        1
+wo            nm            typencito     start         1
+wo            nm            typencito     daarna        1
+do            vm            typencito     start         1
+do            vm            typencito     daarna        1
+do            nm            typencito     start         1
+do            nm            typencito     daarna        1
+vr            vm            typencito     start         1
+vr            vm            typencito     daarna        1
+vr            nm            typencito     start         1
+vr            nm            typencito     daarna        1
+ma            nm            typenhh       start         1
+di            vm            typenhh       start         1
+di            vm            typenhh       daarna        1
+di            nm            typenhh       start         1
+wo            vm            typenhh       start         1
+wo            nm            typenhh       start         1
+do            vm            typenhh       daarna        1
+do            nm            typenhh       start         1
+vr            vm            typenhh       start         1
+vr            vm            typenhh       daarna        1
+vr            nm            typenhh       start         1
+di            vm            cefi          start         2
+di            vm            cefi          daarna        1
+wo            vm            cefi          start         2
+wo            vm            cefi          daarna        2
+do            vm            cefi          start         2
+do            vm            cefi          daarna        1
+vr            vm            cefi          start         2
+vr            vm            cefi          daarna        2
+ma            vm            hhs           start         1
+do            vm            hhs           start         1
 ;
-
-param bezetting
-[ma,vm,*,*]:
-            start   daarna :=
-baxter      0       0
-extrabaxter 0       0
-balie       2       2
-tellenbalie 1       1
-bestelling  0       0
-tellencbbct 1       1
-typencito   1       1
-typenhh     0       0
-cefi        0       0
-hhs         1       0
-[ma,nm,*,*]:
-            start   daarna :=
-baxter      1       2
-extrabaxter 0       0
-balie       3       4
-tellenbalie 1       1
-bestelling  0       0
-tellencbbct 1       0
-typencito   1       1
-typenhh     1       0
-cefi        0       0
-hhs         0       0
-[di,vm,*,*]:
-            start   daarna :=
-baxter      0       0
-extrabaxter 0       0
-balie       3       3
-tellenbalie 1       1
-bestelling  1       0
-tellencbbct 0       1
-typencito   1       1
-typenhh     1       1
-cefi        2       1
-hhs         0       0
-[di,nm,*,*]:
-            start   daarna :=
-baxter      1       2
-extrabaxter 0       0
-balie       3       4
-tellenbalie 1       1
-bestelling  0       0
-tellencbbct 1       1
-typencito   1       1
-typenhh     1       0
-cefi        0       0
-hhs         0       0
-[wo,vm,*,*]:
-            start   daarna :=
-baxter      2       1
-extrabaxter 1       0
-balie       3       3
-tellenbalie 1       1
-bestelling  1       0
-tellencbbct 0       1
-typencito   1       1
-typenhh     1       0
-cefi        2       2
-hhs         0       0
-[wo,nm,*,*]:
-            start   daarna :=
-baxter      1       2
-extrabaxter 0       0
-balie       4       5
-tellenbalie 1       1
-bestelling  0       0
-tellencbbct 2       2
-typencito   1       1
-typenhh     1       0
-cefi        0       0
-hhs         0       0
-[do,vm,*,*]:
-            start   daarna :=
-baxter      0       0
-extrabaxter 0       0
-balie       3       3
-tellenbalie 1       1
-bestelling  2       0
-tellencbbct 0       1
-typencito   1       1
-typenhh     0       1
-cefi        2       1
-hhs         1       0
-[do,nm,*,*]:
-            start   daarna :=
-baxter      1       2
-extrabaxter 0       0
-balie       3       4
-tellenbalie 1       1
-bestelling  0       0
-tellencbbct 2       2
-typencito   1       1
-typenhh     1       0
-cefi        0       0
-hhs         0       0
-[vr,vm,*,*]:
-            start   daarna :=
-baxter      0       0
-extrabaxter 0       0
-balie       4       4
-tellenbalie 1       1
-bestelling  1       0
-tellencbbct 0       1
-typencito   1       1
-typenhh     1       1
-cefi        2       2
-hhs         0       0
-[vr,nm,*,*]:
-            start   daarna :=
-baxter      1       2
-extrabaxter 0       0
-balie       5       4
-tellenbalie 1       1
-bestelling  0       0
-tellencbbct 2       2
-typencito   1       1
-typenhh     1       0
-cefi        0       0
-hhs         0       0
+param aantal_per_shift :=
+ma            vroeg         2
+di            vroeg         3
+wo            vroeg         3
+do            vroeg         2
+vr            vroeg         3
+ma            laat          2
+di            laat          3
+wo            laat          2
+do            laat          3
+vr            laat          3
 ;
-
+param competentie :=
+alinoesh      balie          1 
+alinoesh      tellencbbct    1 
+alinoesh      cefi           1 
+alinoesh      typenhh        1 
+alinoesh      bestelling     1 
+alinoesh      extra          1 
+alinoesh      hhs            1 
+bernadette    balie          1 
+bernadette    tellencbbct    1 
+bernadette    cefi           1 
+bernadette    typencito      1 
+bernadette    typenhh        1 
+bernadette    bestelling     1 
+bernadette    extra          1 
+btissame      extra          1 
+christa       extrabaxter    1 
+christa       tellencbbct    1 
+christa       cefi           1 
+christa       bestelling     1 
+christa       extra          1 
+firdous       balie          1 
+firdous       tellencbbct    1 
+firdous       cefi           1 
+firdous       typencito      1 
+firdous       typenhh        1 
+firdous       bestelling     1 
+firdous       extra          1 
+firdous       hhs            1 
+fokkelien     baxter         1 
+fokkelien     extrabaxter    1 
+fokkelien     balie          1 
+fokkelien     tellenbalie    1 
+fokkelien     tellencbbct    1 
+fokkelien     cefi           1 
+fokkelien     typencito      1 
+fokkelien     typenhh        1 
+fokkelien     bestelling     1 
+fokkelien     extra          1 
+hayat         tellencbbct    1 
+hayat         bestelling     1 
+hayat         extra          1 
+ietke         baxter         1 
+ietke         extrabaxter    1 
+ietke         balie          1 
+ietke         tellenbalie    1 
+ietke         tellencbbct    1 
+ietke         cefi           1 
+ietke         typencito      1 
+ietke         typenhh        1 
+ietke         bestelling     1 
+ietke         extra          1 
+ietke         hhs            1 
+jacomien      balie          1 
+jacomien      tellencbbct    1 
+jacomien      cefi           1 
+jacomien      typenhh        1 
+jacomien      extra          1 
+jacomien      hhs            1 
+jeanette      baxter         1 
+jeanette      extrabaxter    1 
+jeanette      balie          1 
+jeanette      tellenbalie    1 
+jeanette      extra          1 
+kirsten       balie          1 
+kirsten       tellencbbct    1 
+kirsten       cefi           1 
+kirsten       typencito      1 
+kirsten       typenhh        1 
+kirsten       bestelling     1 
+kirsten       extra          1 
+kirsten       hhs            1 
+mark          extrabaxter    1 
+mark          tellencbbct    1 
+mark          cefi           1 
+mark          bestelling     1 
+mark          extra          1 
+martine       balie          1 
+martine       tellencbbct    1 
+martine       cefi           1 
+martine       typencito      1 
+martine       typenhh        1 
+martine       bestelling     1 
+martine       extra          1 
+martine       hhs            1 
+marylon       balie          1 
+marylon       tellenbalie    1 
+marylon       cefi           1 
+marylon       typencito      1 
+marylon       typenhh        1 
+marylon       bestelling     1 
+marylon       extra          1 
+marylon       hhs            1 
+miranda       extrabaxter    1 
+miranda       tellencbbct    1 
+miranda       cefi           1 
+miranda       bestelling     1 
+miranda       extra          1 
+petra         baxter         1 
+petra         extrabaxter    1 
+petra         balie          1 
+petra         tellenbalie    1 
+petra         tellencbbct    1 
+petra         cefi           1 
+petra         typencito      1 
+petra         typenhh        1 
+petra         bestelling     1 
+petra         extra          1 
+petra         hhs            1 
+silvia        balie          1 
+silvia        tellencbbct    1 
+silvia        cefi           1 
+silvia        typenhh        1 
+silvia        bestelling     1 
+silvia        extra          1 
+onbezet1      baxter         1 
+onbezet2      baxter         1 
+onbezet3      baxter         1 
+onbezet4      baxter         1 
+onbezet5      baxter         1 
+onbezet6      baxter         1 
+onbezet1      extrabaxter    1 
+onbezet2      extrabaxter    1 
+onbezet3      extrabaxter    1 
+onbezet4      extrabaxter    1 
+onbezet5      extrabaxter    1 
+onbezet6      extrabaxter    1 
+onbezet1      balie          1 
+onbezet2      balie          1 
+onbezet3      balie          1 
+onbezet4      balie          1 
+onbezet5      balie          1 
+onbezet6      balie          1 
+onbezet1      tellenbalie    1 
+onbezet2      tellenbalie    1 
+onbezet3      tellenbalie    1 
+onbezet4      tellenbalie    1 
+onbezet5      tellenbalie    1 
+onbezet6      tellenbalie    1 
+onbezet1      tellencbbct    1 
+onbezet2      tellencbbct    1 
+onbezet3      tellencbbct    1 
+onbezet4      tellencbbct    1 
+onbezet5      tellencbbct    1 
+onbezet6      tellencbbct    1 
+onbezet1      cefi           1 
+onbezet2      cefi           1 
+onbezet3      cefi           1 
+onbezet4      cefi           1 
+onbezet5      cefi           1 
+onbezet6      cefi           1 
+onbezet1      typencito      1 
+onbezet2      typencito      1 
+onbezet3      typencito      1 
+onbezet4      typencito      1 
+onbezet5      typencito      1 
+onbezet6      typencito      1 
+onbezet1      typenhh        1 
+onbezet2      typenhh        1 
+onbezet3      typenhh        1 
+onbezet4      typenhh        1 
+onbezet5      typenhh        1 
+onbezet6      typenhh        1 
+onbezet1      bestelling     1 
+onbezet2      bestelling     1 
+onbezet3      bestelling     1 
+onbezet4      bestelling     1 
+onbezet5      bestelling     1 
+onbezet6      bestelling     1 
+onbezet1      extra          1 
+onbezet2      extra          1 
+onbezet3      extra          1 
+onbezet4      extra          1 
+onbezet5      extra          1 
+onbezet6      extra          1 
+onbezet1      hhs            1 
+onbezet2      hhs            1 
+onbezet3      hhs            1 
+onbezet4      hhs            1 
+onbezet5      hhs            1 
+onbezet6      hhs            1 
+;
+param minimale_inzet :=
+alinoesh      balie         1
+bernadette    balie         1
+bernadette    extra         1
+firdous       balie         1
+firdous       typencito     1
+fokkelien     baxter        1
+fokkelien     balie         1
+fokkelien     typencito     1
+fokkelien     extra         1
+ietke         baxter        1
+ietke         balie         1
+ietke         typencito     1
+ietke         extra         1
+jacomien      balie         1
+jacomien      tellencbbct   1
+jeanette      baxter        1
+jeanette      balie         1
+kirsten       balie         1
+kirsten       typencito     1
+kirsten       extra         1
+mark          tellencbbct   1
+mark          cefi          1
+mark          extra         1
+martine       balie         1
+martine       typencito     1
+martine       extra         1
+marylon       balie         1
+marylon       typencito     1
+miranda       tellencbbct   1
+miranda       cefi          1
+petra         baxter        1
+petra         balie         1
+petra         typencito     1
+silvia        balie         1
+;
 end;
