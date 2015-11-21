@@ -1,15 +1,12 @@
 ##### BEAMER
 
-set Beamer_persons := David Jeroen Danny;
+set Beamer_persons := Esther Jeroen Danny Bas;
     #Bas als in dienst
     #Esther
     #David vraagt Albert nog
 
 param Beamer_number_needed default 1;
-param Beamer_min default 4;
-param Beamer_max default 5;
-param Beamer_rest default 1;
-param Beamer_ritme default 3;
+param Beamer_ritme default 4;
 param Beamer_offritme_penalty := 3;
 param Beamer_rather_not_penalty := 10;
 
@@ -30,19 +27,10 @@ Lidian      .           .       .       .       1       .
 Wenny       .           .       .       .       1       .
 Miranda     .           .       .       .       .       1
 ;
-param Groep_Blauw_not_prefered_pair_penalty := 2;
+param Groep_Blauw_not_prefered_pair_penalty := 10;
 
 param Leiding_Blauw_number_needed default 1;
 param Groep_Blauw_number_needed default 1;
-param Leiding_Blauw_min default 2 :=
-    Lidian  1
-    Wenny   1;
-param Leiding_Blauw_max default 3 :=
-    Lidian  2
-    Wenny   2;
-param Leiding_Blauw_rest default 4 :=
-    Lidian 6
-    Wenny 6;
 param Leiding_Blauw_ritme default 6 :=
     Lidian  12
     Wenny   12;
@@ -61,9 +49,6 @@ param Groep_Blauw_rather_not_penalty := 10;
 set Geluid_persons := Hans_K Hans_D David;
 
 param Geluid_number_needed default 1;
-param Geluid_min default 4;
-param Geluid_max default 5;
-param Geluid_rest default 1;
 param Geluid_ritme default 3;
 param Geluid_offritme_penalty := 5;
 param Geluid_rather_not_penalty := 10;
@@ -74,20 +59,14 @@ param Geluid_rather_not_penalty := 10;
 
 set Hoofdkoster_persons := Jose Hans_D Herman Matthijs Andreas Frank_K;
 set Hulpkoster_persons := Hans_M Gerben Jeroen Peter Wilfred Ramon Puch Jaap
-    Ferdinand Johan Jonathan Hans_Z Wim_A Teus; #Jef weg
+    Ferdinand Jonathan Hans_Z Wim_A Teus; #Jef weg #Johan
 
 param Hoofdkoster_number_needed default 1;
-param Hoofdkoster_min default 2;
-param Hoofdkoster_max default 4;
-param Hoofdkoster_rest default 4;
 param Hoofdkoster_ritme default 6;
 param Hoofdkoster_offritme_penalty := 3;
 param Hoofdkoster_rather_not_penalty := 10;
 
 param Hulpkoster_number_needed default 2;
-param Hulpkoster_min default 2;
-param Hulpkoster_max default 2;
-param Hulpkoster_rest default 5;
 param Hulpkoster_ritme default 7;
 param Hulpkoster_offritme_penalty := 2;
 param Hulpkoster_rather_not_penalty := 10;
@@ -125,9 +104,6 @@ param Koffie_maximum_missing default 1;
 
 param Koffie_number_needed default 1;
 
-param Koffie_min default 2;
-param Koffie_max default 2;
-param Koffie_rest default 4;
 param Koffie_ritme default 7;
 param Koffie_offritme_penalty := 3;
 param Koffie_rather_not_penalty := 10;
@@ -170,18 +146,7 @@ param Muziek_maximum_missing default 15;
 
 param Muziek_number_needed default 1;
 
-param Muziek_min default 4 :=
-    Tim     2
-    Peter   2;
-param Muziek_max default 4 :=
-    Tim     3
-    Peter   3;
-param Muziek_rest default 1 :=
-    Tim 1
-    Peter 1;
-param Muziek_ritme default 3 :=
-    Tim 6
-    Peter 6;
+param Muziek_ritme default 4;
 param Muziek_offritme_penalty 8;
 param Muziek_rather_not_penalty := 10;
 
@@ -189,17 +154,15 @@ param Muziek_rather_not_penalty := 10;
 
 ##### ROOD
 
-set Leiding_Rood_persons := Nora Jan_Martijn Jolanda Tim In_de_dienst Yentl;
-set Groep_Rood_persons := Emmely Niemand;
+set Leiding_Rood_persons := Nora Jan_Martijn Tim In_de_dienst;
+set Groep_Rood_persons := Niemand; # Emmely
 
 param Groep_Rood_prefered_pair default 0:
-                Emmely  Niemand :=
-Nora            .       1
-Jan_Martijn     .       1
-Jolanda         1       .
-Tim             .       1
-In_de_dienst    .       1
-Yentl           .       1
+                Niemand :=
+Nora            1
+Jan_Martijn     1
+Tim             1
+In_de_dienst    1
 ;
 param Groep_Rood_not_prefered_pair_penalty := 1000;
 
@@ -207,40 +170,25 @@ param Leiding_Rood_number_needed default 1;
     
 param Groep_Rood_number_needed default 1;
 
-param Leiding_Rood_min default 2 :=
-    Nora            1
-    In_de_dienst    1;
-param Leiding_Rood_max default 3 :=
-    Nora            2
-    In_de_dienst    2;
-param Leiding_Rood_rest default 2 :=
-    Nora            4
-    In_de_dienst    4;
 param Leiding_Rood_ritme default 4
     Nora            8
-    In_de_dienst    8;
+    In_de_dienst    3;
 param Leiding_Rood_offritme_penalty := 4;
 param Leiding_Rood_rather_not_penalty := 10;
 
-param Groep_Rood_min default 10 :=
-    Emmely  3;
-param Groep_Rood_max default 14 :=
-    Emmely  4;
-param Groep_Rood_rest default 0
-    Emmely  2;
+param Groep_Rood_min default 12;
+param Groep_Rood_max default 14;
+param Groep_Rood_rest default 0;
 param Groep_Rood_rather_not_penalty := 10;
 
 
 
 ##### WELKOM
 
-set Welkom_persons := Suki Wenny Vena Miranda Marieke Liesbeth_Z Helga; #Marieke valt in voor Lianne
+set Welkom_persons := Suki Wenny Vena Miranda Lianne Liesbeth_Z Helga; #Marieke valt in voor Lianne
 
 param Welkom_number_needed default 1;
 
-param Welkom_min default 2;
-param Welkom_max default 2;
-param Welkom_rest default 5;
 param Welkom_ritme default 7;
 param Welkom_offritme_penalty := 2;
 param Welkom_rather_not_penalty := 10;
@@ -249,15 +197,14 @@ param Welkom_rather_not_penalty := 10;
 
 ##### WIT
 
-set Leiding_Wit_persons := Xandra Dieuwke Yentl Jacolien; #Lianne
+set Leiding_Wit_persons := Xandra Dieuwke Lianne Jacolien;
 set Groep_Wit_persons := Thirza Esther Emma;
 
 param Groep_Wit_prefered_pair default 0:
                 Thirza  Esther  Emma    :=
 Xandra          .       1       .       
-#Lianne          1       .       .
+Lianne          1       .       .
 Dieuwke         .       .       1       
-Yentl           .       1       .       
 Jacolien        1       .       .
 ;
 param Groep_Wit_not_prefered_pair_penalty := 30;
@@ -265,38 +212,27 @@ param Groep_Wit_not_prefered_pair_penalty := 30;
 param Leiding_Wit_number_needed default 1;
 param Groep_Wit_number_needed default 1;
 
-param Leiding_Wit_min default 3 :=
-#    Lianne  0
-    Yentl   1;
-param Leiding_Wit_max default 4 :=
-#    Lianne  0
-    Yentl   2;
-param Leiding_Wit_rest default 1 :=
-#    Lianne  5
-    Yentl   5;
-param Leiding_Wit_ritme default 3 :=
-#    Lianne  8
-    Yentl   6;
+param Leiding_Wit_ritme default 4 :=
+    Lianne  7;
 param Leiding_Wit_offritme_penalty := 20;
 param Leiding_Wit_rather_not_penalty := 10;
 
-param Groep_Wit_min default 4;
-param Groep_Wit_max default 5;
-param Groep_Wit_rest default 1;
+param Groep_Wit_min default 3;
+param Groep_Wit_max default 4 :=
+    Thirza  5;
+param Groep_Wit_rest default 2;
 param Groep_Wit_rather_not_penalty := 10;
 
 
 
 ##### ZANGLEIDERS
 
-set Zangleiding_persons := Tim Hans_K Fokkelien Inge Jolanda;
+set Zangleiding_persons := Tim Hans_K Fokkelien Jolanda Extra1 Extra2 Extra3;
 
 param Zangleiding_number_needed default 1;
 
-param Zangleiding_min default 2;
-param Zangleiding_max default 3;
-param Zangleiding_rest default 3;
-param Zangleiding_ritme default 5;
+param Zangleiding_ritme default 6 :=
+    Jolanda 8;
 param Zangleiding_offritme_penalty := 6;
 param Zangleiding_rather_not_penalty := 10;
 
@@ -304,5 +240,5 @@ param Zangleiding_rather_not_penalty := 10;
 
 ##### MINISTRY
 
-#set Ministry_persons := Andreas Fokkelien Xandra;
+#set Gebed_persons := Andreas Fokkelien Gert Hans_K Hans_Z Jacolien Jan Liesbeth_Z Marieke_P Marieke Monika Nora Rachel Roeland Vivianne Wenny Wim_R Xandra;
 end;
