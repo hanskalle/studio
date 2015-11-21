@@ -58,8 +58,8 @@ def update_last_assignments():
         for assignment in event['assignments']['list']:
             eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
             week, weekday = get_week_and_weekday_from_date(eventdate)
-            # TODO: alleen overige periode
-            if week < 40 and weekday == 7:  # Only sunday-tasks
+            # TODO: alleen vorige periode
+            if weekday == 7:  # Only sunday-tasks
                 task = assignment['task']
                 person = assignment['person']
                 if ',' in person:
@@ -75,17 +75,19 @@ def update_last_assignments():
     for task in get_tasks(availability):
         if task[:6] != 'Groep ':
             original_task = task
-            if task[:8] == 'Leiding ':
-                task = task[8:]
-            if task[:5] == 'Hoofd':
-                task = 'Koster'
-            if task[:4] == 'Hulp':
-                task = 'Koster'
-            f.write('param ' + original_task.replace(' ', '_') + '_last default -53 :=\n')
-            for person in sorted(last_assignments[task]):
-                if person in sets[original_task]:
-                    f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
-            f.write(';\n')
+            #            if task[:8] == 'Leiding ':
+            #                task = task[8:]
+            #            if task[:5] == 'Hoofd':
+            #                task = 'Koster'
+            #            if task[:4] == 'Hulp':
+            #                task = 'Koster'
+            if task in sets:
+                f.write('param ' + original_task.replace(' ', '_') + '_last default -53 :=\n')
+                if task in last_assignments:
+                    for person in sorted(last_assignments[task]):
+                        if person in sets[original_task]:
+                            f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person] - 54))
+                f.write(';\n')
     f.write('end;\n')
     f.close()
 
@@ -154,22 +156,23 @@ def write_availability(filename, persons):
     availability_file.write('param first_week := ' + weeks[0] + ';\n')
     availability_file.write('param last_week := ' + weeks[-1] + ';\n')
     for task in get_tasks(persons):
-        availability_file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
-        for week in weeks:
-            availability_file.write(' ')
-            availability_file.write(week)
-        availability_file.write(':=\n')
-        for person in sorted(persons):
-            availability = get_availability(person, task)
-            name = person['name'].replace(' ', '_')
-            if name in sets[task]:
-                if availability is not None:
-                    availability_file.write(name)
-                    for available in availability:
-                        availability_file.write(' ')
-                        availability_file.write(state_value[available['state']])
-                    availability_file.write('\n')
-        availability_file.write(';\n')
+        if task in sets:
+            availability_file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
+            for week in weeks:
+                availability_file.write(' ')
+                availability_file.write(week)
+            availability_file.write(':=\n')
+            for person in sorted(persons):
+                availability = get_availability(person, task)
+                name = person['name'].replace(' ', '_')
+                if name in sets[task]:
+                    if availability is not None:
+                        availability_file.write(name)
+                        for available in availability:
+                            availability_file.write(' ')
+                            availability_file.write(state_value[available['state']])
+                        availability_file.write('\n')
+            availability_file.write(';\n')
     availability_file.write('end;\n')
     availability_file.close()
 
@@ -201,11 +204,11 @@ def add_week(rooster, week):
 def get_date_of_sunday_of_week(week):
     # Christmas hack
     if week == "52":
-        return date(2015, 12, 25)
+        return date(2016, 12, 25)
     elif week == "53":
-        return date(2015, 1, 1) + timedelta(days=7 * (int(week) - 1)) + timedelta(days=-4)
+        return date(2016, 1, 1) + timedelta(days=7 * (int(week) - 1)) + timedelta(days=2)
     # End Christmas hack
-    return date(2015, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=-4)
+    return date(2016, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=2)
 
 
 def get_week_and_weekday_from_date(eventdate):
