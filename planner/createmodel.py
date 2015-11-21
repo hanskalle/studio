@@ -46,7 +46,7 @@ class Generator:
         model = []
         for task in tasks:
             model.extend(task.get_sets())
-        model.append('param first_week, integer, >= 1;')
+        model.append('param first_week, integer, >= 0;')
         model.append('param last_week, integer, <= 53;')
         model.append('param number_of_weeks := last_week - first_week+1;')
         model.append('set weeks := first_week .. last_week;')
@@ -111,10 +111,7 @@ class Task:
         params = ['param %(name)s_offritme_penalty, >=0;' % self.dict,
                   'param %(name)s_rather_not_penalty, >=0;' % self.dict,
                   'param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;' % self.dict,
-                  'param %(name)s_number_needed {w in weeks}, integer, >=0;' % self.dict,
-                  'param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0;' % self.dict,
-                  'param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0;' % self.dict,
-                  'param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;' % self.dict]
+                  'param %(name)s_number_needed {w in weeks}, integer, >=0;' % self.dict]
         if self.in_teams:
             params.append('param %(name)s_member {t in %(name)s_teams, p in %(name)s_persons}, binary;' % self.dict)
             params.append('param %(name)s_essential {p in %(name)s_persons}, >= 0;' % self.dict)
@@ -123,14 +120,24 @@ class Task:
             params.append(
                 'param %(name)s_prefered_pair {p1 in %(paired_task)s_persons, p2 in %(name)s_persons}, '
                 'binary;' % self.dict)
+            params.append('param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0;' % self.dict)
+            params.append('param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0;' % self.dict)
+            params.append('param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;' % self.dict)
             params.append('param %(name)s_not_prefered_pair_penalty, >=0;' % self.dict)
         else:
             params.append('param %(name)s_ritme {p in %(name)s_%(set)s}, integer, >=1;' % self.dict)
+            params.append('param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0, '
+                          'default floor(number_of_weeks / %(name)s_ritme[p]);' % self.dict)
+            params.append('param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0, '
+                          'default ceil(number_of_weeks / %(name)s_ritme[p]);' % self.dict)
+            params.append('param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0,'
+                          'default ceil(3 * (%(name)s_ritme[p] - 1) / 4);' % self.dict)
             params.append('param %(name)s_last {x in %(name)s_%(set)s}, integer, < first_week;' % self.dict)
         return params
 
     def get_vars(self):
         variables = ['var %(name)s {t in %(name)s_%(set)s, w in weeks}, binary;' % self.dict,
+                     'var %(name)s_too_early {w in weeks}, integer, >=0;' % self.dict,
                      'var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;' % self.dict]
         if self.in_teams:
             variables.append('var %(name)s_missing {p in %(name)s_persons, w in weeks}, binary;' % self.dict)
@@ -142,7 +149,8 @@ class Task:
 
     def get_objective_terms(self):
         terms = ['  + (sum {p in %(name)s_persons, w in weeks}' % self.dict,
-                 '    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])' % self.dict]
+                 '    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])' % self.dict,
+                 '  + 100 * (sum {w in weeks} %(name)s_too_early[w])' % self.dict]
         if self.in_teams:
             terms.append('  + (sum {p in %(name)s_persons, w in weeks}' % self.dict)
             terms.append('    %(name)s_essential[p] * %(name)s_missing[p,w])' % self.dict)
@@ -276,7 +284,7 @@ class Task:
             rules.append(
                 '  (sum {w2 in w1..(w1 + %(name)s_rest[x]+%(succesive_count)i-1): '
                 'w2 in weeks} %(name)s[x,w2])' % self.dict)
-            rules.append('  <= %(succesive_count)i;' % self.dict)
+            rules.append('  <= %(succesive_count)i + %(name)s_too_early[w1];' % self.dict)
         return rules
 
     def get_rule_rest_history(self, overrides):
