@@ -58,14 +58,6 @@ subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_m
     {p in Zangleiding_persons inter Muziek_teams, w in weeks}:
     Muziek[p,w] >= Zangleiding[p,w];
 
-subject to Jolanda_heeft_1_week_rust_tussen_zangleiding_en_leiding_van_groep_Rood
-    {w in first_week..(last_week-1)}:
-    Zangleiding['Jolanda',w] + Leiding_Rood['Jolanda',w+1] <= 1 + geenrustjolanda[w];
-
-subject to Jolanda_heeft_1_week_rust_tussen_leiding_van_groep_Rood_en_zangleiding
-    {w in first_week..(last_week-1)}:
-    Leiding_Rood['Jolanda',w] + Zangleiding['Jolanda',w+1] <= 1 + geenrustjolanda[w];
-
 subject to Jolanda_geen_zangleiding_tegelijkertijd_met_Wim_A_hulpkoster
     {w in weeks}:
     Zangleiding['Jolanda',w] + Hulpkoster['Wim_A',w] <= 1;
