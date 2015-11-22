@@ -172,7 +172,7 @@ param Groep_Rood_number_needed default 1;
 
 param Leiding_Rood_ritme default 4
     Nora            8
-    In_de_dienst    3;
+    In_de_dienst    2.66;
 param Leiding_Rood_offritme_penalty := 4;
 param Leiding_Rood_rather_not_penalty := 10;
 
@@ -212,7 +212,7 @@ param Groep_Wit_not_prefered_pair_penalty := 30;
 param Leiding_Wit_number_needed default 1;
 param Groep_Wit_number_needed default 1;
 
-param Leiding_Wit_ritme default 4 :=
+param Leiding_Wit_ritme default 3.5 :=
     Lianne  7;
 param Leiding_Wit_offritme_penalty := 20;
 param Leiding_Wit_rather_not_penalty := 10;
