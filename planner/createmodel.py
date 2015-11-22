@@ -71,6 +71,8 @@ class Generator:
             if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
         model.extend(self.read_from('specials.mod', 'subject to'))
+        for task in tasks:
+            model.extend(task.get_checks())
         model.append('solve;')
         for task in tasks:
             model.extend(task.get_display_lines())
@@ -125,7 +127,7 @@ class Task:
             params.append('param %(name)s_rest {p in %(name)s_%(set)s}, integer, >=0;' % self.dict)
             params.append('param %(name)s_not_prefered_pair_penalty, >=0;' % self.dict)
         else:
-            params.append('param %(name)s_ritme {p in %(name)s_%(set)s}, integer, >=1;' % self.dict)
+            params.append('param %(name)s_ritme {p in %(name)s_%(set)s}, >=1;' % self.dict)
             params.append('param %(name)s_min {p in %(name)s_%(set)s}, integer, >=0, '
                           'default floor(number_of_weeks / %(name)s_ritme[p]);' % self.dict)
             params.append('param %(name)s_max {p in %(name)s_%(set)s}, integer, >=0, '
@@ -244,7 +246,8 @@ class Task:
         if not 'ritme_%(name)s' % self.dict in overrides:
             rules.append('subject to ritme_%(name)s' % self.dict)
             rules.append('  {w1 in weeks_extended, x in %(name)s_%(set)s}:' % self.dict)
-            rules.append('  (sum {w2 in w1..(w1 + %(name)s_ritme[x]-1): w2 in weeks} %(name)s[x,w2])' % self.dict)
+            rules.append(
+                '  (sum {w2 in w1..(w1 + round(%(name)s_ritme[x])-1): w2 in weeks} %(name)s[x,w2])' % self.dict)
             rules.append('    <= %(succesive_count)i + %(name)s_offritme[x,w1];' % self.dict)
         return rules
 
@@ -253,8 +256,9 @@ class Task:
         if not 'ritme_history_%(name)s' % self.dict in overrides:
             rules.append('subject to ritme_history_%(name)s' % self.dict)
             rules.append(
-                '  {x in %(name)s_%(set)s, w1 in (first_week-%(name)s_ritme[x]+1)..%(name)s_last[x]}:' % self.dict)
-            rules.append('  (sum {w2 in w1..(w1 + %(name)s_ritme[x]-1): w2 in weeks} %(name)s[x,w2])' % self.dict)
+                '  {x in %(name)s_%(set)s, w1 in (first_week-round(%(name)s_ritme[x])+1)..%(name)s_last[x]}:' % self.dict)
+            rules.append(
+                '  (sum {w2 in w1..(w1 + round(%(name)s_ritme[x])-1): w2 in weeks} %(name)s[x,w2])' % self.dict)
             rules.append('    <= %(name)s_offritme[x,w1];' % self.dict)
         return rules
 
@@ -334,6 +338,15 @@ class Task:
                 '  {x in %(name)s_%(set)s, w in 0..(number_of_weeks/2-1): (first_week+2*w+1) in weeks}:' % self.dict)
             rules.append('  %(name)s[x,first_week+2*w] = %(name)s[x,first_week+2*w+1];' % self.dict)
         return rules
+
+    def get_checks(self):
+        checks = []
+        if self.paired_task is None:
+            checks.append('check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) >=0.999;' % self.dict)
+        if not self.in_teams:
+            checks.append(
+                'check {p in %(name)s_%(set)s}: (sum {w in weeks} %(name)s_available[p,w]) >= %(name)s_min[p];' % self.dict)
+        return checks
 
     def get_display_lines(self):
         lines = [
