@@ -7,6 +7,9 @@ import requests
 host = 'www.ichthusculemborg.nl'
 auth = ('username', 'password')
 state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
+this_year = 2016
+last_year = 2015
+first_week = 0
 
 
 def delete_assignment(uid):
@@ -57,36 +60,38 @@ def update_last_assignments():
     for event in events:
         for assignment in event['assignments']['list']:
             eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
-            week, weekday = get_week_and_weekday_from_date(eventdate)
-            # TODO: alleen vorige periode
-            if weekday == 7:  # Only sunday-tasks
-                task = assignment['task']
-                person = assignment['person']
-                if ',' in person:
-                    persons = person
-                    for person in persons.split(','):
-                        person = person.strip()
+            year, week, weekday = get_year_week_and_weekday_from_date(eventdate)
+            if year < this_year:
+                week -= 54
+            if week < first_week:
+                if (weekday == 7) or (eventdate.month == 12 and eventdate.day == 25):  # Only sunday-tasks or christmas
+                    task = assignment['task']
+                    person = assignment['person'].replace(' ', '_')
+                    if ',' in person:
+                        persons = person
+                        for person in persons.split(','):
+                            person = person.strip()
+                            add_last_assigment(last_assignments, task, person, week)
+                    else:
                         add_last_assigment(last_assignments, task, person, week)
-                else:
-                    add_last_assigment(last_assignments, task, person, week)
     availability = get_persons()
     sets = get_sets()
     f = open('last.dat', 'w')
     for task in get_tasks(availability):
         if task[:6] != 'Groep ':
             original_task = task
-            #            if task[:8] == 'Leiding ':
-            #                task = task[8:]
-            #            if task[:5] == 'Hoofd':
-            #                task = 'Koster'
-            #            if task[:4] == 'Hulp':
-            #                task = 'Koster'
-            if task in sets:
+            if task[:8] == 'Leiding ':
+                task = task[8:]
+            if task[:5] == 'Hoofd':
+                task = 'Koster'
+            if task[:4] == 'Hulp':
+                task = 'Koster'
+            if original_task in sets:
                 f.write('param ' + original_task.replace(' ', '_') + '_last default -53 :=\n')
                 if task in last_assignments:
                     for person in sorted(last_assignments[task]):
                         if person in sets[original_task]:
-                            f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person] - 54))
+                            f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
                 f.write(';\n')
     f.write('end;\n')
     f.close()
@@ -211,7 +216,7 @@ def get_date_of_sunday_of_week(week):
     return date(2016, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=2)
 
 
-def get_week_and_weekday_from_date(eventdate):
+def get_year_week_and_weekday_from_date(eventdate):
     # Christmas hack
     if eventdate == datetime(eventdate.year, 12, 25):
         return 52, 0
@@ -221,7 +226,7 @@ def get_week_and_weekday_from_date(eventdate):
     if week >= 52:
         week += 1
     # End Christmas hack
-    return week, weekday
+    return year, week, weekday
 
 
 def add_person(rooster, week, task, person):
@@ -265,11 +270,11 @@ def get_results(timlim):
 
 def write_markup(filename, rooster):
     markup_file = open(filename, 'w')
-    markup_file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^koster^opmerkingen^\n')
+    markup_file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^Gebed^koster^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
         columns = [['Zangleiding'], ['Muziek'], ['Geluid'], ['Beamer'], ['Leiding Blauw', 'Groep Blauw'],
-                   ['Leiding Wit', 'Groep Wit'], ['Leiding Rood', 'Groep Rood'], ['Koffie'], ['Welkom'],
+                   ['Leiding Wit', 'Groep Wit'], ['Leiding Rood', 'Groep Rood'], ['Koffie'], ['Welkom'], ['Gebed'],
                    ['Hoofdkoster', 'Hulpkoster']]
         markup_file.write('|week ')
         markup_file.write(week)
@@ -322,6 +327,7 @@ def write_rest(rooster):
         'Rood': ['Leiding Rood', 'Groep Rood'],
         'Koffie': ['Koffie'],
         'Welkom': ['Welkom'],
+        'Gebed': ['Gebed'],
         'Koster': ['Hoofdkoster', 'Hulpkoster']}
     existing_events = get_events()
     weeks = rooster.keys()
