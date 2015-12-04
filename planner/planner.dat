@@ -240,5 +240,10 @@ param Zangleiding_rather_not_penalty := 10;
 
 ##### MINISTRY
 
-#set Gebed_persons := Andreas Fokkelien Gert Hans_K Hans_Z Jacolien Jan Liesbeth_Z Marieke_P Marieke Monika Nora Rachel Roeland Vivianne Wenny Wim_R Xandra;
+set Gebed_persons := Andreas Fokkelien Hans_K Hans_Z Jacolien Jan Liesbeth_Z Marieke_P Marieke Monika Nora Rachel Roeland Vivianne Wenny Wim_R Xandra;
+
+param Gebed_number_needed default 2;
+param Gebed_ritme default 8;
+param Gebed_offritme_penalty := 6;
+param Gebed_rather_not_penalty := 30;
 end;
