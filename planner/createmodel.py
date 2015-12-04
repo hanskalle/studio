@@ -41,7 +41,7 @@ class Generator:
                  Task('Groep Rood', paired_task='Leiding Rood'), Task('Leiding Wit'),
                  Task('Groep Wit', paired_task='Leiding Wit'), Task('Leiding Blauw'),
                  Task('Groep Blauw', paired_task='Leiding Blauw'), Task('Koffie', True), Task('Welkom'),
-                 Task('Hoofdkoster', succesive_count=2), Task('Hulpkoster')]
+                 Task('Hoofdkoster', succesive_count=2), Task('Hulpkoster'), Task('Gebed')]
 
         model = []
         for task in tasks:
@@ -65,8 +65,7 @@ class Generator:
             model.extend(task.get_rules(overrides))
         dont_exclude = [('Beamer', 'Hulpkoster'), ('Beamer', 'Ministry'), ('Groep_Blauw', 'Welkom'),
                         ('Hulpkoster', 'Welkom'), ('Leiding_Blauw', 'Welkom'), ('Muziek', 'Zangleiding'),
-                        ('Leiding_Rood', 'Leiding_Wit')]
-        # ('Ministry', 'Welkom'),
+                        ('Leiding_Rood', 'Leiding_Wit'), ('Gebed', 'Welkom')]
         for task1, task2 in combinations(tasks, 2):
             if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
