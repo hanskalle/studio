@@ -64,9 +64,13 @@ subject to jeugddienst2:
 subject to Bas_alleen_beamer_als_in_de_dienst {w in weeks}:
     Beamer['Bas',w] <= Leiding_Rood['In_de_dienst',w];
 
-subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team
+subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team1
     {p in Zangleiding_persons inter Muziek_teams, w in weeks}:
     Muziek[p,w] >= Zangleiding[p,w];
+
+subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team2
+    {p in Zangleiding_persons inter Muziek_persons, t in Muziek_teams, w in weeks: Muziek_member[t, p]}:
+    Muziek[t,w] >= Zangleiding[p,w];
 
 subject to Jolanda_geen_zangleiding_tegelijkertijd_met_Wim_A_hulpkoster
     {w in weeks}:
@@ -112,3 +116,5 @@ subject to Nora_graag_met_haar_man {w in weeks}:
 #  Muziek['Inge',w] - Muziek_missing['Justin',w] = 0;
 
 display Muziek_too_early;
+display Muziek;
+display Zangleiding;
