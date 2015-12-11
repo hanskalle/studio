@@ -227,12 +227,14 @@ param Groep_Wit_rather_not_penalty := 10;
 
 ##### ZANGLEIDERS
 
-set Zangleiding_persons := Tim Hans_K Fokkelien Jolanda Extra1 Extra2 Extra3;
+set Zangleiding_persons := Tim Hans_K Fokkelien Jolanda Ramon Hans_Z Liesbeth_Z Wim_R;
 
 param Zangleiding_number_needed default 1;
 
-param Zangleiding_ritme default 6 :=
-    Jolanda 8;
+param Zangleiding_ritme default 8 :=
+    Fokkelien 6;
+    Hans 6;
+    Wim_R 12;
 param Zangleiding_offritme_penalty := 6;
 param Zangleiding_rather_not_penalty := 10;
 
