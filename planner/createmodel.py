@@ -37,10 +37,11 @@ class Generator:
     def model(self):
         overrides = self.read_overrides('specials.mod')
 
-        tasks = [Task('Zangleiding'), Task('Muziek', True), Task('Geluid'), Task('Beamer'), Task('Leiding Rood'),
-                 Task('Groep Rood', paired_task='Leiding Rood'), Task('Leiding Wit'),
-                 Task('Groep Wit', paired_task='Leiding Wit'), Task('Leiding Blauw'),
-                 Task('Groep Blauw', paired_task='Leiding Blauw'), Task('Koffie', True), Task('Welkom'),
+        tasks = [Task('Zangleiding'), Task('Muziek', True), Task('Geluid'), Task('Beamer'),
+                 Task('Leiding Rood'),
+                 Task('Leiding Wit'), Task('Groep Wit', paired_task='Leiding Wit'),
+                 Task('Leiding Blauw'), Task('Groep Blauw', paired_task='Leiding Blauw'),
+                 Task('Koffie', True), Task('Welkom'),
                  Task('Hoofdkoster', succesive_count=2), Task('Hulpkoster'), Task('Gebed')]
 
         model = []
@@ -65,7 +66,7 @@ class Generator:
             model.extend(task.get_rules(overrides))
         dont_exclude = [('Beamer', 'Hulpkoster'), ('Beamer', 'Ministry'), ('Groep_Blauw', 'Welkom'),
                         ('Hulpkoster', 'Welkom'), ('Leiding_Blauw', 'Welkom'), ('Muziek', 'Zangleiding'),
-                        ('Leiding_Rood', 'Leiding_Wit'), ('Gebed', 'Welkom')]
+                        ('Gebed', 'Welkom')]
         for task1, task2 in combinations(tasks, 2):
             if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
@@ -142,6 +143,7 @@ class Task:
                      'var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;' % self.dict]
         if self.in_teams:
             variables.append('var %(name)s_missing {p in %(name)s_persons, w in weeks}, binary;' % self.dict)
+            variables.append('var %(name)s_present {p in %(name)s_persons, w in weeks}, binary;' % self.dict)
         if self.paired_task is not None:
             variables.append('var %(name)s_not_prefered_pair {w in weeks}, binary;' % self.dict)
         else:
@@ -172,6 +174,7 @@ class Task:
         rules.extend(self.get_rule_rest(overrides))
         if self.in_teams:
             rules.extend(self.get_rule_missing(overrides))
+            rules.extend(self.get_rule_present(overrides))
             rules.extend(self.get_rule_maximum_missing(overrides))
         if self.paired_task is None:
             rules.extend(self.get_rule_ritme(overrides))
@@ -317,7 +320,18 @@ class Task:
             rules.append(
                 '  {w in weeks, t in %(name)s_teams, p in %(name)s_persons: '
                 '%(name)s_member[t,p]=1 and %(name)s_essential[p]>=1}:' % self.dict)
-            rules.append('  %(name)s[t,w] <= %(name)s_available[p,w] + %(name)s_missing[p,w];' % self.dict)
+            rules.append(
+                '  %(name)s[t,w] <= %(name)s_available[p,w] + 0.5 * %(name)s_rather_not[p,w] + %(name)s_missing[p,w];' % self.dict)
+        return rules
+
+    def get_rule_present(self, overrides):
+        rules = []
+        if not 'present_%(name)s' % self.dict in overrides:
+            rules.append('subject to present_%(name)s' % self.dict)
+            rules.append(
+                '  {w in weeks, p in %(name)s_persons}:' % self.dict)
+            rules.append(
+                '  (sum {t in %(name)s_teams: %(name)s_member[t,p]=1} %(name)s[t,w]) = %(name)s_present[p,w] + %(name)s_missing[p,w];' % self.dict)
         return rules
 
     def get_rule_maximum_missing(self, overrides):
@@ -349,18 +363,13 @@ class Task:
 
     def get_display_lines(self):
         lines = [
-            'display {w in weeks, %(name)s_ in %(name)s_%(set)s: %(name)s[%(name)s_,w]=1}: w, %(name)s_;' % self.dict,
-            'display {w in weeks, rather_not_ in %(name)s_persons: %(name)s_rather_not[rather_not_,w]=1}: '
-            'w, rather_not_;' % self.dict]
+            'display %(name)s;' % self.dict]
+        # 'display %(name)s_rather_not;' % self.dict]
         if self.in_teams:
-            lines.append(
-                'display {w in weeks, missing_ in %(name)s_persons: %(name)s_missing[missing_,w]=1}: '
-                'w, missing_;' % self.dict)
+            lines.append('display %(name)s_present;' % self.dict)
+            lines.append('display %(name)s_missing;' % self.dict)
         if self.paired_task is not None:
-            lines.append(
-                'display {w in weeks, not_prefered_pair_ in %(name)s_persons: '
-                '%(name)s_not_prefered_pair[w]=1 and %(name)s[not_prefered_pair_,w]=1}: '
-                'w, not_prefered_pair_;' % self.dict)
+            lines.append('display %(name)s_not_prefered_pair;' % self.dict)
         return lines
 
 
