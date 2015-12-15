@@ -35,12 +35,12 @@ ignore rest_history_Leiding_Blauw
 #ignore minimum_Muziek
 #ignore maximum_Muziek
 #ignore rest_Muziek
-ignore rest_history_Muziek
+#ignore rest_history_Muziek
 #ignore minimum_Leiding_Rood
 #ignore maximum_Leiding_Rood
 #ignore rest_Leiding_Rood
 #ignore rest_Groep_Rood
-#ignore rest_history_Leiding_Rood
+ignore rest_history_Leiding_Rood
 #ignore minimum_Welkom
 #ignore maximum_Welkom
 #ignore rest_Welkom
@@ -114,7 +114,3 @@ subject to Nora_graag_met_haar_man {w in weeks}:
 #subject to Justin_heeft_minimaal_3_weken_rust_tussen_muziekbeurten_historisch
 #  {w in (Muziek_last['Inge']+1)..(Muziek_last['Inge']+3): w in weeks}:
 #  Muziek['Inge',w] - Muziek_missing['Justin',w] = 0;
-
-display Muziek_too_early;
-display Muziek;
-display Zangleiding;
