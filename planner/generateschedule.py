@@ -183,27 +183,16 @@ def write_availability(filename, persons):
 
 
 def parse_results(filename):
+    import re
+    pattern = re.compile("(?P<task>[A-Za-z_]+)\[(?P<person>[A-Za-z_]+),(?P<week>[0-9]+)\]\.val = 1")
     rooster = {}
-    week = 0
     for line in open(filename):
-        if 'w = ' in line:
-            week = line.strip()[4:]
-            add_week(rooster, week)
-        elif ' = ' in line:
-            fields = line.strip().split(' = ')
-            task = fields[0][0:-1].replace('_', ' ')
-            person = fields[1].replace('_', ' ')
-            add_person(rooster, week, task, person)
+        if line[-9:-1] == ".val = 1":
+            match = pattern.match(line)
+            if match:
+                values = pattern.match(line).groupdict()
+                add_person(rooster, values["week"], values["task"], values["person"])
     return rooster
-
-
-def add_week(rooster, week):
-    if week not in rooster:
-        rooster[week] = {}
-        rooster[week]['datum'] = get_date_of_sunday_of_week(week)
-        rooster[week]['missing'] = []
-        rooster[week]['rather not'] = []
-        rooster[week]['not prefered pair'] = []
 
 
 def get_date_of_sunday_of_week(week):
@@ -230,8 +219,16 @@ def get_year_week_and_weekday_from_date(eventdate):
 
 
 def add_person(rooster, week, task, person):
+    if week not in rooster:
+        rooster[week] = {}
+        rooster[week]['datum'] = get_date_of_sunday_of_week(week)
+        rooster[week]['missing'] = []
+        rooster[week]['rather not'] = []
+        rooster[week]['not prefered pair'] = []
+    task = task.replace('_', ' ')
     if task not in rooster[week]:
         rooster[week][task] = []
+    person = person.replace('_', ' ')
     rooster[week][task].append(person)
 
 
@@ -273,8 +270,8 @@ def write_markup(filename, rooster):
     markup_file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^Gebed^koster^opmerkingen^\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
-        columns = [['Zangleiding'], ['Muziek'], ['Geluid'], ['Beamer'], ['Leiding Blauw', 'Groep Blauw'],
-                   ['Leiding Wit', 'Groep Wit'], ['Leiding Rood', 'Groep Rood'], ['Koffie'], ['Welkom'], ['Gebed'],
+        columns = [['Zangleiding'], ['Muziek present'], ['Geluid'], ['Beamer'], ['Leiding Blauw', 'Groep Blauw'],
+                   ['Leiding Wit', 'Groep Wit'], ['Leiding Rood'], ['Koffie present'], ['Welkom'], ['Gebed'],
                    ['Hoofdkoster', 'Hulpkoster']]
         markup_file.write('|week ')
         markup_file.write(week)
@@ -286,7 +283,7 @@ def write_markup(filename, rooster):
             for task in column:
                 if task in rooster[week]:
                     names.extend(rooster[week][task])
-            width = 10 * len(column)
+            width = 20 * len(column)
             markup_file.write(("{:<" + str(width) + "s}").format(", ".join(names)))
             markup_file.write('|')
         remarks = []
@@ -319,13 +316,13 @@ def find_event(events, eventdate, eventtime):
 def write_rest(rooster):
     columns = {
         'Zangleiding': ['Zangleiding'],
-        'Muziek': ['Muziek'],
+        'Muziek': ['Muziek present'],
         'Geluid': ['Geluid'],
         'Beamer': ['Beamer'],
         'Blauw': ['Leiding Blauw', 'Groep Blauw'],
         'Wit': ['Leiding Wit', 'Groep Wit'],
-        'Rood': ['Leiding Rood', 'Groep Rood'],
-        'Koffie': ['Koffie'],
+        'Rood': ['Leiding Rood'],
+        'Koffie': ['Koffie present'],
         'Welkom': ['Welkom'],
         'Gebed': ['Gebed'],
         'Koster': ['Hoofdkoster', 'Hulpkoster']}
