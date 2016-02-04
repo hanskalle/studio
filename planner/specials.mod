@@ -58,6 +58,12 @@ ignore rest_history_Leiding_Rood
 subject to jeugddienst1:
     Zangleiding['Jolanda',5] = 1;
 
+subject to eerstedienst:
+    Zangleiding['Wim_R',0] = 1;
+
+subject to paasdienst:
+    Zangleiding['Jolanda',12] = 1;
+
 subject to jeugddienst2:
     Leiding_Rood['In_de_dienst',5] = 1;
 
@@ -106,11 +112,3 @@ subject to Liesbeth_graag_met_haar_man {w in weeks}:
 
 subject to Nora_graag_met_haar_man {w in weeks}:
     Gebed['Nora',w] = Gebed['Wim_R',w];
-
-#subject to Justin_heeft_minimaal_3_weken_rust_tussen_muziekbeurten
-#  {w1 in weeks}:
-#  (sum {w2 in w1..(w1+3): w2 in weeks} (Muziek['Inge',w2] - Muziek_missing['Justin',w2])) <= 1;
-
-#subject to Justin_heeft_minimaal_3_weken_rust_tussen_muziekbeurten_historisch
-#  {w in (Muziek_last['Inge']+1)..(Muziek_last['Inge']+3): w in weeks}:
-#  Muziek['Inge',w] - Muziek_missing['Justin',w] = 0;

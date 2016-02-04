@@ -74,7 +74,7 @@ param Hulpkoster_rather_not_penalty := 10;
 ##### KOFFIE
 
 set Koffie_persons := Emma Lilian Ailine Jacolien Miranda Lydia Emmely Mieke Ton
-    Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M;
+    Marieke Rinus Monika Nora Wim_R Dieuwke Hans_M Cafe_Roule;
 set Koffie_teams := Casson Jacolien Lydia Vermeulen Pigmans Rosier Mertens;
 
 param Koffie_member default 0 (tr) :
@@ -100,7 +100,9 @@ Hans_M      .       .           .       .           .       .       1
 param Koffie_essential default 0;
 param Koffie_maximum_missing default 1;
 
-param Koffie_number_needed default 1;
+param Koffie_number_needed default 1 :=
+    2   0
+    11  0;
 
 param Koffie_ritme default 7;
 param Koffie_offritme_penalty := 3;
@@ -111,7 +113,7 @@ param Koffie_rather_not_penalty := 10;
 ##### MUZIEK
 
 set Muziek_persons := Tim Johan Rosalie Inge Joshua Justin Xandra Peter
-    Jonathan Wendy Selicia Vena Hans_Z; #Andreas
+    Jonathan Wendy Selicia Vena Hans_Z;
 set Muziek_teams := Tim Inge Peter Johan;
 
 param Muziek_member default 0 (tr) :
@@ -119,13 +121,13 @@ param Muziek_member default 0 (tr) :
 Tim         .       .       .       1
 Johan       .       .       1       .
 Rosalie     .       1       .       1
-#Andreas    .       .       .       .
 Hans_Z      .       .       1       .
 Vena        .       .       .       1
 Inge        1       .       .       .
 Joshua      1       .       .       .
 Justin      1       .       .       .
 Xandra      1       .       .       .
+Selicia     1       .       .       .
 Peter       .       1       .       .
 Jonathan    .       1       .       .
 Wendy       .       1       .       .
@@ -133,16 +135,17 @@ Wendy       .       1       .       .
 
 #0 is onmisbaar, verder hoe hoger hoe slechter misbaar
 param Muziek_essential default 0 :=
-    Wendy   5
-    Vena    5
-#   Andreas 5
-    Rosalie 10
-    Inge    15
-    Xandra  10
-    Justin  15;
+    Wendy    5
+    Vena     5
+    Selicia  5
+    Rosalie  10
+    Inge     15
+    Xandra   10
+    Justin   15;
 param Muziek_maximum_missing default 15;
 
-param Muziek_number_needed default 1;
+param Muziek_number_needed default 1
+    5 0;
 
 param Muziek_ritme default 4;
 param Muziek_offritme_penalty 8;
@@ -196,9 +199,9 @@ param Leiding_Wit_number_needed default 1;
 param Groep_Wit_number_needed default 1;
 
 param Leiding_Wit_ritme default 4.5 :=
-    Lianne  8;
+    Lianne  6;
 param Leiding_Wit_offritme_penalty := 20;
-param Leiding_Wit_rather_not_penalty := 10;
+param Leiding_Wit_rather_not_penalty := 20;
 
 param Groep_Wit_min default 3;
 param Groep_Wit_max default 4 :=
