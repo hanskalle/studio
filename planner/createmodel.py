@@ -159,6 +159,7 @@ class Task:
                      'var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;' % self.dict]
         if self.in_teams:
             variables.append('var %(name)s_missing {p in %(name)s_persons, w in weeks}, binary;' % self.dict)
+            variables.append('var %(name)s_present {p in %(name)s_persons, w in weeks}, binary;' % self.dict)
         if self.paired_task is not None:
             variables.append('var %(name)s_not_prefered_pair {w in weeks}, binary;' % self.dict)
         else:
@@ -190,6 +191,7 @@ class Task:
         rules.extend(self.get_rule_rest(overrides))
         if self.in_teams:
             rules.extend(self.get_rule_missing(overrides))
+            rules.extend(self.get_rule_present(overrides))
         if self.paired_task is None:
             rules.extend(self.get_rule_ritme(overrides))
             rules.extend(self.get_rule_ritme_history(overrides))
@@ -329,6 +331,16 @@ class Task:
             rules.append('  %(name)s[l,w] <= %(name)s_available[p,w] + %(name)s_missing[p,w];' % self.dict)
         return rules
 
+     def get_rule_present(self, overrides):
+        rules = []
+        if not self.matches_one_of('present_%(name)s' % self.dict, overrides):
+            rules.append('subject to present_%(name)s' % self.dict)
+            rules.append(
+                '  {w in weeks, p in %(name)s_persons}:' % self.dict)
+            rules.append(
+                '  (sum {t in %(name)s_teams: %(name)s_member[t,p]=1} %(name)s[t,w]) = %(name)s_present[p,w] + %(name)s_missing[p,w];' % self.dict)
+        return rules
+    
     def get_rule_twice(self, overrides):
         rules = []
         if not self.matches_one_of('twice_%(name)s' % self.dict, overrides):
@@ -359,6 +371,7 @@ class Task:
             lines.append(
                 'display {w in weeks, missing_ in %(name)s_persons: %(name)s_missing[missing_,w]=1}: '
                 'w, missing_;' % self.dict)
+            lines.append('display %(name)s_present;' % self.dict)
         if self.paired_task is not None:
             lines.append(
                 'display {w in weeks, not_prefered_pair_ in %(name)s_persons: '

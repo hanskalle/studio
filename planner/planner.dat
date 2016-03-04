@@ -1,4 +1,10 @@
 ##### BEAMER
+
+set Beamer_persons := Esther Jeroen Danny Bas;
+    #Bas als in dienst
+    #Esther
+    #David vraagt Albert nog
+
 param Beamer_number_needed default 1;
 param Beamer_offritme_penalty := 3;
 param Beamer_rather_not_penalty := 10;
