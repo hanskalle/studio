@@ -8,6 +8,7 @@ def get_uid(size=32, chars=string.digits + "ABCDEF"):
 
 
 def post_availability(uid, name, task, week, state):
+    print uid, name, task, week, state
     import httplib
     import urllib
     conn = httplib.HTTPConnection("ichthusculemborg.nl")
@@ -81,21 +82,17 @@ def exists(availability, name, task):
     return False
 
 
-def get_sets():
+def get_sets(password):
+    import requests
+    import json
+    r = requests.get("http://www.ichthusculemborg.nl/services/commitments",auth=('hans.kalle@telfort.nl', password))
+    assert r.status_code == 200
+    commitments = json.loads(r.text)
     sets = {}
-    complete_line = ''
-    for line in open('planner.dat', 'r'):
-        if '#' in line:
-            line = line[0:line.find('#')]
-        complete_line = complete_line + ' ' + line
-        complete_line = complete_line.strip()
-        if len(complete_line) > 0:
-            if complete_line[-1] == ';':
-                if complete_line[0:3] == 'set':
-                    words = complete_line[4:-1].split()
-                    if words[0][-8:] == '_persons':
-                        sets[words[0][0:-8]] = words[2:]
-                complete_line = ''
+    for commitment in commitments:
+        if not commitment['task'] in sets:
+            sets[commitment['task']] = []
+        sets[commitment['task']].append(commitment['person'])
     return sets
 
 
@@ -139,7 +136,7 @@ if __name__ == "__main__":
         uid = person["uid"]
         if name not in uid_from_name:
             uid_from_name[name] = uid
-    sets = get_sets()
+    sets = get_sets(password)
     for setname in sets:
         for name in sets[setname]:
             if name not in uid_from_name:
