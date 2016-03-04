@@ -174,8 +174,9 @@ def write_availability(filename, persons):
             availability_file.write(':=\n')
             for person in sorted(persons):
                 availability = get_availability(person, task)
-                name = person['name'].replace(' ', '_')
+                name = person['name']
                 if name in sets[task]:
+                    name = name.replace(' ', '_')
                     if availability is not None:
                         availability_file.write(name)
                         for available in availability:
@@ -295,35 +296,34 @@ def get_results(timlim):
 
 def write_markup(filename, rooster):
     markup_file = open(filename, 'w')
-    markup_file.write('^week^datum^leiding^team^geluid^beamer^blauw^wit^rood^koffie^welkom^Gebed^koster^opmerkingen^\n')
+    markup_file.write('week,datum,leiding,team,geluid,beamer,blauw,wit,rood,koffie,welkom,Gebed,koster,opmerkingen\n')
     weeks = rooster.keys()
     for week in sorted(weeks):
         columns = [['Zangleiding'], ['Muziek present'], ['Geluid'], ['Beamer'], ['Leiding Blauw', 'Groep Blauw'],
                    ['Leiding Wit', 'Groep Wit'], ['Leiding Rood'], ['Koffie present'], ['Welkom'], ['Gebed'],
                    ['Hoofdkoster', 'Hulpkoster']]
-        markup_file.write('|week ')
+        markup_file.write('week ')
         markup_file.write(week)
-        markup_file.write('|')
-        markup_file.write(rooster[week]['datum'].strftime('%d %b'))
-        markup_file.write('|')
+        markup_file.write(',')
+        markup_file.write(rooster[week]['datum'].strftime('%d-%M-%Y'))
+        markup_file.write(',')
         for column in columns:
             names = []
             for task in column:
                 if task in rooster[week]:
                     names.extend(rooster[week][task])
-            width = 20 * len(column)
-            markup_file.write(("{:<" + str(width) + "s}").format(", ".join(names)))
-            markup_file.write('|')
+            markup_file.write("+".join(names))
+            markup_file.write(',')
         remarks = []
         if len(rooster[week]['missing']) > 0:
-            remarks.append(', '.join(rooster[week]['missing']) + ' mist')
+            remarks.append('|'.join(rooster[week]['missing']) + ' mist')
         if len(rooster[week]['rather not']) > 0:
-            remarks.append(', '.join(rooster[week]['rather not']) + ' liever niet')
+            remarks.append('|'.join(rooster[week]['rather not']) + ' liever niet')
         if len(rooster[week]['not prefered pair']):
-            remarks.append(', '.join(rooster[week]['not prefered pair']) + ' afwijkend paar')
+            remarks.append('|'.join(rooster[week]['not prefered pair']) + ' afwijkend paar')
         if len(remarks) > 0:
-            markup_file.write(','.join(remarks))
-        markup_file.write(' |\n')
+            markup_file.write('|'.join(remarks))
+        markup_file.write('\n')
     markup_file.close()
     show_file(filename)
 
