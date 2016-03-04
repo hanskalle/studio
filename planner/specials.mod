@@ -1,16 +1,38 @@
 var wijngaardenbreuk {weeks}, binary;
 var matthijszonderlianne, binary;
 var liannezondermatthijs, binary;
-set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan'};
+set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};
 
 
-+ (sum {w in weeks} 8 * wijngaardenbreuk[w])
++ 8 * (sum {w in weeks} wijngaardenbreuk[w])
 + 10 * matthijszonderlianne
 + 20 * liannezondermatthijs
-+ (sum {w in weeks} 8 * geenrustjolanda[w])
 
 
-#ignore minimum_.*
+ignore minimum_Hulpkoster
+ignore minimum_Leiding_Wit
+ignore minimum_Groep_Wit
+ignore minimum_Leiding_Rood
+ignore minimum_.*
+ignore rest_.*
+
+
+subject to Wenny1: Gebed['Wenny',13] = 1;
+subject to Wenny2: Welkom['Wenny',13] = 1;
+subject to Wenny3: Leiding_Blauw['Wenny',14] = 1;
+subject to Wenny4: Gebed['Wenny',17] = 1;
+subject to Wenny5: Welkom['Wenny',17] = 1;
+subject to Wenny6: Leiding_Blauw['Wenny',18] = 1;
+subject to Wenny7: Gebed['Wenny',19] = 1;
+subject to Wenny8: Welkom['Wenny',19] = 1;
+
+
+#subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;
+#subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;
+
+
+subject to jeugddienst1: Zangleiding['Jolanda',22] = 1;
+subject to jeugddienst2: Leiding_Rood['In_de_dienst',22] = 1;
 
 
 subject to Bas_tot_vakantie_alleen_beamer_als_Rood_in_de_dienst {w in weeks: w < 27}:
