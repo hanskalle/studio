@@ -86,7 +86,7 @@ def update_last_assignments():
                 if task in last_assignments:
                     for person in sorted(last_assignments[task]):
                         if person in sets[original_task]:
-                            f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person] - 54))
+                            f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
                 f.write(';\n')
     f.write('end;\n')
     f.close()
@@ -101,6 +101,11 @@ def add_last_assigment(last_assignments, task, person, week):
 def update_availability():
     persons = get_persons()
     write_availability('availability.dat', persons)
+
+
+def update_commitments():
+    commitments = get_commitments()
+    write_commitments('commitments.dat', commitments)
 
 
 def get_persons():
@@ -177,6 +182,29 @@ def write_availability(filename, persons):
     availability_file.close()
 
 
+def write_commitments(filename, commitments):
+    commitments_file = open(filename, 'w')
+    tasks = set([commitment['task'] for commitment in commitments])
+    for task in tasks:
+        commitments_file.write('set %s_persons := ' % task.replace(' ', '_'))
+        for commitment in commitments:
+            if commitment['task'] == task:
+                commitments_file.write(commitment['person'].replace(' ', '_'))
+                commitments_file.write(' ')
+        commitments_file.write(';\n')
+        commitments_file.write('param %s_ritme := \n' % task.replace(' ', '_'))
+        for commitment in commitments:
+            if commitment['task'] == task:
+                commitments_file.write('\t')
+                commitments_file.write(commitment['person'].replace(' ', '_'))
+                commitments_file.write(' ')
+                commitments_file.write(commitment['frequency'])
+                commitments_file.write('\n')
+        commitments_file.write(';\n')
+    commitments_file.write('end;\n')
+    commitments_file.close()
+
+
 def parse_results(filename):
     rooster = {}
     week = 0
@@ -230,21 +258,20 @@ def add_person(rooster, week, task, person):
     rooster[week][task].append(person)
 
 
+def get_commitments():
+    import requests
+    import json
+    r = requests.get("http://www.ichthusculemborg.nl/services/commitments",auth=auth)
+    assert r.status_code == 200
+    return json.loads(r.text)
+
+
 def get_sets():
     sets = {}
-    complete_line = ''
-    for line in open('planner.dat', 'r'):
-        if '#' in line:
-            line = line[0:line.find('#')]
-        complete_line = complete_line + ' ' + line
-        complete_line = complete_line.strip()
-        if len(complete_line) > 0:
-            if complete_line[-1] == ';':
-                if complete_line[0:3] == 'set':
-                    words = complete_line[4:-1].split()
-                    if words[0][-8:] == '_persons':
-                        sets[words[0][0:-8].replace('_', ' ')] = words[2:]
-                complete_line = ''
+    for commitment in get_commitments():
+        if not commitment['task'] in sets:
+            sets[commitment['task']] = []
+        sets[commitment['task']].append(commitment['person'])
     return sets
 
 
@@ -257,6 +284,7 @@ def get_results(timlim):
          '--tmlim', timlim,
          '--model', 'gen.mod',
          '--data', 'planner.dat',
+         '--data', 'commitments.dat',
          '--data', 'last.dat',
          '--data', 'availability.dat',
          '-y', 'results.txt'])
@@ -354,8 +382,9 @@ def write_rest(rooster):
 
 
 def show_help():
-    print sys.argv[0], ' [-alp] [-o <filename>] [-h <hostname>] [-t <time-limit>]'
+    print sys.argv[0], ' [-aclp] [-o <filename>] [-h <hostname>] [-t <time-limit>]'
     print '\t-a\tGet availability from service.'
+    print '\t-c\tGet commitments from service.'
     print '\t-l\tGet last assignments from service.'
     print '\t-p\tPublish schedule on service.'
     print '\t-o\tWrite output to this file. Default rooster.txt.'
@@ -371,10 +400,11 @@ if __name__ == "__main__":
     time_limit = "300"
     do_get_availability = False
     do_get_last_assignments = False
+    do_get_commitments = False
     do_publish = False
     output_filename = 'rooster.txt'
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "ahlo:ps:t:")
+        opts, args = getopt.getopt(sys.argv[1:], "achlo:ps:t:")
     except getopt.GetoptError:
         print "Incorrect arguments."
         show_help()
@@ -382,6 +412,8 @@ if __name__ == "__main__":
     for opt, arg in opts:
         if opt == "-a":
             do_get_availability = True
+        elif opt == "-c":
+            do_get_commitments = True
         elif opt == '-h':
             show_help()
             sys.exit()
@@ -395,7 +427,7 @@ if __name__ == "__main__":
             host = arg
         elif opt == "-t":
             time_limit = arg
-    if do_get_availability or do_publish or do_get_last_assignments:
+    if do_get_availability or do_publish or do_get_last_assignments or do_get_commitments:
         auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     if do_get_last_assignments:
         update_last_assignments()
@@ -403,6 +435,9 @@ if __name__ == "__main__":
     if do_get_availability:
         update_availability()
         print 'Beschikbaarheid opgehaald.'
+    if do_get_commitments:
+        update_commitments()
+        print 'Inzet opgehaald.'
     new_rooster = get_results(time_limit)
     write_markup(output_filename, new_rooster)
     if do_publish:
