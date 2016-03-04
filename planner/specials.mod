@@ -43,24 +43,15 @@ subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt
 subject to Roel_hulpkoster_met_hoofdkoster_Herman
     {w in weeks}:
     Hulpkoster['Roel',w] <= Hoofdkoster['Herman',w];
+
 subject to Rachel_geen_gebed_met_man {w in weeks}:
     Gebed['Rachel',w] <= 1 - (sum {p in gebedsmannen} Gebed[p,w]);
 
-subject to Rachel_niet_als_Tim_een_taak_heeft {w in weeks}:
+subject to Rachel_geen_gebed_als_Tim_een_taak_heeft {w in weeks}:
     Gebed['Rachel',w] <= 1 - Muziek['Tim',w] - Leiding_Rood['Tim',w];
 
 subject to Geen_mannen_samen_gebed {w in weeks}:
     (sum {p in gebedsmannen} Gebed[p,w]) <= 1;
-
-subject to Liesbeth_graag_met_haar_man {w in weeks}:
-    Gebed['Liesbeth_Z',w] = Gebed['Hans_Z',w];
-
-subject to Nora_graag_met_haar_man {w in weeks}:
-    Gebed['Nora',w] = Gebed['Wim_R',w];
-
-#subject to Justin_heeft_minimaal_3_weken_rust_tussen_muziekbeurten
-#  {w1 in weeks}:
-#  (sum {w2 in w1..(w1+3): w2 in weeks} (Muziek['Inge',w2] - Muziek_missing['Justin',w2])) <= 1;
 
 subject to Nora_gebed_met_Wim_R
     {w in weeks}:
