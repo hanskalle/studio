@@ -284,6 +284,7 @@ def get_results(timlim):
     createmodel.Generator().write_model('gen.mod')
     subprocess.check_call(
         ['glpsol',
+         '--cuts',
          '--tmlim', timlim,
          '--model', 'gen.mod',
          '--data', 'planner.dat',
@@ -305,7 +306,7 @@ def write_markup(filename, rooster):
         markup_file.write('week ')
         markup_file.write(week)
         markup_file.write(',')
-        markup_file.write(rooster[week]['datum'].strftime('%d-%M-%Y'))
+        markup_file.write(rooster[week]['datum'].strftime('%d-%m-%Y'))
         markup_file.write(',')
         for column in columns:
             names = []
