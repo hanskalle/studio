@@ -116,44 +116,44 @@ class Task:
         return sets
 
     def get_params(self):
-        params = ['param %(name)s_offritme_penalty, >=0, default 5;' % self.dict,
+        params = ['param %(name)s_offritme_penalty, >=0, default 100;' % self.dict,
                   'param %(name)s_rather_not_penalty, >=0, default 20;' % self.dict,
-                  'param %(name)s_too_early_penalty, >=0, default 100;' % self.dict,
+                  #                  'param %(name)s_too_early_penalty, >=0, default 100;' % self.dict,
                   'param %(name)s_available {p in %(name)s_persons, w in weeks}, >=0, <=1;' % self.dict,
                   'param %(name)s_number_needed {w in weeks}, integer, >=0;' % self.dict]
         if self.in_teams:
             params.append('set %(name)s_leaders;' % self.dict)
             params.append('set %(name)s_team {l in %(name)s_leaders};' % self.dict)
             params.append('param %(name)s_essential {p in %(name)s_persons}, >= 0;' % self.dict)
-            params.append('param %(name)s_team_available {l in %(name)s_leaders, w in weeks} := ' % self.dict)
+            params.append('param %(name)s_team_available {l in %(name)s_leaders, w in weeks} := '
+                          '  (min {p in %(name)s_team[l]: %(name)s_essential[p]=0} %(name)s_available[p,w]);' % self.dict)
+        params.append('param %(name)s_ritme {p in %(name)s_persons}, >=1;' % self.dict)
+        if self.in_teams:
             params.append(
-                '  (min {p in %(name)s_team[l]: %(name)s_essential[p]=0} %(name)s_available[p,w]);' % self.dict)
+                'param %(name)s_ritme_factor := (sum {p in %(name)s_leaders} 1 / %(name)s_ritme[p]);' % self.dict)
+        else:
+            params.append(
+                'param %(name)s_ritme_factor := (sum {p in %(name)s_persons} 1 / %(name)s_ritme[p]);' % self.dict)
+        params.append('param %(name)s_needed_total := (sum {w in weeks} %(name)s_number_needed[w]);' % self.dict)
+        params.append('param %(name)s_min {p in %(name)s_persons}, integer, >=0, '
+                      'default floor(%(name)s_needed_total / %(name)s_ritme_factor / %(name)s_ritme[p] - 0.5);' % self.dict)
+        params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
+                      'default ceil(%(name)s_needed_total / %(name)s_ritme_factor / %(name)s_ritme[p]);' % self.dict)
         if self.paired_task is not None:
-            params.append(
-                'param %(name)s_prefered_pair {p1 in %(paired_task)s_persons, p2 in %(name)s_persons}, '
-                'binary;' % self.dict)
-            params.append('param %(name)s_ritme {p in %(name)s_persons}, >=1;' % self.dict)
-            params.append('param %(name)s_min {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * floor(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
-            params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * ceil(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
-            params.append('param %(name)s_rest {p in %(name)s_persons}, integer, >=0,'
-                          'default %(succesive_count)d * ceil(3 * (%(name)s_ritme[p] - 1) / 4);' % self.dict)
+            params.append('param %(name)s_prefered_pair {p1 in %(paired_task)s_persons, p2 in %(name)s_persons}, '
+                          'binary;' % self.dict)
+            #            params.append('param %(name)s_rest {p in %(name)s_persons}, integer, >=0,'
+            #                          'default %(succesive_count)d * ceil(3 * (%(name)s_ritme[p] - 1) / 4);' % self.dict)
             params.append('param %(name)s_not_prefered_pair_penalty, >=0, default 30;' % self.dict)
         else:
-            params.append('param %(name)s_ritme {p in %(name)s_persons}, >=1;' % self.dict)
-            params.append('param %(name)s_min {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * floor(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
-            params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * ceil(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
-            params.append('param %(name)s_rest {p in %(name)s_persons}, integer, >=0,'
-                          'default %(succesive_count)d * ceil(3 * (%(name)s_ritme[p] - 1) / 4);' % self.dict)
+            #            params.append('param %(name)s_rest {p in %(name)s_persons}, integer, >=0,'
+            #                          'default %(succesive_count)d * ceil(3 * (%(name)s_ritme[p] - 1) / 4);' % self.dict)
             params.append('param %(name)s_last {x in %(name)s_persons}, integer, < first_week;' % self.dict)
         return params
 
     def get_vars(self):
         variables = ['var %(name)s {t in %(name)s_%(set)s, w in weeks}, binary;' % self.dict,
-                     'var %(name)s_too_early {w in weeks}, integer, >=0;' % self.dict,
+                     #                     'var %(name)s_too_early {w in weeks}, integer, >=0;' % self.dict,
                      #                     'var %(name)s_empty {w in weeks}, integer, >=0;' % self.dict,
                      'var %(name)s_rather_not {p in %(name)s_persons, w in weeks}, binary;' % self.dict]
         if self.in_teams:
@@ -162,14 +162,15 @@ class Task:
         if self.paired_task is not None:
             variables.append('var %(name)s_not_prefered_pair {w in weeks}, binary;' % self.dict)
         else:
-            variables.append('var %(name)s_offritme {t in %(name)s_%(set)s, w in weeks_extended}, binary;' % self.dict)
+            variables.append(
+                'var %(name)s_offritme {t in %(name)s_%(set)s, w in weeks_extended}, integer, >=0;' % self.dict)
         return variables
 
     def get_objective_terms(self):
         terms = ['  + (sum {p in %(name)s_persons, w in weeks}' % self.dict,
-                 '    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])' % self.dict,
+                 '    %(name)s_rather_not_penalty * %(name)s_rather_not[p,w])' % self.dict]
                  #                 '  + 1000 * (sum {w in weeks} %(name)s_empty[w])' % self.dict,
-                 '  + %(name)s_too_early_penalty * (sum {w in weeks} %(name)s_too_early[w])' % self.dict]
+        #                 '  + %(name)s_too_early_penalty * (sum {w in weeks} %(name)s_too_early[w])' % self.dict]
         if self.in_teams:
             terms.append('  + (sum {p in %(name)s_persons, w in weeks}' % self.dict)
             terms.append('    %(name)s_essential[p] * %(name)s_missing[p,w])' % self.dict)
@@ -187,14 +188,12 @@ class Task:
         rules.extend(self.get_rule_available(overrides))
         rules.extend(self.get_rule_minimum(overrides))
         rules.extend(self.get_rule_maximum(overrides))
-        rules.extend(self.get_rule_rest(overrides))
         if self.in_teams:
             rules.extend(self.get_rule_missing(overrides))
             rules.extend(self.get_rule_present(overrides))
         if self.paired_task is None:
             rules.extend(self.get_rule_ritme(overrides))
             rules.extend(self.get_rule_ritme_history(overrides))
-            rules.extend(self.get_rule_rest_history(overrides))
         else:
             rules.extend(self.get_rule_prefered_pair(overrides))
         if self.succesive_count == 2:
@@ -257,22 +256,33 @@ class Task:
     def get_rule_ritme(self, overrides):
         rules = []
         if not self.matches_one_of('ritme_%(name)s' % self.dict, overrides):
-            rules.append('subject to ritme_%(name)s' % self.dict)
-            rules.append('  {w1 in weeks_extended, p in %(name)s_%(set)s}:' % self.dict)
-            rules.append(
-                '  (sum {w2 in w1..(w1 + round(%(name)s_ritme[p])-1): w2 in weeks} %(name)s[p,w2])' % self.dict)
-            rules.append('    <= %(succesive_count)i + %(name)s_offritme[p,w1];' % self.dict)
+            rules.append('subject to ritme_%(name)s_1'
+                         '  {w0 in weeks, p in %(name)s_%(set)s, d in 1..(floor(%(name)s_ritme[p]-1)): (w0+d) in weeks}:'
+                         '  %(name)s_offritme[p,w0]'
+                         '  >= floor(%(name)s_ritme[p]) - d'
+                         '    - 1000 * (1-%(name)s[p,w0])'
+                         '    - 1000 * (1-%(name)s[p,w0+d]);' % self.dict)
+        #            rules.append('subject to ritme_%(name)s_2'
+        #                         '  {w0 in weeks, p in %(name)s_%(set)s, d in 1..(floor(%(name)s_ritme[p]/2)): (w0+d) in weeks}:'
+        #                         '  %(name)s_offritme[p,w0]'
+        #                         '  >= 2 * floor(%(name)s_ritme[p]) - d'
+        #                         '    - 1000 * (1-%(name)s[p,w0])'
+        #                         '    - 1000 * (1-%(name)s[p,w0+d]);' % self.dict)
         return rules
 
     def get_rule_ritme_history(self, overrides):
         rules = []
         if not self.matches_one_of('ritme_history_%(name)s' % self.dict, overrides):
-            rules.append('subject to ritme_history_%(name)s' % self.dict)
-            rules.append(
-                '  {p in %(name)s_%(set)s, w1 in (first_week-round(%(name)s_ritme[p])+1)..%(name)s_last[p]}:' % self.dict)
-            rules.append(
-                '  (sum {w2 in w1..(w1 + round(%(name)s_ritme[p])-1): w2 in weeks} %(name)s[p,w2])' % self.dict)
-            rules.append('    <= %(name)s_offritme[p,w1];' % self.dict)
+            rules.append('subject to ritme_history_%(name)s_1'
+                         '  {p in %(name)s_%(set)s, w0 in %(name)s_last[p]..%(name)s_last[p], d in 1..(floor(%(name)s_ritme[p]-1)): (w0+d) in weeks}:'
+                         '  %(name)s_offritme[p,w0]'
+                         '  >= floor(%(name)s_ritme[p]) - d'
+                         '    - 1000 * (1-%(name)s[p,w0+d]);' % self.dict)
+            #           rules.append('subject to ritme_history_%(name)s_2'
+            #                        '  {p in %(name)s_%(set)s, w0 in %(name)s_last[p]..%(name)s_last[p], d in 1..(floor(%(name)s_ritme[p]/2)): (w0+d) in weeks}:'
+            #                        '  %(name)s_offritme[p,w0]'
+            #                        '  >= 2 * floor(%(name)s_ritme[p]) - d'
+            #                        '    - 1000 * (1-%(name)s[p,w0+d]);' % self.dict)
         return rules
 
     def get_rule_minimum(self, overrides):
@@ -293,24 +303,25 @@ class Task:
             rules.append('    <= %(name)s_max[p];' % self.dict)
         return rules
 
-    def get_rule_rest(self, overrides):
-        rules = []
-        if not self.matches_one_of('rest_%(name)s' % self.dict, overrides):
-            rules.append('subject to rest_%(name)s' % self.dict)
-            rules.append('  {p in %(name)s_%(set)s, w1 in weeks}:' % self.dict)
-            rules.append('  (sum {w2 in w1..(w1 + %(name)s_rest[p]+%(succesive_count)i-1): '
-                         'w2 in weeks} %(name)s[p,w2])' % self.dict)
-            rules.append('    <= %(succesive_count)i + %(name)s_too_early[w1];' % self.dict)
-        return rules
+    #    def get_rule_rest(self, overrides):
+    #        rules = []
+    #        return rules
+    #        if not self.matches_one_of('rest_%(name)s' % self.dict, overrides):
+    #            rules.append('subject to rest_%(name)s' % self.dict)
+    #            rules.append('  {p in %(name)s_%(set)s, w1 in weeks}:' % self.dict)
+    #            rules.append('  (sum {w2 in w1..(w1 + %(name)s_rest[p]+%(succesive_count)i-1): '
+    #                         'w2 in weeks} %(name)s[p,w2])' % self.dict)
+    #            rules.append('    <= %(succesive_count)i + %(name)s_too_early[w1];' % self.dict)
+    #        return rules
 
-    def get_rule_rest_history(self, overrides):
-        rules = []
-        if not self.matches_one_of('rest_history_%(name)s' % self.dict, overrides):
-            rules.append('subject to rest_history_%(name)s' % self.dict)
-            rules.append('  {p in %(name)s_%(set)s, w in (%(name)s_last[p]+1)..(%(name)s_last[p]+%(name)s_rest[p]): '
-                         'w in weeks}:' % self.dict)
-            rules.append('  %(name)s[p,w] == 0;' % self.dict)
-        return rules
+    #    def get_rule_rest_history(self, overrides):
+    #        rules = []
+    #        if not self.matches_one_of('rest_history_%(name)s' % self.dict, overrides):
+    #            rules.append('subject to rest_history_%(name)s' % self.dict)
+    #            rules.append('  {p in %(name)s_%(set)s, w in (%(name)s_last[p]+1)..(%(name)s_last[p]+%(name)s_rest[p]): '
+    #                         'w in weeks}:' % self.dict)
+    #            rules.append('  %(name)s[p,w] == 0;' % self.dict)
+    #        return rules
 
     def get_rule_prefered_pair(self, overrides):
         rules = []
@@ -351,31 +362,44 @@ class Task:
 
     def get_checks(self):
         checks = []
-        if self.paired_task is None and not self.in_teams:
-            checks.append(
-                'check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) >= (sum {w in weeks} %(name)s_number_needed[w]) / number_of_weeks - 0.001;' % self.dict)
-            checks.append(
-                'check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) <= (sum {w in weeks} %(name)s_number_needed[w]) / number_of_weeks + 0.5;' % self.dict)
         if self.in_teams:
-            checks.append(
-                'check {p in %(name)s_leaders}: (sum {w in weeks} %(name)s_available[p,w]) >= %(name)s_min[p];' % self.dict)
-            checks.append(
-                'check {w in weeks}: (sum {p in %(name)s_leaders} %(name)s_available[p,w]) >= %(name)s_number_needed[w];' % self.dict)
+            checks.append('check: '
+                          '(sum {p in %(name)s_leaders, w in weeks} %(name)s_available[p,w]) '
+                          '>= (sum {w in weeks} %(name)s_number_needed[w]);' % self.dict)
+            checks.append('check {p in %(name)s_leaders}: '
+                          '(sum {w in weeks} %(name)s_available[p,w]) '
+                          '>= %(name)s_min[p];' % self.dict)
+            checks.append('check {w in weeks}: '
+                          '(sum {p in %(name)s_leaders} %(name)s_available[p,w]) '
+                          '>= %(name)s_number_needed[w];' % self.dict)
         else:
-            checks.append(
-                'check {p in %(name)s_persons}: (sum {w in weeks} %(name)s_available[p,w]) >= %(name)s_min[p];' % self.dict)
-            checks.append(
-                'check {w in weeks}: (sum {p in %(name)s_persons} %(name)s_available[p,w]) >= %(name)s_number_needed[w];' % self.dict)
+            checks.append('check: '
+                          '(sum {p in %(name)s_persons, w in weeks} %(name)s_available[p,w]) '
+                          '>= (sum {w in weeks} %(name)s_number_needed[w]);' % self.dict)
+            checks.append('check {w in weeks}: '
+                          '(sum {p in %(name)s_persons} %(name)s_available[p,w]) '
+                          '>= %(name)s_number_needed[w];' % self.dict)
+            checks.append('check {p in %(name)s_persons}: '
+                          '(sum {w in weeks} %(name)s_available[p,w])'
+                          '>= %(name)s_min[p];' % self.dict)
         return checks
 
     def get_display_lines(self):
         lines = [
             'display %(name)s;' % self.dict,
+            'display %(name)s_min;' % self.dict,
+            'display %(name)s_max;' % self.dict,
             'display %(name)s_rather_not;' % self.dict]
+        #            'display %(name)s_too_early;' % self.dict]
         if self.in_teams:
             lines.append('display %(name)s_present;' % self.dict)
+            lines.append('display {p in %(name)s_persons} (sum {w in weeks} %(name)s_present[p,w]);' % self.dict)
+        else:
+            lines.append('display {p in %(name)s_persons} (sum {w in weeks} %(name)s[p,w]);' % self.dict)
         if self.paired_task is not None:
             lines.append('display %(name)s_not_prefered_pair;' % self.dict)
+        else:
+            lines.append('display %(name)s_offritme;' % self.dict)
         return lines
 
 
