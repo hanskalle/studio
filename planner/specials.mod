@@ -9,11 +9,6 @@ set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'}
 + 20 * liannezondermatthijs
 
 
-ignore minimum_Hulpkoster
-ignore minimum_Leiding_Wit
-ignore minimum_Groep_Wit
-ignore minimum_Leiding_Rood
-ignore minimum_.*
 ignore rest_.*
 
 
@@ -27,8 +22,8 @@ subject to Wenny7: Gebed['Wenny',19] = 1;
 subject to Wenny8: Welkom['Wenny',19] = 1;
 
 
-#subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;
-#subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;
+subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;
+subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;
 
 
 subject to jeugddienst1: Zangleiding['Jolanda',22] = 1;
@@ -86,5 +81,3 @@ subject to Liesbeth_Z_gebed_met_Hans_Z
 subject to Wenny_gebed_met_Jan_P
     {w in weeks}:
     Gebed['Wenny',w] <= Gebed['Jan_P',w];
-
-display Muziek_too_early;
