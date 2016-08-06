@@ -3,8 +3,20 @@ from itertools import combinations
 
 
 class Generator:
-    def __init__(self):
-        pass
+    def __init__(self, tasks=None):
+        if tasks == None:
+            self.tasks = [Task('Zangleiding'), Task('Muziek', True), Task('Geluid'), Task('Beamer'),
+                          Task('Leiding Rood'),
+                          Task('Leiding Wit'), Task('Groep Wit', paired_task='Leiding Wit'), Task('Leiding Blauw'),
+                          Task('Groep Blauw', paired_task='Leiding Blauw'), Task('Gebed'), Task('Koffie', True),
+                          Task('Welkom'),
+                          Task('Hoofdkoster', succesive_count=2), Task('Hulpkoster')]
+        else:
+            self.tasks = tasks
+        self.dont_exclude = [('Beamer', 'Hulpkoster'), ('Beamer', 'Gebed'), ('Groep_Blauw', 'Welkom'),
+                             ('Hulpkoster', 'Welkom'), ('Leiding_Blauw', 'Welkom'), ('Muziek', 'Zangleiding'),
+                             ('Leiding_Rood', 'Leiding_Wit'), ('Geluid', 'Hoofdkoster'), ('Gebed', 'Welkom')]
+        return
 
     @staticmethod
     def read_from(filename, start):
@@ -36,43 +48,34 @@ class Generator:
     @property
     def model(self):
         overrides = self.read_overrides('specials.mod')
-
-        tasks = [Task('Zangleiding'), Task('Muziek', True), Task('Geluid'), Task('Beamer'), Task('Leiding Rood'),
-                 Task('Leiding Wit'), Task('Groep Wit', paired_task='Leiding Wit'), Task('Leiding Blauw'),
-                 Task('Groep Blauw', paired_task='Leiding Blauw'), Task('Gebed'), Task('Koffie', True), Task('Welkom'),
-                 Task('Hoofdkoster', succesive_count=2), Task('Hulpkoster')]
-
         model = []
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_sets())
         model.append('param first_week, integer, >= 0;')
         model.append('param last_week, integer, <= 53;')
         model.append('param number_of_weeks := last_week - first_week+1;')
         model.append('set weeks := first_week .. last_week;')
         model.append('set weeks_extended := (first_week-number_of_weeks+2) .. (last_week+number_of_weeks-2);')
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_params())
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_vars())
         model.extend(self.read_from('specials.mod', 'var'))
         model.append('minimize penalties:')
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_objective_terms())
         model.extend(self.read_from('specials.mod', '+'))
         model.append(';')
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_rules(overrides))
-        dont_exclude = [('Beamer', 'Hulpkoster'), ('Beamer', 'Gebed'), ('Groep_Blauw', 'Welkom'),
-                        ('Hulpkoster', 'Welkom'), ('Leiding_Blauw', 'Welkom'), ('Muziek', 'Zangleiding'),
-                        ('Leiding_Rood', 'Leiding_Wit'), ('Geluid', 'Hoofdkoster'), ('Gebed', 'Welkom')]
-        for task1, task2 in combinations(tasks, 2):
-            if not ((task1.name, task2.name) in dont_exclude or (task2.name, task1.name) in dont_exclude):
+        for task1, task2 in combinations(self.tasks, 2):
+            if not ((task1.name, task2.name) in self.dont_exclude or (task2.name, task1.name) in self.dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
         model.extend(self.read_from('specials.mod', 'subject to'))
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_checks())
         model.append('solve;')
-        for task in tasks:
+        for task in self.tasks:
             model.extend(task.get_display_lines())
         model.extend(self.read_from('specials.mod', 'display'))
         model.append('end;')
