@@ -8,14 +8,7 @@ set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'}
 + 10 * matthijszonderlianne
 + 20 * liannezondermatthijs
 
-
-ignore minimum_Hulpkoster
-ignore minimum_Leiding_Wit
-ignore minimum_Groep_Wit
-ignore minimum_Leiding_Rood
-ignore minimum_.*
-ignore rest_.*
-
+#ignore rest_.*
 
 subject to Wenny1: Gebed['Wenny',13] = 1;
 subject to Wenny2: Welkom['Wenny',13] = 1;
@@ -27,8 +20,8 @@ subject to Wenny7: Gebed['Wenny',19] = 1;
 subject to Wenny8: Welkom['Wenny',19] = 1;
 
 
-#subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;
-#subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;
+subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;
+subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;
 
 
 subject to jeugddienst1: Zangleiding['Jolanda',22] = 1;
