@@ -25,7 +25,7 @@ def create_event(eventdate, eventtime, description, location, remark):
         "description": description,
         "location": location,
         "remark": remark})
-    print data
+    print(data)
     r = requests.post(url, data, auth=auth)
     assert (r.status_code == 200)
     return r.json()
@@ -41,7 +41,7 @@ def create_assignment(event, task, person, remark):
         "task": task,
         "person": person,
         "remark": remark})
-    print data
+    print(data)
     r = requests.post(url, data, auth=auth)
     assert (r.status_code == 200)
     return r.json()
@@ -114,14 +114,14 @@ def update_commitments():
 
 
 def get_persons():
-    import httplib
-    import urllib
+    from http.client import HTTPConnection
+    from urllib.parse import urlencode
     import json
 
-    params = urllib.urlencode({'email': auth[0], 'wachtwoord': auth[1]})
+    params = urlencode({'email': auth[0], 'wachtwoord': auth[1]})
     headers = {"Content-type": "application/x-www-form-urlencoded",
                "Accept": "text/plain"}
-    conn = httplib.HTTPConnection("www.ichthusculemborg.nl")
+    conn = HTTPConnection("www.ichthusculemborg.nl")
     conn.request("POST", "/intranet/login.asp?p=/planner/persons", params, headers)
     response = conn.getresponse()
     if response.status == 302:
@@ -162,7 +162,7 @@ def get_availability(person, taskname):
 def write_availability(filename, persons):
     sets = get_sets()
     availability_file = open(filename, 'w')
-    weeks = get_weeks(persons)
+    weeks = list(get_weeks(persons))
     availability_file.write('param first_week := ' + weeks[0] + ';\n')
     availability_file.write('param last_week := ' + weeks[-1] + ';\n')
     for task in get_tasks(persons):
@@ -330,7 +330,7 @@ def write_markup(filename, rooster):
 
 def show_file(filename):
     for line in open(filename, 'r'):
-        print line[0:-1]
+        print(line[0:-1])
 
 
 def find_event(events, eventdate, eventtime):
@@ -365,7 +365,7 @@ def write_rest(rooster):
             event_uid = event[0]['uid']
         else:
             event_uid = existing_event['uid']
-        for assignment, tasks in columns.iteritems():
+        for assignment, tasks in columns.items():
             if existing_event is not None:
                 for existing_assignment in existing_event['assignments']['list']:
                     if existing_assignment['task'] == assignment:
@@ -385,14 +385,14 @@ def write_rest(rooster):
 
 
 def show_help():
-    print sys.argv[0], ' [-aclp] [-o <filename>] [-h <hostname>] [-t <time-limit>]'
-    print '\t-a\tGet availability from service.'
-    print '\t-c\tGet commitments from service.'
-    print '\t-l\tGet last assignments from service.'
-    print '\t-p\tPublish schedule on service.'
-    print '\t-o\tWrite output to this file. Default rooster.txt.'
-    print '\t-s\tHostname. Default www.ichthusculemborg.nl.'
-    print '\t-t\tLimit search time in seconds. Default 300 seconds.'
+    print(sys.argv[0], ' [-aclp] [-o <filename>] [-h <hostname>] [-t <time-limit>]')
+    print('\t-a\tGet availability from service.')
+    print('\t-c\tGet commitments from service.')
+    print('\t-l\tGet last assignments from service.')
+    print('\t-p\tPublish schedule on service.')
+    print('\t-o\tWrite output to this file. Default rooster.txt.')
+    print('\t-s\tHostname. Default www.ichthusculemborg.nl.')
+    print('\t-t\tLimit search time in seconds. Default 300 seconds.')
 
 
 if __name__ == "__main__":
@@ -409,7 +409,7 @@ if __name__ == "__main__":
     try:
         opts, args = getopt.getopt(sys.argv[1:], "achlo:ps:t:")
     except getopt.GetoptError:
-        print "Incorrect arguments."
+        print("Incorrect arguments.")
         show_help()
         sys.exit(2)
     for opt, arg in opts:
@@ -434,13 +434,13 @@ if __name__ == "__main__":
         auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     if do_get_last_assignments:
         update_last_assignments()
-        print 'Laatste inzet opgehaald.'
+        print('Laatste inzet opgehaald.')
     if do_get_availability:
         update_availability()
-        print 'Beschikbaarheid opgehaald.'
+        print('Beschikbaarheid opgehaald.')
     if do_get_commitments:
         update_commitments()
-        print 'Inzet opgehaald.'
+        print('Inzet opgehaald.')
     new_rooster = get_results(time_limit)
     write_markup(output_filename, new_rooster)
     if do_publish:
