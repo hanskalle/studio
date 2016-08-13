@@ -219,7 +219,8 @@ class Task:
             params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
                           'default %(succesive_count)d * '
                           'ceil(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
-            params.append('param %(name)s_last {x in %(name)s_persons}, integer, < first_week;' % self.dict)
+            params.append(
+                'param %(name)s_last {x in %(name)s_persons}, integer, < first_week, default -53;' % self.dict)
         return params
 
     def get_vars(self):
