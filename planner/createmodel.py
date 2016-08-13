@@ -29,50 +29,28 @@ class Specials:
 
 
 class Generator:
-    def __init__(self, tasks=None, specials=None):
-        if tasks is None:
-            self.tasks = [Task('Zangleiding'), Task('Muziek', in_teams=True), Task('Geluid'), Task('Beamer'),
-                          Task('Leiding Rood'),
-                          Task('Leiding Wit'), Task('Groep Wit', paired_task='Leiding Wit'), Task('Leiding Blauw'),
-                          Task('Groep Blauw', paired_task='Leiding Blauw'), Task('Gebed', default_number_needed=2),
-                          Task('Koffie', in_teams=True),
-                          Task('Welkom'),
-                          Task('Hoofdkoster', succesive_count=2), Task('Hulpkoster', default_number_needed=2)]
+    def __init__(self, tasks, specials=Specials(), dont_exclude=None, fixes=None):
+        self.tasks = tasks
+        self.specials = specials
+        self.dont_exclude = dont_exclude
+        if fixes is None:
+            self.fixes = fixes
         else:
-            self.tasks = tasks
-        if specials is None:
-            self.specials = Specials()
-        else:
-            self.specials = specials
-        self.dont_exclude = [('Beamer', 'Hulpkoster'), ('Beamer', 'Gebed'), ('Groep_Blauw', 'Welkom'),
-                             ('Hulpkoster', 'Welkom'), ('Leiding_Blauw', 'Welkom'), ('Muziek', 'Zangleiding'),
-                             ('Leiding_Rood', 'Leiding_Wit'), ('Geluid', 'Hoofdkoster'), ('Gebed', 'Welkom')]
+            self.fixes = []
         return
-
-    @staticmethod
-    def read_from(filename, start):
-        lines = []
-        copy = False
-        for line in open(filename, 'r'):
-            line = line.strip()
-            if len(line) == 0:
-                copy = False
-            if line.startswith(start):
-                copy = True
-            if copy:
-                lines.append(line)
-        return lines
 
     def get_overrides(self):
         overrides = self.specials.ignores
         for constraint in self.specials.constraints:
-            overrides.append(constraint.split()[2][:-1])
+            name = constraint.split()[2]
+            if name[-1] == ':':
+                name = name[:-1]
+            overrides.append(name)
         return overrides
 
     @property
     def model(self):
         overrides = self.get_overrides()
-        print("Overrides:", overrides)
         model = []
         for task in self.tasks:
             model.extend(task.get_sets())
@@ -85,7 +63,7 @@ class Generator:
             model.extend(task.get_params())
         for task in self.tasks:
             model.extend(task.get_vars())
-        model.extend(self.read_from('specials.mod', 'var'))
+        model.extend(self.specials.vars)
         model.append('minimize penalties:')
         for task in self.tasks:
             model.extend(task.get_objective_terms())
@@ -97,31 +75,47 @@ class Generator:
             if not ((task1.name, task2.name) in self.dont_exclude or (task2.name, task1.name) in self.dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
         model.extend(self.specials.constraints)
-        model.extend(self.read_from('fixes.mod', 'subject to'))
-
-        data = []
-        for task in self.tasks:
-            data.extend(task.get_data())
-        with open('planner.dat', 'w') as f:
-            for line in data:
-                f.write(line + '\n')
-            f.write('end;\n')
-
+        model.extend(self.rules_for_fixes)
         for task in self.tasks:
             model.extend(task.get_checks())
         model.append('solve;')
         for task in self.tasks:
             model.extend(task.get_display_lines())
-        model.extend(self.read_from('specials.mod', 'display'))
+        # model.extend(self.specials.displays, 'display')
         model.append('end;')
         return model
 
+    @property
+    def rules_for_fixes(self):
+        rules = []
+        for i, fix in enumerate(self.fixes):
+            rules.append("subject to fix_%d:" % i + " %s['%s',%s] = 1;" % fix)
+        return rules
+
+    @property
+    def data(self):
+        data = []
+        for task in self.tasks:
+            data.extend(task.get_data())
+        return data
+
+    def write(self, modelname, dataname):
+        self.write_model(modelname)
+        self.write_data(dataname)
+
     def write_model(self, filename):
-        model_file = open(filename, 'w')
-        for line in self.model:
-            model_file.write(line)
-            model_file.write('\n')
-        model_file.close()
+        with open(filename, 'w') as f:
+            for line in self.model:
+                f.write(line)
+                f.write('\n')
+
+    def write_data(self, filename):
+        with open(filename, 'w') as f:
+            for line in self.data:
+                f.write(line)
+                f.write('\n')
+            f.write('end;\n')
+        return
 
 
 class Task:
@@ -289,8 +283,8 @@ class Task:
             for param, value in self.params.items():
                 if type(value) is dict:
                     data.append('param %s_%s :=' % (self.dict['name'], param))
-                    for label, value in value.items():
-                        data.append('  %s %s' % (label, value))
+                    for label, single_value in value.items():
+                        data.append('  %s %s' % (label, single_value))
                     data.append(';')
                 elif type(value) is int:
                     data.append('param %s_%s := %d;' % (self.dict['name'], param, value))
@@ -510,7 +504,3 @@ class Task:
                 'display %(name)s_offritme_H;' % self.dict,
                 'display %(name)s_offritme_X;' % self.dict])
         return lines
-
-
-if __name__ == '__main__':
-    Generator().write_model('gen.mod')
