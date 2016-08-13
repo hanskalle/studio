@@ -1,188 +1,124 @@
-##### BEAMER
-param Beamer_number_needed default 1 :=
-    37 0;
-param Beamer_offritme_penalty := 3;
-param Beamer_rather_not_penalty := 10;
-
-
-
-##### BLAUW
-param Groep_Blauw_prefered_pair default 0:
-            Vivianne    Anneke  Noa     Selicia Hanna_Vera   Chiara :=
-Rachel      1           .       .       .       .       .
-Mieke       .           1       .       .       .       .
-Annelies    .           .       1       .       .       .
-Mirjam      .           .       .       1       .       .
-Lidian      .           .       .       .       1       .
-Wenny       .           .       .       .       1       .
-Miranda     .           .       .       .       .       1
+param Zangleiding_number_needed :=
+  37 0
+;
+param Muziek_number_needed :=
+  37 0
+  22 0
+;
+param Muziek_essential :=
+  David 5
+  Vena 5
+  Xandra 10
+  Wendy 5
+  Rosalie 10
+  Selicia 5
+;
+set Muziek_leaders := Johan Peter Tim Onbezet;
+set Muziek_team[Johan] := Johan Hans_Z David;
+set Muziek_team[Peter] := Peter Rosalie Jonathan Wendy;
+set Muziek_team[Tim] := Tim Vena Rosalie Xandra;
+set Muziek_team[Onbezet] := Onbezet;
+param Geluid_number_needed :=
+  37 0
+  22 0
+;
+param Leiding_Rood_number_needed :=
+  32 0
+  37 0
+  27 0
+  28 0
+  29 0
+  30 0
+  31 0
+;
+param Leiding_Wit_number_needed :=
+  32 0
+  37 0
+  27 0
+  28 0
+  29 0
+  30 0
+  31 0
+;
+param Groep_Wit_not_prefered_pair_penalty := 30;
+param Groep_Wit_number_needed :=
+  32 0
+  37 0
+  27 0
+  28 0
+  29 0
+  30 0
+  31 0
+;
+param Groep_Wit_prefered_pair := 
+  Jacolien Thirza 1
+  Xandra Esther 1
+  Yentl Esther 1
+  Dieuwke Emma 1
+  Lianne David 1
 ;
 param Groep_Blauw_not_prefered_pair_penalty := 30;
-
-param Leiding_Blauw_number_needed default 1 := 37 0;
-param Groep_Blauw_number_needed default 1 := 37 0;
-param Leiding_Blauw_offritme_penalty := 4;
-param Leiding_Blauw_rather_not_penalty := 10;
-
-param Groep_Blauw_rather_not_penalty := 9;
-
-
-
-##### GELUID
-param Geluid_number_needed default 1 :=
-    22  0
-    37  0;
-param Geluid_offritme_penalty := 5;
-param Geluid_rather_not_penalty := 14;
-
-
-
-##### KOSTERS
-param Hoofdkoster_number_needed default 1;# := 37 0;
-param Hoofdkoster_offritme_penalty := 3;
-param Hoofdkoster_rather_not_penalty := 13;
-param Hulpkoster_min :=
-    Levi    1;
-param Hulpkoster_max :=
-    Levi    2;
-
-param Hulpkoster_number_needed default 2 :=
-    16 6
-    18 3
-    27 0
-    28 0
-    29 0
-    30 0
-    31 0
-    32 0
-    33 3
-    35 3
-    37 0;
-param Hulpkoster_offritme_penalty := 2;
-param Hulpkoster_rather_not_penalty := 11;
-
-
-
-##### KOFFIE
-set Koffie_leaders := Cafe_Roulez Jacolien Mieke Marieke Monika Nora Dieuwke;
-set Koffie_team[Cafe_Roulez] := Cafe_Roulez;
-set Koffie_team[Jacolien] := Jacolien Miranda;
-set Koffie_team[Mieke] := Mieke Lydia Emmely;
-set Koffie_team[Marieke] := Marieke Ton;
-set Koffie_team[Monika] := Monika Rinus;
-set Koffie_team[Nora] := Nora Wim_R;
-set Koffie_team[Dieuwke] := Dieuwke Hans_M;
-
-param Koffie_essential default 0;
-param Koffie_number_needed default 1 :=
-    35 2
-    37 0;
-param Koffie_offritme_penalty := 3;
-param Koffie_rather_not_penalty := 12;
-
-
-
-##### MUZIEK
-set Muziek_leaders := Tim Peter Johan Onbezet;
-set Muziek_team[Tim] := Tim Rosalie Vena Xandra;
-set Muziek_team[Peter] := Peter Rosalie Jonathan Wendy;
-set Muziek_team[Johan] := Johan Hans_Z David;
-set Muziek_team[Onbezet] := Onbezet;
-
-#0 is onmisbaar, verder hoe hoger hoe slechter misbaar
-param Muziek_essential default 0 :=
-    Wendy   5
-    Vena    5
-    Selicia 5
-    David   5
-    Rosalie 10
-    Xandra  10
-    ;
-param Muziek_number_needed default 1 :=
-    22 0
-    37 0;
-param Muziek_offritme_penalty 8;
-param Muziek_rather_not_penalty := 20;
-
-
-
-##### ROOD
-param Leiding_Rood_number_needed default 1 :=
-    27 0
-    28 0
-    29 0
-    30 0
-    31 0
-    32 0
-    37 0;
-param Leiding_Rood_offritme_penalty := 4;
-param Leiding_Rood_rather_not_penalty := 15;
-
-
-
-##### WELKOM
-param Welkom_number_needed default 1 :=
-    37 0;
-param Welkom_offritme_penalty := 2;
-param Welkom_rather_not_penalty := 25;
-param Welkom_min :=
-    Wenny 3;
-param Welkom_max :=
-    Wenny 3;
-
-
-##### WIT
-param Groep_Wit_prefered_pair default 0:
-                Thirza  Esther  Emma    David    :=
-Xandra          .       1       .       .
-Dieuwke         .       .       1       .
-Yentl           .       1       .       .
-Lianne          .       .       .       1
-Jacolien        1       .       .       .
+param Groep_Blauw_prefered_pair := 
+  Rachel Vivianne 1
+  Mieke Anneke 1
+  Annelies Noa 1
+  Mirjam Selicia 1
+  Lidian Hanna_Vera 1
+  Wenny Hanna_Vera 1
+  Miranda Chiara 1
 ;
-param Groep_Wit_not_prefered_pair_penalty := 300;
-
-param Leiding_Wit_number_needed default 1 :=
-    27 0
-    28 0
-    29 0
-    30 0
-    31 0
-    32 0
-    37 0;
-param Groep_Wit_number_needed default 1 :=
-    27 0
-    28 0
-    29 0
-    30 0
-    31 0
-    32 0
-    37 0;
-
-param Leiding_Wit_offritme_penalty := 20;
-param Leiding_Wit_rather_not_penalty := 25;
-
-param Groep_Wit_rather_not_penalty := 25;
-
-
-
-##### ZANGLEIDERS
-param Zangleiding_number_needed default 1 :=
-    37 0;
-param Zangleiding_offritme_penalty := 6;
-param Zangleiding_rather_not_penalty := 20;
-
-
-
-##### GEBED
-param Gebed_offritme_penalty := 3;
-param Gebed_number_needed default 2 :=
-    37 0;
-param Gebed_rather_not_penalty := 5;
-param Gebed_min :=
-    Wenny 3
-    Jan_P 3;
+param Beamer_number_needed :=
+  37 0
+;
+param Welkom_max :=
+  Wenny 3
+;
+param Welkom_min :=
+  Wenny 3
+;
+param Welkom_number_needed :=
+  37 0
+;
+param Koffie_number_needed :=
+  35 2
+  37 0
+;
+set Koffie_leaders := Mieke Cafe_Roulez Dieuwke Marieke Nora Jacolien Monika;
+set Koffie_team[Mieke] := Mieke Lydia Emmely;
+set Koffie_team[Cafe_Roulez] := Cafe_Roulez;
+set Koffie_team[Dieuwke] := Dieuwke Hans_M;
+set Koffie_team[Marieke] := Marieke Ton;
+set Koffie_team[Nora] := Nora Wim_R;
+set Koffie_team[Jacolien] := Jacolien Miranda;
+set Koffie_team[Monika] := Monika Rinus;
 param Gebed_max :=
-    Wenny 3
-    Jan_P 3;
+  Wenny 3
+  Jan_P 3
+;
+param Gebed_min :=
+  Wenny 3
+  Jan_P 3
+;
+param Gebed_number_needed :=
+  37 0
+;
+param Hulpkoster_max :=
+  Levi 2
+;
+param Hulpkoster_min :=
+  Levi 1
+;
+param Hulpkoster_number_needed :=
+  16 6
+  32 0
+  18 3
+  35 3
+  37 0
+  33 3
+  27 0
+  28 0
+  29 0
+  30 0
+  31 0
+;
 end;
