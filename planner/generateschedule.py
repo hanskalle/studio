@@ -4,6 +4,8 @@ from datetime import datetime, date, timedelta, time
 
 import requests
 
+from createmodel import Task, Specials
+
 host = 'www.ichthusculemborg.nl'
 auth = ('username', 'password')
 state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
@@ -11,10 +13,71 @@ this_year = 2016
 last_year = 2015
 first_week = 0
 
+specials = Specials()
+
+specials.ignore_constraint("minimum_.*")
+
+specials.add_constraint("subject to Wenny1: Gebed['Wenny',13] = 1;")
+specials.add_constraint("subject to Wenny2: Welkom['Wenny',13] = 1;")
+specials.add_constraint("subject to Wenny3: Leiding_Blauw['Wenny',14] = 1;")
+specials.add_constraint("subject to Wenny4: Gebed['Wenny',17] = 1;")
+specials.add_constraint("subject to Wenny5: Welkom['Wenny',17] = 1;")
+specials.add_constraint("subject to Wenny6: Leiding_Blauw['Wenny',18] = 1;")
+specials.add_constraint("subject to Wenny7: Gebed['Wenny',19] = 1;")
+specials.add_constraint("subject to Wenny8: Welkom['Wenny',19] = 1;")
+specials.add_constraint("subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;")
+specials.add_constraint("subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;")
+specials.add_constraint("subject to jeugddienst1: Zangleiding['Jolanda',22] = 1;")
+specials.add_constraint("subject to jeugddienst2: Leiding_Rood['In_de_dienst',22] = 1;")
+
+specials.add_constraint("subject to Bas_tot_vakantie_alleen_beamer_als_Rood_in_de_dienst {w in weeks: w < 27}:"
+                        " Beamer['Bas',w] <= Leiding_Rood['In_de_dienst',w];")
+
+specials.add_constraint("subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team"
+                        " {p in Zangleiding_persons inter Muziek_leaders, w in weeks}:"
+                        " Muziek[p,w] >= Zangleiding[p,w];")
+
+specials.add_constraint("subject to Jolanda_geen_zangleiding_tegelijkertijd_met_Wim_A_hulpkoster {w in weeks}:"
+                        " Zangleiding['Jolanda',w] + Hulpkoster['Wim_A',w] <= 1;")
+specials.add_constraint("subject to Roel_hulpkoster_met_hoofdkoster_Herman {w in weeks}:"
+                        " Hulpkoster['Roel',w] <= Hoofdkoster['Herman',w];")
+
+specials.add_var("var matthijszonderlianne, binary;")
+specials.add_objective_term("10 * matthijszonderlianne")
+specials.add_constraint("subject to Als_Matthuis_hoofdkoster_is_doet_Lianne_welkom {w in weeks}:"
+                        " Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne;")
+
+specials.add_var("var liannezondermatthijs, binary;")
+specials.add_objective_term("20 * liannezondermatthijs")
+specials.add_constraint("subject to Als_Lianne_welkom_doet_is_Matthijs_hoofdkoster {w in weeks}:"
+                        " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs;")
+
+specials.add_var("var wijngaardenbreuk {weeks}, binary;")
+specials.add_objective_term("8 * (sum {w in weeks} wijngaardenbreuk[w])")
+specials.add_constraint("subject to Rachel_leidt_groep_Blauw_wanneer_Tim_groep_Rood_leidt {w in weeks}:"
+                        " Leiding_Rood['Tim',w] <= Leiding_Blauw['Rachel',w] + wijngaardenbreuk[w];")
+specials.add_constraint("subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt {w in weeks}:"
+                        " Leiding_Blauw['Rachel',w] <= Leiding_Rood['Tim',w] + wijngaardenbreuk[w];")
+
+specials.add_var("set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};")
+specials.add_constraint("subject to Rachel_geen_gebed_met_man {w in weeks}:"
+                        " Gebed['Rachel',w] <= 1 - (sum {p in gebedsmannen} Gebed[p,w]);")
+specials.add_constraint("subject to Rachel_geen_gebed_als_Tim_een_taak_heeft {w in weeks}:"
+                        " Gebed['Rachel',w] <= 1 - Muziek['Tim',w] - Leiding_Rood['Tim',w];")
+specials.add_constraint("subject to Geen_mannen_samen_gebed {w in weeks}:"
+                        " (sum {p in gebedsmannen} Gebed[p,w]) <= 1;")
+specials.add_constraint("subject to Nora_gebed_met_Wim_R {w in weeks}:"
+                        " Gebed['Nora',w] <= Gebed['Wim_R',w];")
+specials.add_constraint("subject to Liesbeth_Z_gebed_met_Hans_Z {w in weeks}:"
+                        " Gebed['Liesbeth_Z',w] <= Gebed['Hans_Z',w];")
+specials.add_constraint("subject to Wenny_gebed_met_Jan_P {w in weeks}:"
+                        " Gebed['Wenny',w] <= Gebed['Jan_P',w];")
+
 
 def delete_assignment(uid):
     url = "http://" + host + "/services/assignments/" + uid
     r = requests.delete(url, auth=auth)
+    assert r.status_code == 200
     return
 
 
@@ -167,7 +230,7 @@ def write_availability(filename, persons):
     availability_file.write('param last_week := ' + weeks[-1] + ';\n')
     for task in get_tasks(persons):
         if task in sets:
-            availability_file.write('param %s_available default 1:\n' % task.replace(' ', '_'))
+            availability_file.write('param %s_available:\n' % task.replace(' ', '_'))
             for week in weeks:
                 availability_file.write(' ')
                 availability_file.write(week)
@@ -264,7 +327,7 @@ def add_person(rooster, week, task, person):
 def get_commitments():
     import requests
     import json
-    r = requests.get("http://www.ichthusculemborg.nl/services/commitments",auth=auth)
+    r = requests.get("http://" + host + "/services/commitments", auth=auth)
     assert r.status_code == 200
     return json.loads(r.text)
 
@@ -281,7 +344,117 @@ def get_sets():
 def get_results(timlim):
     import subprocess
     import createmodel
-    createmodel.Generator().write_model('gen.mod')
+
+    zangleiding = Task('Zangleiding')
+    zangleiding.set_number_needed(37, 0)
+
+    muziek = Task('Muziek', True)
+    muziek.set_number_needed(22, 0)
+    muziek.set_number_needed(37, 0)
+    muziek.set_essential('Wendy', 5)
+    muziek.set_essential('Vena', 5)
+    muziek.set_essential('Selicia', 5)
+    muziek.set_essential('David', 5)
+    muziek.set_essential('Rosalie', 10)
+    muziek.set_essential('Xandra', 10)
+    muziek.set_team('Tim', ['Tim', 'Vena', 'Rosalie', 'Xandra'])
+    muziek.set_team('Peter', ['Peter', 'Rosalie', 'Jonathan', 'Wendy'])
+    muziek.set_team('Johan', ['Johan', 'Hans_Z', 'David'])
+    muziek.set_team('Onbezet', ['Onbezet'])
+
+    geluid = Task('Geluid')
+    geluid.set_number_needed(22, 0)
+    geluid.set_number_needed(37, 0)
+
+    beamer = Task('Beamer')
+    beamer.set_number_needed(37, 0)
+
+    leiding_rood = Task('Leiding Rood')
+    leiding_rood.set_number_needed(27, 0)
+    leiding_rood.set_number_needed(28, 0)
+    leiding_rood.set_number_needed(29, 0)
+    leiding_rood.set_number_needed(30, 0)
+    leiding_rood.set_number_needed(31, 0)
+    leiding_rood.set_number_needed(32, 0)
+    leiding_rood.set_number_needed(37, 0)
+
+    leiding_wit = Task('Leiding Wit')
+    leiding_wit.set_number_needed(27, 0)
+    leiding_wit.set_number_needed(28, 0)
+    leiding_wit.set_number_needed(29, 0)
+    leiding_wit.set_number_needed(30, 0)
+    leiding_wit.set_number_needed(31, 0)
+    leiding_wit.set_number_needed(32, 0)
+    leiding_wit.set_number_needed(37, 0)
+
+    groep_wit = Task('Groep Wit', paired_task='Leiding Wit')
+    groep_wit.set_number_needed(27, 0)
+    groep_wit.set_number_needed(28, 0)
+    groep_wit.set_number_needed(29, 0)
+    groep_wit.set_number_needed(30, 0)
+    groep_wit.set_number_needed(31, 0)
+    groep_wit.set_number_needed(32, 0)
+    groep_wit.set_number_needed(37, 0)
+    groep_wit.set_pair('Jacolien', 'Thirza')
+    groep_wit.set_pair('Xandra', 'Esther')
+    groep_wit.set_pair('Yentl', 'Esther')
+    groep_wit.set_pair('Dieuwke', 'Emma')
+    groep_wit.set_pair('Lianne', 'David')
+
+    leiding_blauw = Task('Leiding Blauw')
+
+    groep_blauw = Task('Groep Blauw', paired_task='Leiding Blauw')
+    groep_blauw.set_pair('Rachel', 'Vivianne')
+    groep_blauw.set_pair('Mieke', 'Anneke')
+    groep_blauw.set_pair('Annelies', 'Noa')
+    groep_blauw.set_pair('Mirjam', 'Selicia')
+    groep_blauw.set_pair('Lidian', 'Hanna_Vera')
+    groep_blauw.set_pair('Wenny', 'Hanna_Vera')
+    groep_blauw.set_pair('Miranda', 'Chiara')
+
+    gebed = Task('Gebed', default_number_needed=2)
+    gebed.set_number_needed(37, 0)
+    gebed.set_param('min', {'Wenny': 3, 'Jan_P': 3})
+    gebed.set_param('max', {'Wenny': 3, 'Jan_P': 3})
+
+    welkom = Task('Welkom')
+    welkom.set_number_needed(37, 0)
+    welkom.set_param('min', {'Wenny': 3})
+    welkom.set_param('max', {'Wenny': 3})
+
+    koffie = Task('Koffie', in_teams=True)
+    koffie.set_number_needed(35, 2)
+    koffie.set_number_needed(37, 0)
+    koffie.set_team('Cafe_Roulez', ['Cafe_Roulez'])
+    koffie.set_team('Jacolien', ['Jacolien', 'Miranda'])
+    koffie.set_team('Mieke', ['Mieke', 'Lydia', 'Emmely'])
+    koffie.set_team('Marieke', ['Marieke', 'Ton'])
+    koffie.set_team('Monika', ['Monika', 'Rinus'])
+    koffie.set_team('Nora', ['Nora', 'Wim_R'])
+    koffie.set_team('Dieuwke', ['Dieuwke', 'Hans_M'])
+
+    hoofdkoster = Task('Hoofdkoster', succesive_count=2)
+    # hoofdkoster.set_number_needed(37, 0) Geeft problemen met het tweemaal achtereenvolgens inzetten...
+
+    hulpkoster = Task('Hulpkoster', default_number_needed=2)
+    hulpkoster.set_number_needed(16, 6)
+    hulpkoster.set_number_needed(18, 3)
+    hulpkoster.set_number_needed(27, 0)
+    hulpkoster.set_number_needed(28, 0)
+    hulpkoster.set_number_needed(29, 0)
+    hulpkoster.set_number_needed(30, 0)
+    hulpkoster.set_number_needed(31, 0)
+    hulpkoster.set_number_needed(32, 0)
+    hulpkoster.set_number_needed(33, 3)
+    hulpkoster.set_number_needed(35, 3)
+    hulpkoster.set_number_needed(37, 0)
+    hulpkoster.set_param('min', {'Levi': 1})
+    hulpkoster.set_param('max', {'Levi': 2})
+
+    tasks = [zangleiding, muziek, geluid, beamer, leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw,
+             gebed, welkom, koffie, hoofdkoster, hulpkoster]
+
+    createmodel.Generator(tasks=tasks, specials=specials).write_model('gen.mod')
     subprocess.check_call(
         ['glpsol',
          '--tmlim', timlim,
@@ -339,6 +512,27 @@ def find_event(events, eventdate, eventtime):
         if event['start'] == start:
             return event
     return None
+
+
+def to_fixes(file_in, tasks):
+    count = 0
+    fixes = open('fixes.mod', 'w')
+    for line in open(file_in, 'r'):
+        line = line.strip()
+        if line[-8:] == '.val = 1':
+            name = line[:line.find('[')]
+            if name in tasks:
+                count += 1
+                pos1 = line.find('[') + 1
+                pos2 = line.find(',')
+                fixes.write('subject to fix%d: ' % count)
+                fixes.write(line[:pos1])
+                fixes.write("'")
+                fixes.write(line[pos1:pos2])
+                fixes.write("'")
+                fixes.write(line[pos2:-8])
+                fixes.write(' = 1;\n')
+    fixes.close()
 
 
 def write_rest(rooster):
@@ -430,6 +624,9 @@ if __name__ == "__main__":
             host = arg
         elif opt == "-t":
             time_limit = arg
+    # to_fixes('test.dat', ['Leiding Rood', 'Leiding Wit', 'Leiding Blauw'])
+    # to_fixes('test.dat', ['Leiding_Rood', 'Leiding_Wit', 'Groep_Wit', 'Leiding_Blauw', 'Groep_Blauw', 'Hoofdkoster'])
+    to_fixes('results - met rust.txt', ['Zangleiding', 'Muziek', 'Geluid', 'Leiding Rood', 'Hoofdkoster'])
     if do_get_availability or do_publish or do_get_last_assignments or do_get_commitments:
         auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     if do_get_last_assignments:
