@@ -156,25 +156,17 @@ def write_availabilities(filename, availabilities, tasks):
         f.write('end;\n')
 
 
-def write_commitments(filename, last_assignments, tasks):
+def write_commitments_new(filename, commitments):
     with open(filename, 'w') as f:
-        for task in last_assignments:
-            print(task)
-            if task[:6] != 'Groep ':
-                original_task = task
-                if task[:8] == 'Leiding ':
-                    task = task[8:]
-                if task[:5] == 'Hoofd':
-                    task = 'Koster'
-                if task[:4] == 'Hulp':
-                    task = 'Koster'
-                if original_task in tasks:
-                    print(original_task)
-                    f.write('param ' + original_task.replace(' ', '_') + '_last :=\n')
-                    for person in sorted(last_assignments[task].keys()):
-                        print(person)
-                        f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
-                    f.write(';\n')
+        for task, persons in commitments.items():
+            f.write("set %s_persons :=" % task.replace(' ', '_'))
+            for person in persons:
+                f.write(" %s" % person.replace(' ', '_'))
+            f.write(";\n")
+            f.write("param %s_ritme :=\n" % task.replace(' ', '_'))
+            for person, frequency in persons.items():
+                f.write("\t%s\t%s\n" % (person.replace(' ', '_'), frequency))
+            f.write(";\n")
         f.write('end;\n')
 
 
@@ -412,8 +404,17 @@ def get_task_name_list(tasks):
 def get_results(timlim):
     services = Services('http://www.ichthusculemborg.nl/services', auth)
     availabilities = get_av(services.get_availabilities())
+    del availabilities['Koffie']['Ailine']
+    del availabilities['Koffie']['Lilian']
+    del availabilities['Koffie']['Emma']
+    del availabilities['Hoofdkoster']['Andreas']
     commitments = get_comm(services.get_commitments())
     last_assignments = get_last_assignments(services.get_events(), 2016, 13, commitments)
+    del last_assignments['Koffie']['Ailine']
+    del last_assignments['Koffie']['Emma']
+    availabilities['Hoofdkoster']['Herman'] = availabilities['Hoofdkoster']['Herman B']
+    del availabilities['Hoofdkoster']['Herman B']
+    del availabilities['Hulpkoster']['Wilfred']
 
     zangleiding = Task('Zangleiding')
     zangleiding.set_number_needed(37, 0)
@@ -529,12 +530,12 @@ def get_results(timlim):
         ('Leiding_Blauw', 'Welkom'),
         ('Muziek', 'Zangleiding'),
         ('Leiding_Rood', 'Leiding_Wit'),
-        ('Geluid', 'Hoofdkoster'),
         ('Gebed', 'Welkom')]
 
     specials = Specials()
     fixes = []
     tasks = [zangleiding, muziek, geluid]
+    # tasks = [zangleiding, muziek, geluid, leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw, beamer, welkom, koffie, hoofdkoster, gebed, hulpkoster]
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
     specials.add_constraint(
