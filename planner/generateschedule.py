@@ -524,7 +524,6 @@ def get_results(timlim):
 
     dont_exclude = [
         ('Beamer', 'Hulpkoster'),
-        ('Beamer', 'Gebed'),
         ('Groep_Blauw', 'Welkom'),
         ('Hulpkoster', 'Welkom'),
         ('Leiding_Blauw', 'Welkom'),
@@ -534,39 +533,50 @@ def get_results(timlim):
 
     specials = Specials()
     fixes = []
+
     tasks = [zangleiding, muziek, geluid]
     # tasks = [zangleiding, muziek, geluid, leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw, beamer, welkom, koffie, hoofdkoster, gebed, hulpkoster]
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+
     specials.add_constraint(
         "subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team"
         " {p in Zangleiding_persons inter Muziek_leaders, w in weeks}:"
         " Muziek[p,w] >= Zangleiding[p,w];")
-    specials.add_constraint("subject to jeugddienst1: Zangleiding['Jolanda',22] = 1;")
+    specials.add_constraint(
+        "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken {w in first_week..last_week-7}:"
+        " sum {w2 w..w+7} Zangleiding['Liesbeth_Z',w] <= 1;")
+    specials.add_constraint(
+        "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken_historisch"
+        " {w in Zangleiding_last['Liesbeth_Z']+1..Zangleiding_last['Liesbeth_Z']+7: w >= first_week}:"
+        " Zangleiding['Liesbeth_Z',w] = 0;")
+
     optimize_phase('1', tasks, dont_exclude, specials, [], timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+
     specials.ignore_constraint("minimum_.*")
-    specials.add_constraint("subject to jeugddienst2: Leiding_Rood['In_de_dienst',22] = 1;")
-    specials.add_constraint("subject to Wenny_Blauw_1: Leiding_Blauw['Wenny',14] = 1;")
-    specials.add_constraint("subject to Wenny_Blauw_2: Leiding_Blauw['Wenny',18] = 1;")
+
     specials.add_var("var wijngaardenbreuk {weeks}, binary;")
     specials.add_objective_term("8 * (sum {w in weeks} wijngaardenbreuk[w])")
     specials.add_constraint("subject to Rachel_leidt_groep_Blauw_wanneer_Tim_groep_Rood_leidt {w in weeks}:"
                             " Leiding_Rood['Tim',w] <= Leiding_Blauw['Rachel',w] + wijngaardenbreuk[w];")
     specials.add_constraint("subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt {w in weeks}:"
                             " Leiding_Blauw['Rachel',w] <= Leiding_Rood['Tim',w] + wijngaardenbreuk[w];")
+
     optimize_phase('2', tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([beamer, welkom, koffie, hoofdkoster])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-    specials.add_constraint("subject to Bas_tot_vakantie_alleen_beamer_als_Rood_in_de_dienst {w in weeks: w < 27}:"
-                            " Beamer['Bas',w] <= Leiding_Rood['In_de_dienst',w];")
+
+    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_18_dec: Koffie['Cafe Roulez',50] = 0;")
+    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_26_mrt: Koffie['Cafe Roulez',26] = 0;")
+
     specials.add_var("var matthijszonderlianne, binary;")
     specials.add_objective_term("10 * matthijszonderlianne")
     specials.add_constraint("subject to Als_Matthuis_hoofdkoster_is_doet_Lianne_welkom {w in weeks}:"
@@ -575,17 +585,14 @@ def get_results(timlim):
     specials.add_objective_term("20 * liannezondermatthijs")
     specials.add_constraint("subject to Als_Lianne_welkom_doet_is_Matthijs_hoofdkoster {w in weeks}:"
                             " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs;")
-    specials.add_constraint("subject to Wenny_Welkom_1: Welkom['Wenny',13] = 1;")
-    specials.add_constraint("subject to Wenny_Welkom_2: Welkom['Wenny',17] = 1;")
-    specials.add_constraint("subject to Wenny_Welkom_3: Welkom['Wenny',19] = 1;")
-    specials.add_constraint("subject to cafe_roulez1: Koffie['Cafe_Roulez', 21] = 1;")
-    specials.add_constraint("subject to cafe_roulez2: Koffie['Cafe_Roulez', 38] = 1;")
+
     optimize_phase('3', tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([gebed])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+
     specials.add_var("set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};")
     specials.add_constraint("subject to Rachel_geen_gebed_met_man {w in weeks}:"
                             " Gebed['Rachel',w] <= 1 - (sum {p in gebedsmannen} Gebed[p,w]);")
@@ -599,19 +606,19 @@ def get_results(timlim):
                             " Gebed['Liesbeth_Z',w] <= Gebed['Hans_Z',w];")
     specials.add_constraint("subject to Wenny_gebed_met_Jan_P {w in weeks}:"
                             " Gebed['Wenny',w] <= Gebed['Jan_P',w];")
-    specials.add_constraint("subject to Wenny_Gebed_1: Gebed['Wenny',13] = 1;")
-    specials.add_constraint("subject to Wenny_Gebed_2: Gebed['Wenny',17] = 1;")
-    specials.add_constraint("subject to Wenny_Gebed_3: Gebed['Wenny',19] = 1;")
+
     optimize_phase('4', tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([hulpkoster])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+
     # specials.add_constraint("subject to Jolanda_geen_zangleiding_tegelijkertijd_met_Wim_A_hulpkoster {w in weeks}:"
     #                         " Zangleiding['Jolanda',w] + Hulpkoster['Wim_A',w] <= 1;")
     # specials.add_constraint("subject to Roel_hulpkoster_met_hoofdkoster_Herman {w in weeks}:"
     #                         " Hulpkoster['Roel',w] <= Hoofdkoster['Herman',w];")
+
     optimize_phase('', tasks, dont_exclude, specials, fixes, timlim)
     return parse_results('results.txt')
 
