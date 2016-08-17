@@ -205,11 +205,11 @@ class Task:
                 'binary, default 0;' % self.dict)
             params.append('param %(name)s_ritme {p in %(name)s_persons}, >=1;' % self.dict)
             params.append('param %(name)s_min {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * floor(number_of_weeks'
-                          '/ %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
+                          'default %(succesive_count)d * floor((sum {w in weeks} %(name)s_number_needed[w])'
+                          '/ %(default_number_needed)d / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * ceil(number_of_weeks'
-                          '/ %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
+                          'default %(succesive_count)d * ceil((sum {w in weeks} %(name)s_number_needed[w])'
+                          '/ %(default_number_needed)d / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append('param %(name)s_not_prefered_pair_penalty, >=0, default 30;' % self.dict)
         else:
             params.append('param %(name)s_ritme {p in %(name)s_persons}, >=1;' % self.dict)
