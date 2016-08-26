@@ -9,9 +9,7 @@ from services import Services
 
 host = 'www.ichthusculemborg.nl'
 auth = ('username', 'password')
-state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
-this_year = 2016
-last_year = 2015
+base_year = 2016
 first_week = 0
 
 
@@ -20,7 +18,7 @@ def get_last_assignments(events, before_year, before_week, commitments):
     for event in events:
         eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
         (year, week, weekday) = get_year_week_and_weekday_from_date(eventdate)
-        while (year < before_year):
+        while year < before_year:
             year += 1
             week -= 53
         if week < before_week:
@@ -44,33 +42,6 @@ def get_last_assignments(events, before_year, before_week, commitments):
 #             sets[task] = []
 #         sets[task].append(person)
 #     return sets
-
-
-def get_comm(orginal):
-    commitments = {}
-    for commitment in orginal:
-        task = commitment['task'].replace('_', ' ')
-        person = commitment['person'].replace('_', ' ')
-        frequency = commitment['frequency']
-        if task not in commitments:
-            commitments[task] = {}
-        commitments[task][person] = frequency
-    return commitments
-
-
-def get_av(orginal):
-    availabilities = {}
-    for availability in orginal:
-        task = availability['task'].replace('_', ' ')
-        person = availability['name'].replace('_', ' ')
-        week = availability['week']
-        available = state_value[availability['state']]
-        if task not in availabilities:
-            availabilities[task] = {}
-        if person not in availabilities[task]:
-            availabilities[task][person] = {}
-        availabilities[task][person][week] = available
-    return availabilities
 
 
 def delete_assignment(uid):
@@ -177,7 +148,7 @@ def update_last_assignments():
         for assignment in event['assignments']['list']:
             eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
             year, week, weekday = get_year_week_and_weekday_from_date(eventdate)
-            if year < this_year:
+            if year < base_year:
                 week -= 54
             if week < first_week:
                 if (weekday == 7) or (eventdate.month == 12 and eventdate.day == 25):  # Only sunday-tasks or christmas
@@ -297,7 +268,7 @@ def write_availability(filename, persons):
                         availability_file.write(name)
                         for available in availability:
                             availability_file.write(' ')
-                            availability_file.write(state_value[available['state']])
+                            availability_file.write(available['state'])
                         availability_file.write('\n')
             availability_file.write(';\n')
     availability_file.write('end;\n')
@@ -340,26 +311,34 @@ def parse_results(filename):
     return rooster
 
 
+def christmas_on_sunday():
+    return date(base_year, 12, 25).weekday() == 6
+
 def get_date_of_sunday_of_week(week):
-    # Christmas hack
-    if week == "52":
-        return date(2016, 12, 25)
-    elif week == "53":
-        return date(2016, 1, 1) + timedelta(days=7 * (int(week) - 1)) + timedelta(days=2)
+    if not christmas_on_sunday():
+        # Christmas hack
+        if not christmas_on_sunday():
+            if week == "52":
+                return date(base_year, 12, 25)
+        elif int(week) >= 53:
+            return date(base_year, 1, 1) + timedelta(days=7 * (int(week) - 1)) + timedelta(
+                days=date(2016, 1, 1).weekday() - 2)
     # End Christmas hack
-    return date(2016, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=2)
+    return date(base_year, 1, 1) + timedelta(days=7 * int(week)) + timedelta(days=date(2016, 1, 1).weekday() - 2)
 
 
 def get_year_week_and_weekday_from_date(eventdate):
-    # Christmas hack
-    if eventdate == datetime(eventdate.year, 12, 25):
-        return 52, 0
-    # End Christmas hack
+    if not christmas_on_sunday():
+        # Christmas hack
+        if eventdate == datetime(eventdate.year, 12, 25):
+            return 52, 0
+            # End Christmas hack
     year, week, weekday = eventdate.isocalendar()
-    # Christmas hack
-    if week >= 52:
-        week += 1
-    # End Christmas hack
+    if not christmas_on_sunday():
+        # Christmas hack
+        if week >= 52:
+            week += 1
+            # End Christmas hack
     return year, week, weekday
 
 
@@ -403,25 +382,13 @@ def get_task_name_list(tasks):
 
 def get_results(timlim):
     services = Services('http://www.ichthusculemborg.nl/services', auth)
-    availabilities = get_av(services.get_availabilities())
-    del availabilities['Koffie']['Ailine']
-    del availabilities['Koffie']['Lilian']
-    del availabilities['Koffie']['Emma']
-    del availabilities['Hoofdkoster']['Andreas']
-    commitments = get_comm(services.get_commitments())
-    last_assignments = get_last_assignments(services.get_events(), 2016, 13, commitments)
-    del last_assignments['Koffie']['Ailine']
-    del last_assignments['Koffie']['Emma']
-    availabilities['Hoofdkoster']['Herman'] = availabilities['Hoofdkoster']['Herman B']
-    del availabilities['Hoofdkoster']['Herman B']
-    del availabilities['Hulpkoster']['Wilfred']
+    availabilities = services.get_availabilities()
+    commitments = services.get_commitments()
+    last_assignments = get_last_assignments(services.get_events(), base_year, first_week, commitments)
 
     zangleiding = Task('Zangleiding')
-    zangleiding.set_number_needed(37, 0)
 
     muziek = Task('Muziek', True)
-    muziek.set_number_needed(22, 0)
-    muziek.set_number_needed(37, 0)
     muziek.set_essential('Wendy', 5)
     muziek.set_essential('Vena', 5)
     muziek.set_essential('Selicia', 5)
@@ -434,38 +401,15 @@ def get_results(timlim):
     muziek.set_team('Onbezet', ['Onbezet'])
 
     geluid = Task('Geluid')
-    geluid.set_number_needed(22, 0)
-    geluid.set_number_needed(37, 0)
 
     beamer = Task('Beamer')
-    beamer.set_number_needed(37, 0)
 
     leiding_rood = Task('Leiding Rood')
-    leiding_rood.set_number_needed(27, 0)
-    leiding_rood.set_number_needed(28, 0)
-    leiding_rood.set_number_needed(29, 0)
-    leiding_rood.set_number_needed(30, 0)
-    leiding_rood.set_number_needed(31, 0)
-    leiding_rood.set_number_needed(32, 0)
-    leiding_rood.set_number_needed(37, 0)
 
     leiding_wit = Task('Leiding Wit')
-    leiding_wit.set_number_needed(27, 0)
-    leiding_wit.set_number_needed(28, 0)
-    leiding_wit.set_number_needed(29, 0)
-    leiding_wit.set_number_needed(30, 0)
-    leiding_wit.set_number_needed(31, 0)
-    leiding_wit.set_number_needed(32, 0)
-    leiding_wit.set_number_needed(37, 0)
 
     groep_wit = Task('Groep Wit', paired_task='Leiding Wit')
-    groep_wit.set_number_needed(27, 0)
-    groep_wit.set_number_needed(28, 0)
-    groep_wit.set_number_needed(29, 0)
-    groep_wit.set_number_needed(30, 0)
-    groep_wit.set_number_needed(31, 0)
-    groep_wit.set_number_needed(32, 0)
-    groep_wit.set_number_needed(37, 0)
+
     groep_wit.set_pair('Jacolien', 'Thirza')
     groep_wit.set_pair('Xandra', 'Esther')
     groep_wit.set_pair('Yentl', 'Esther')
@@ -484,19 +428,11 @@ def get_results(timlim):
     groep_blauw.set_pair('Miranda', 'Chiara')
 
     gebed = Task('Gebed', default_number_needed=2)
-    gebed.set_number_needed(37, 0)
-    gebed.set_param('min', {'Wenny': 3, 'Jan_P': 3})
-    gebed.set_param('max', {'Wenny': 3, 'Jan_P': 3})
 
     welkom = Task('Welkom')
-    welkom.set_number_needed(37, 0)
-    welkom.set_param('min', {'Wenny': 3})
-    welkom.set_param('max', {'Wenny': 3})
 
     koffie = Task('Koffie', in_teams=True)
-    koffie.set_number_needed(35, 2)
-    koffie.set_number_needed(37, 0)
-    koffie.set_team('Cafe_Roulez', ['Cafe_Roulez'])
+    koffie.set_team('Cafe_Rouler', ['Cafe_Rouler'])
     koffie.set_team('Jacolien', ['Jacolien', 'Miranda'])
     koffie.set_team('Mieke', ['Mieke', 'Lydia', 'Emmely'])
     koffie.set_team('Marieke', ['Marieke', 'Ton'])
@@ -505,22 +441,30 @@ def get_results(timlim):
     koffie.set_team('Dieuwke', ['Dieuwke', 'Hans_M'])
 
     hoofdkoster = Task('Hoofdkoster', succesive_count=2)
-    # hoofdkoster.set_number_needed(37, 0) Geeft problemen met het tweemaal achtereenvolgens inzetten...
 
     hulpkoster = Task('Hulpkoster', default_number_needed=2)
-    hulpkoster.set_number_needed(16, 6)
-    hulpkoster.set_number_needed(18, 3)
-    hulpkoster.set_number_needed(27, 0)
-    hulpkoster.set_number_needed(28, 0)
-    hulpkoster.set_number_needed(29, 0)
-    hulpkoster.set_number_needed(30, 0)
-    hulpkoster.set_number_needed(31, 0)
-    hulpkoster.set_number_needed(32, 0)
-    hulpkoster.set_number_needed(33, 3)
-    hulpkoster.set_number_needed(35, 3)
-    hulpkoster.set_number_needed(37, 0)
-    hulpkoster.set_param('min', {'Levi': 1})
-    hulpkoster.set_param('max', {'Levi': 2})
+
+    # Einde herfstvakantie
+    hulpkoster.set_number_needed(42, 3)  # Matten zuigen
+
+    # Kids Praise 6 november
+    leiding_rood.set_number_needed(44, 0)
+    leiding_wit.set_number_needed(44, 0)
+    groep_wit.set_number_needed(44, 0)
+    leiding_blauw.set_number_needed(44, 2)
+    groep_blauw.set_number_needed(44, 2)
+    hoofdkoster.set_number_needed(44, 2)
+    hulpkoster.set_number_needed(44, 4)
+
+    # Kerst
+    hoofdkoster.set_number_needed(51, 4)
+    hulpkoster.set_number_needed(51, 4)
+
+    # Einde kerstvakantie
+    hulpkoster.set_number_needed(53, 3)
+
+    # Einde voorjaarsvakantie
+    hulpkoster.set_number_needed(61, 3)
 
     dont_exclude = [
         ('Beamer', 'Hulpkoster'),
@@ -551,14 +495,12 @@ def get_results(timlim):
         " {w in Zangleiding_last['Liesbeth_Z']+1..Zangleiding_last['Liesbeth_Z']+7: w >= first_week}:"
         " Zangleiding['Liesbeth_Z',w] = 0;")
 
-    optimize_phase('1', tasks, dont_exclude, specials, [], timlim)
+    optimize_phase('1', tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-
-    specials.ignore_constraint("minimum_.*")
 
     specials.add_var("var wijngaardenbreuk {weeks}, binary;")
     specials.add_objective_term("8 * (sum {w in weeks} wijngaardenbreuk[w])")
@@ -574,8 +516,8 @@ def get_results(timlim):
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
 
-    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_18_dec: Koffie['Cafe Roulez',50] = 0;")
-    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_26_mrt: Koffie['Cafe Roulez',26] = 0;")
+    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_18_dec: Koffie['Cafe Rouler',50] = 0;")
+    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_26_mrt: Koffie['Cafe Rouler',26] = 0;")
 
     specials.add_var("var matthijszonderlianne, binary;")
     specials.add_objective_term("10 * matthijszonderlianne")

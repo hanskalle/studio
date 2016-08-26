@@ -54,11 +54,10 @@ class Generator:
         model = []
         for task in self.tasks:
             model.extend(task.get_sets())
-        model.append('param first_week, integer, >= 0;')
-        model.append('param last_week, integer, <= 53;')
+        model.append('param first_week, integer;')
+        model.append('param last_week, integer;')
         model.append('param number_of_weeks := last_week - first_week+1;')
         model.append('set weeks := first_week .. last_week;')
-        model.append('set weeks_extended := (first_week-number_of_weeks+2) .. (last_week+number_of_weeks-2);')
         for task in self.tasks:
             model.extend(task.get_params())
         for task in self.tasks:
@@ -220,7 +219,7 @@ class Task:
                           'default %(succesive_count)d * '
                           'ceil(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append(
-                'param %(name)s_last {x in %(name)s_persons}, integer, < first_week, default -53;' % self.dict)
+                'param %(name)s_last {x in %(name)s_persons}, integer, < first_week, default -100;' % self.dict)
         return params
 
     def get_vars(self):
