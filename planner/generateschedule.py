@@ -108,18 +108,18 @@ def write_last_assignments(filename, last_assignments, tasks):
 
 def write_availabilities(filename, availabilities, tasks):
     with open(filename, 'w') as f:
-        f.write("param first_week := 13;\n")
-        f.write("param last_week := 38;\n")
+        f.write("param first_week := 39;\n")
+        f.write("param last_week := 64;\n")
         for task in availabilities:
             if task in tasks:
                 f.write('param ' + task.replace(' ', '_') + '_available :\n')
                 f.write('\t\t\t')
-                for week in range(13, 39):
+                for week in range(39, 64 + 1):
                     f.write('\t%d' % week)
                 f.write(' :=\n')
                 for person in sorted(availabilities[task].keys()):
                     f.write('\t%s\t' % person.replace(' ', '_'))
-                    for week in range(13, 39):
+                    for week in range(39, 64 + 1):
                         key = str(week)
                         f.write('\t%s' % availabilities[task][person][key])
                     f.write('\n')
@@ -127,17 +127,18 @@ def write_availabilities(filename, availabilities, tasks):
         f.write('end;\n')
 
 
-def write_commitments_new(filename, commitments):
+def write_commitments(filename, commitments, tasks):
     with open(filename, 'w') as f:
         for task, persons in commitments.items():
-            f.write("set %s_persons :=" % task.replace(' ', '_'))
-            for person in persons:
-                f.write(" %s" % person.replace(' ', '_'))
-            f.write(";\n")
-            f.write("param %s_ritme :=\n" % task.replace(' ', '_'))
-            for person, frequency in persons.items():
-                f.write("\t%s\t%s\n" % (person.replace(' ', '_'), frequency))
-            f.write(";\n")
+            if task.replace(' ', '_') in tasks:
+                f.write("set %s_persons :=" % task.replace(' ', '_'))
+                for person in persons:
+                    f.write(" %s" % person.replace(' ', '_'))
+                f.write(";\n")
+                f.write("param %s_ritme :=\n" % task.replace(' ', '_'))
+                for person, frequency in persons.items():
+                    f.write("\t%s\t%s\n" % (person.replace(' ', '_'), frequency))
+                f.write(";\n")
         f.write('end;\n')
 
 
@@ -275,7 +276,7 @@ def write_availability(filename, persons):
     availability_file.close()
 
 
-def write_commitments(filename, commitments):
+def write_commitments_old(filename, commitments):
     commitments_file = open(filename, 'w')
     tasks = set([commitment['task'] for commitment in commitments])
     for task in tasks:
@@ -395,9 +396,11 @@ def get_results(timlim):
     muziek.set_essential('David', 5)
     muziek.set_essential('Rosalie', 10)
     muziek.set_essential('Xandra', 10)
+    muziek.set_team('Tim_alleen', ['Tim'])
     muziek.set_team('Tim', ['Tim', 'Vena', 'Rosalie', 'Xandra'])
-    muziek.set_team('Peter', ['Peter', 'Rosalie', 'Jonathan', 'Wendy'])
+    muziek.set_team('Jonathan', ['Jonathan', 'Rosalie', 'Wendy', 'Selicia'])
     muziek.set_team('Johan', ['Johan', 'Hans_Z', 'David'])
+    muziek.set_team('Gelegenheidsband', ['Gelegenheidsband'])
     muziek.set_team('Onbezet', ['Onbezet'])
 
     geluid = Task('Geluid')
@@ -410,11 +413,12 @@ def get_results(timlim):
 
     groep_wit = Task('Groep Wit', paired_task='Leiding Wit')
 
-    groep_wit.set_pair('Jacolien', 'Thirza')
-    groep_wit.set_pair('Xandra', 'Esther')
-    groep_wit.set_pair('Yentl', 'Esther')
     groep_wit.set_pair('Dieuwke', 'Emma')
-    groep_wit.set_pair('Lianne', 'David')
+    groep_wit.set_pair('Jacolien', 'Esther')
+    groep_wit.set_pair('Elsa', 'Esther')
+    groep_wit.set_pair('Elsa', 'Ferdinand')
+    groep_wit.set_pair('Marian', 'Jannienke')
+    groep_wit.set_pair('Lianne', 'Thirza')
 
     leiding_blauw = Task('Leiding Blauw')
 
@@ -434,13 +438,13 @@ def get_results(timlim):
     koffie = Task('Koffie', in_teams=True)
     koffie.set_team('Cafe_Rouler', ['Cafe_Rouler'])
     koffie.set_team('Jacolien', ['Jacolien', 'Miranda'])
-    koffie.set_team('Mieke', ['Mieke', 'Lydia', 'Emmely'])
+    koffie.set_team('Mieke', ['Mieke', 'Emmely'])
     koffie.set_team('Marieke', ['Marieke', 'Ton'])
     koffie.set_team('Monika', ['Monika', 'Rinus'])
     koffie.set_team('Nora', ['Nora', 'Wim_R'])
     koffie.set_team('Dieuwke', ['Dieuwke', 'Hans_M'])
 
-    hoofdkoster = Task('Hoofdkoster', succesive_count=2)
+    hoofdkoster = Task('Hoofdkoster', succesive_count=1)
 
     hulpkoster = Task('Hulpkoster', default_number_needed=2)
 
@@ -461,16 +465,16 @@ def get_results(timlim):
     hulpkoster.set_number_needed(51, 4)
 
     # Einde kerstvakantie
-    hulpkoster.set_number_needed(53, 3)
+    hulpkoster.set_number_needed(53, 3)  # Matten zuigen
 
     # Einde voorjaarsvakantie
-    hulpkoster.set_number_needed(61, 3)
+    hulpkoster.set_number_needed(61, 3)  # Matten zuigen
 
     dont_exclude = [
         ('Beamer', 'Hulpkoster'),
+        ('Leiding_Blauw', 'Welkom'),
         ('Groep_Blauw', 'Welkom'),
         ('Hulpkoster', 'Welkom'),
-        ('Leiding_Blauw', 'Welkom'),
         ('Muziek', 'Zangleiding'),
         ('Leiding_Rood', 'Leiding_Wit'),
         ('Gebed', 'Welkom')]
@@ -478,10 +482,31 @@ def get_results(timlim):
     specials = Specials()
     fixes = []
 
+    # tasks = [hoofdkoster]
+    # write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
+    # write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+    # write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
+    # optimize_phase(tasks, dont_exclude, specials, fixes, "0")
+    # return parse_results('results.txt')
+
+
+
+    for task in [zangleiding, muziek, geluid, leiding_rood, leiding_wit, leiding_blauw, beamer, welkom, koffie,
+                 hoofdkoster, gebed, hulpkoster]:
+        tasks = [task]
+        write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
+        write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+        write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
+        if optimize_phase(tasks, dont_exclude, specials, fixes, "5"):
+            exit(1)
+
+
+
     tasks = [zangleiding, muziek, geluid]
-    # tasks = [zangleiding, muziek, geluid, leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw, beamer, welkom, koffie, hoofdkoster, gebed, hulpkoster]
+    print(get_task_name_list(tasks))
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
 
     specials.add_constraint(
         "subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team"
@@ -489,18 +514,19 @@ def get_results(timlim):
         " Muziek[p,w] >= Zangleiding[p,w];")
     specials.add_constraint(
         "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken {w in first_week..last_week-7}:"
-        " sum {w2 w..w+7} Zangleiding['Liesbeth_Z',w] <= 1;")
+        " sum {w2 in w..w+7} Zangleiding['Liesbeth_Z',w] <= 1;")
     specials.add_constraint(
         "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken_historisch"
         " {w in Zangleiding_last['Liesbeth_Z']+1..Zangleiding_last['Liesbeth_Z']+7: w >= first_week}:"
         " Zangleiding['Liesbeth_Z',w] = 0;")
 
-    optimize_phase('1', tasks, dont_exclude, specials, fixes, timlim)
+    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
 
     specials.add_var("var wijngaardenbreuk {weeks}, binary;")
     specials.add_objective_term("8 * (sum {w in weeks} wijngaardenbreuk[w])")
@@ -509,15 +535,16 @@ def get_results(timlim):
     specials.add_constraint("subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt {w in weeks}:"
                             " Leiding_Blauw['Rachel',w] <= Leiding_Rood['Tim',w] + wijngaardenbreuk[w];")
 
-    optimize_phase('2', tasks, dont_exclude, specials, fixes, timlim)
+    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([beamer, welkom, koffie, hoofdkoster])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
 
-    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_18_dec: Koffie['Cafe Rouler',50] = 0;")
-    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_26_mrt: Koffie['Cafe Rouler',26] = 0;")
+    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_18_dec: Koffie['Cafe_Rouler',50] = 0;")
+    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_26_mrt: Koffie['Cafe_Rouler',64] = 0;")
 
     specials.add_var("var matthijszonderlianne, binary;")
     specials.add_objective_term("10 * matthijszonderlianne")
@@ -528,12 +555,13 @@ def get_results(timlim):
     specials.add_constraint("subject to Als_Lianne_welkom_doet_is_Matthijs_hoofdkoster {w in weeks}:"
                             " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs;")
 
-    optimize_phase('3', tasks, dont_exclude, specials, fixes, timlim)
+    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([gebed])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
 
     specials.add_var("set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};")
     specials.add_constraint("subject to Rachel_geen_gebed_met_man {w in weeks}:"
@@ -549,38 +577,39 @@ def get_results(timlim):
     specials.add_constraint("subject to Wenny_gebed_met_Jan_P {w in weeks}:"
                             " Gebed['Wenny',w] <= Gebed['Jan_P',w];")
 
-    optimize_phase('4', tasks, dont_exclude, specials, fixes, timlim)
+    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([hulpkoster])
     write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-
-    # specials.add_constraint("subject to Jolanda_geen_zangleiding_tegelijkertijd_met_Wim_A_hulpkoster {w in weeks}:"
-    #                         " Zangleiding['Jolanda',w] + Hulpkoster['Wim_A',w] <= 1;")
-    # specials.add_constraint("subject to Roel_hulpkoster_met_hoofdkoster_Herman {w in weeks}:"
-    #                         " Hulpkoster['Roel',w] <= Hoofdkoster['Herman',w];")
-
-    optimize_phase('', tasks, dont_exclude, specials, fixes, timlim)
+    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
+    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
     return parse_results('results.txt')
 
 
-def optimize_phase(phase, tasks, dont_exclude, specials, fixes, timlim):
+def optimize_phase(tasks, dont_exclude, specials, fixes, timlim):
     import subprocess
     import createmodel
+    import os
 
-    print("################## Phase %s ##################" % phase)
+    print("#### %s ####" % ', '.join(get_task_name_list(tasks)))
     createmodel.Generator(tasks, specials=specials, dont_exclude=dont_exclude, fixes=fixes).write('gen.mod',
                                                                                                   'planner.dat')
-    subprocess.check_call(
+    return_code = subprocess.call(
         ['glpsol',
          '--tmlim', timlim,
          '--model', 'gen.mod',
          '--data', 'planner.dat',
-         '--data', 'commitments%s.dat' % phase,
+         '--data', 'commitments.dat',
          '--data', 'last.dat',
          '--data', 'availability.dat',
          '-y', 'results.txt'])
+    if return_code == 0:
+        size = os.stat('results.txt').st_size
+        if size == 0:
+            return_code = -1
+    return return_code
 
 
 def write_markup(filename, rooster):
@@ -594,7 +623,7 @@ def write_markup(filename, rooster):
         markup_file.write('week ')
         markup_file.write(week)
         markup_file.write(',')
-        markup_file.write(rooster[week]['datum'].strftime('%d-%M-%Y'))
+        markup_file.write(rooster[week]['datum'].strftime('%d-%m-%Y'))
         markup_file.write(',')
         for column in columns:
             names = []

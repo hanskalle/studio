@@ -72,9 +72,16 @@ class Services:
         return availabilities
 
     def post_availability(self, uid, name, task, week, state):
-        data = {'uid': uid, 'name': name, 'task': task, 'week': week, 'state': state}
-        r = requests.post(self.environment + '/availabilities', data, auth=self.credentials)
-        assert r.status_code == 200
+        url = "%s/availabilities" % self.environment
+        data = json.dumps({
+            'uid': uid,
+            'name': name,
+            'task': task,
+            'week': week,
+            'state': state
+        })
+        r = requests.post(url, data, auth=self.credentials)
+        assert (r.status_code == 200)
         return r.text
 
     def get_assignments(self):

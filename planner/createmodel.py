@@ -33,7 +33,7 @@ class Generator:
         self.tasks = tasks
         self.specials = specials
         self.dont_exclude = dont_exclude
-        if fixes is None:
+        if fixes is not None:
             self.fixes = fixes
         else:
             self.fixes = []
@@ -474,7 +474,7 @@ class Task:
         checks = []
         if self.paired_task is None and not self.in_teams:
             checks.append(
-                'check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) >= (sum {w in weeks} %(name)s_number_needed[w]) / number_of_weeks - 0.001;' % self.dict)
+                'check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) >= (sum {w in weeks} %(name)s_number_needed[w]) / number_of_weeks - 0.5;' % self.dict)
             checks.append(
                 'check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) <= (sum {w in weeks} %(name)s_number_needed[w]) / number_of_weeks + 0.5;' % self.dict)
         if self.in_teams:

@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from services import Services
+
 domain = 'http://www.ichthusculemborg.nl/services'
 
 
@@ -7,6 +9,20 @@ def exists(availabilities, person, task, week):
         if person in availabilities[task]:
             return week in availabilities[task][person]
     return False
+
+
+def insert_missing_persons(services):
+    persons = services.get_missing_persons()
+    if persons:
+        for person in persons:
+            match = services.get_persons_matching(person['person'])
+            if len(match) == 1:
+                print(services.post_person(person['person'], match[0]['persoonid'], match[0]['email']))
+            else:
+                print(services.post_person(person['person'], '0', 'rooster@ichthusculemborg.nl'))
+        print("Database is geupdate.")
+    else:
+        print("Database is al up-to-date.")
 
 
 def show_help():
@@ -20,7 +36,6 @@ if __name__ == "__main__":
     import sys
     import getopt
     import getpass
-    from services import Services
 
     from_week = 40
     till_week = 52
@@ -44,6 +59,8 @@ if __name__ == "__main__":
         sys.exit(2)
     print('get password')
     password = getpass.getpass('Password for hans.kalle@telfort.nl: ')
+    print('insert missing persons')
+    insert_missing_persons(services)
     print('get persons')
     services = Services(domain, ('hans.kalle@telfort.nl', password))
     persons = services.get_persons()
@@ -56,7 +73,6 @@ if __name__ == "__main__":
     print(availabilities)
     for task in commitments:
         for person in commitments[task]:
-            if person not in ["In_de_dienst", "Niemand"]:
-                for week in range(from_week, till_week + 1):
-                    if not exists(availabilities, task, person, week):
-                        print(services.post_availability(persons[person]['uid'], person, task, week, "yes"))
+            for week in range(from_week, till_week + 1):
+                if not exists(availabilities, task, person, week):
+                    print(services.post_availability(persons[person]['uid'], person, task, week, "yes"))
