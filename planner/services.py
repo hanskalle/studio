@@ -10,7 +10,7 @@ class Services:
         self.state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
 
     @staticmethod
-    def get_uid(self):
+    def get_uid():
         import random
         import string
         return ''.join(random.choice(string.digits + "ABCDEF") for _ in range(32))

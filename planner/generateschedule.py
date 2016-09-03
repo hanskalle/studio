@@ -33,17 +33,6 @@ def get_last_assignments(events, before_year, before_week, commitments):
     return last_assigments
 
 
-# def get_sets(commitments):
-#     sets = {}
-#     for commitment in commitments:
-#         task = commitment['task']
-#         person = commitment['person']
-#         if task not in sets:
-#             sets[task] = []
-#         sets[task].append(person)
-#     return sets
-
-
 def delete_assignment(uid):
     url = "http://" + host + "/services/assignments/" + uid
     r = requests.delete(url, auth=auth)
@@ -107,6 +96,7 @@ def write_last_assignments(filename, last_assignments, tasks):
 
 
 def write_availabilities(filename, availabilities, tasks):
+    count = 0
     with open(filename, 'w') as f:
         f.write("param first_week := 39;\n")
         f.write("param last_week := 64;\n")
@@ -122,9 +112,12 @@ def write_availabilities(filename, availabilities, tasks):
                     for week in range(39, 64 + 1):
                         key = str(week)
                         f.write('\t%s' % availabilities[task][person][key])
+                        if availabilities[task][person][key] != '0':
+                            count += 1
                     f.write('\n')
                 f.write(';\n')
         f.write('end;\n')
+        print("Aantal opties:", count)
 
 
 def write_commitments(filename, commitments, tasks):
@@ -142,63 +135,10 @@ def write_commitments(filename, commitments, tasks):
         f.write('end;\n')
 
 
-def update_last_assignments():
-    last_assignments = {}
-    events = get_events()
-    for event in events:
-        for assignment in event['assignments']['list']:
-            eventdate = datetime.strptime(event['start'][:19], '%Y-%m-%dT%H:%M:%S')
-            year, week, weekday = get_year_week_and_weekday_from_date(eventdate)
-            if year < base_year:
-                week -= 54
-            if week < first_week:
-                if (weekday == 7) or (eventdate.month == 12 and eventdate.day == 25):  # Only sunday-tasks or christmas
-                    task = assignment['task']
-                    person = assignment['person'].replace(' ', '_')
-                    if ',' in person:
-                        persons = person
-                        for person in persons.split(','):
-                            person = person.strip()
-                            add_last_assigment(last_assignments, task, person, week)
-                    else:
-                        add_last_assigment(last_assignments, task, person, week)
-    availability = get_persons()
-    sets = get_sets_old()
-    f = open('last.dat', 'w')
-    for task in get_tasks(availability):
-        if task[:6] != 'Groep ':
-            original_task = task
-            if task[:8] == 'Leiding ':
-                task = task[8:]
-            if task[:5] == 'Hoofd':
-                task = 'Koster'
-            if task[:4] == 'Hulp':
-                task = 'Koster'
-            if original_task in sets:
-                f.write('param ' + original_task.replace(' ', '_') + '_last default -53 :=\n')
-                if task in last_assignments:
-                    for person in sorted(last_assignments[task]):
-                        if person in sets[original_task]:
-                            f.write('\t%s\t%d\n' % (person.replace(' ', '_'), last_assignments[task][person]))
-                f.write(';\n')
-    f.write('end;\n')
-    f.close()
-
-
 def add_last_assigment(last_assignments, task, person, week):
     if task not in last_assignments:
         last_assignments[task] = {}
     last_assignments[task][person] = week
-
-
-def update_availability():
-    persons = get_persons()
-    write_availability('availability.dat', persons)
-
-
-def update_commitments():
-    commitments = get_commitments()
-    write_commitments('commitments.dat', commitments)
 
 
 def get_persons():
@@ -247,58 +187,6 @@ def get_availability(person, taskname):
     return None
 
 
-def write_availability(filename, persons):
-    sets = get_sets_old()
-    availability_file = open(filename, 'w')
-    weeks = list(get_weeks(persons))
-    availability_file.write('param first_week := ' + weeks[0] + ';\n')
-    availability_file.write('param last_week := ' + weeks[-1] + ';\n')
-    for task in get_tasks(persons):
-        if task in sets:
-            availability_file.write('param %s_available:\n' % task.replace(' ', '_'))
-            for week in weeks:
-                availability_file.write(' ')
-                availability_file.write(week)
-            availability_file.write(':=\n')
-            for person in sorted(persons):
-                availability = get_availability(person, task)
-                name = person['name']
-                if name in sets[task]:
-                    name = name.replace(' ', '_')
-                    if availability is not None:
-                        availability_file.write(name)
-                        for available in availability:
-                            availability_file.write(' ')
-                            availability_file.write(available['state'])
-                        availability_file.write('\n')
-            availability_file.write(';\n')
-    availability_file.write('end;\n')
-    availability_file.close()
-
-
-def write_commitments_old(filename, commitments):
-    commitments_file = open(filename, 'w')
-    tasks = set([commitment['task'] for commitment in commitments])
-    for task in tasks:
-        commitments_file.write('set %s_persons := ' % task.replace(' ', '_'))
-        for commitment in commitments:
-            if commitment['task'] == task:
-                commitments_file.write(commitment['person'].replace(' ', '_'))
-                commitments_file.write(' ')
-        commitments_file.write(';\n')
-        commitments_file.write('param %s_ritme := \n' % task.replace(' ', '_'))
-        for commitment in commitments:
-            if commitment['task'] == task:
-                commitments_file.write('\t')
-                commitments_file.write(commitment['person'].replace(' ', '_'))
-                commitments_file.write(' ')
-                commitments_file.write(commitment['frequency'])
-                commitments_file.write('\n')
-        commitments_file.write(';\n')
-    commitments_file.write('end;\n')
-    commitments_file.close()
-
-
 def parse_results(filename):
     import re
     pattern = re.compile("(?P<task>[A-Za-z_]+)\[(?P<person>[A-Za-z_]+),(?P<week>[0-9]+)\]\.val = 1")
@@ -314,6 +202,7 @@ def parse_results(filename):
 
 def christmas_on_sunday():
     return date(base_year, 12, 25).weekday() == 6
+
 
 def get_date_of_sunday_of_week(week):
     if not christmas_on_sunday():
@@ -357,22 +246,10 @@ def add_person(rooster, week, task, person):
     rooster[week][task].append(person)
 
 
-def get_commitments():
-    import requests
-    import json
-    r = requests.get("http://" + host + "/services/commitments", auth=auth)
-    assert r.status_code == 200
-    return json.loads(r.text)
-
-
-def get_sets_old():
-    sets = {}
-    for commitment in get_commitments():
-        if not commitment['task'] in sets:
-            sets[commitment['task']] = []
-        sets[commitment['task']].append(commitment['person'])
-    return sets
-
+def show_fixes(fixes, sel_task, sel_person):
+    for fix in fixes:
+        if fix[0] == sel_task and fix[1] == sel_person:
+            print(fix)
 
 def get_task_name_list(tasks):
     names = []
@@ -400,7 +277,6 @@ def get_results(timlim):
     muziek.set_team('Tim', ['Tim', 'Vena', 'Rosalie', 'Xandra'])
     muziek.set_team('Jonathan', ['Jonathan', 'Rosalie', 'Wendy', 'Selicia'])
     muziek.set_team('Johan', ['Johan', 'Hans_Z', 'David'])
-    muziek.set_team('Gelegenheidsband', ['Gelegenheidsband'])
     muziek.set_team('Onbezet', ['Onbezet'])
 
     geluid = Task('Geluid')
@@ -452,17 +328,21 @@ def get_results(timlim):
     hulpkoster.set_number_needed(42, 3)  # Matten zuigen
 
     # Kids Praise 6 november
-    leiding_rood.set_number_needed(44, 0)
     leiding_wit.set_number_needed(44, 0)
     groep_wit.set_number_needed(44, 0)
     leiding_blauw.set_number_needed(44, 2)
     groep_blauw.set_number_needed(44, 2)
     hoofdkoster.set_number_needed(44, 2)
     hulpkoster.set_number_needed(44, 4)
+    koffie.set_number_needed(44, 2)
 
     # Kerst
     hoofdkoster.set_number_needed(51, 4)
     hulpkoster.set_number_needed(51, 4)
+    leiding_wit.set_number_needed(51, 0)
+    groep_wit.set_number_needed(51, 0)
+    leiding_blauw.set_number_needed(51, 0)
+    groep_blauw.set_number_needed(51, 0)
 
     # Einde kerstvakantie
     hulpkoster.set_number_needed(53, 3)  # Matten zuigen
@@ -472,7 +352,6 @@ def get_results(timlim):
 
     dont_exclude = [
         ('Beamer', 'Hulpkoster'),
-        ('Leiding_Blauw', 'Welkom'),
         ('Groep_Blauw', 'Welkom'),
         ('Hulpkoster', 'Welkom'),
         ('Muziek', 'Zangleiding'),
@@ -482,87 +361,95 @@ def get_results(timlim):
     specials = Specials()
     fixes = []
 
-    # tasks = [hoofdkoster]
+    # tasks = [gebed]
     # write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
     # write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
     # write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
-    # optimize_phase(tasks, dont_exclude, specials, fixes, "0")
+    # if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+    #     exit(1)
     # return parse_results('results.txt')
 
+    # for task in [zangleiding, muziek, geluid, leiding_rood, leiding_wit, leiding_blauw, beamer, welkom, koffie,
+    #              hoofdkoster, gebed, hulpkoster]:
+    #     tasks = [task]
+    #     if optimize_phase(tasks, dont_exclude, specials, fixes, "10", last_assignments, availabilities, commitments):
+    #         exit(1)
+
+    # tasks = [zangleiding, muziek, geluid, leiding_rood, leiding_wit, leiding_blauw, beamer, welkom, koffie,
+    #          hoofdkoster, gebed, hulpkoster]
+    # if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+    #     exit(1)
 
 
-    for task in [zangleiding, muziek, geluid, leiding_rood, leiding_wit, leiding_blauw, beamer, welkom, koffie,
-                 hoofdkoster, gebed, hulpkoster]:
-        tasks = [task]
-        write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
-        write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-        write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
-        if optimize_phase(tasks, dont_exclude, specials, fixes, "5"):
-            exit(1)
+    tasks = []
 
-
-
-    tasks = [zangleiding, muziek, geluid]
-    print(get_task_name_list(tasks))
-    write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
-    write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
-
+    tasks = [zangleiding, muziek, geluid, hoofdkoster]
+    specials.add_constraint("subject to Jolanda_doet_de_Kids_Praise: Zangleiding['Jolanda', 44] = 1;")
+    specials.add_var("var hansteveel {weeks}, binary;")
+    specials.add_objective_term("500 * (sum {w in weeks} hansteveel[w])")
+    specials.add_constraint("subject to Hans_D_niet_3_zondagen_achter_elkaar {w in first_week+2..last_week}:"
+                            "(sum {w2 in w-2..w} (  Hoofdkoster['Hans_D',w2] + Geluid['Hans_D',w2]))  <= 2 + hansteveel[w];")
     specials.add_constraint(
         "subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team"
         " {p in Zangleiding_persons inter Muziek_leaders, w in weeks}:"
         " Muziek[p,w] >= Zangleiding[p,w];")
     specials.add_constraint(
-        "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken {w in first_week..last_week-7}:"
-        " sum {w2 in w..w+7} Zangleiding['Liesbeth_Z',w] <= 1;")
+        "subject to Liesbeth_Z_minimaal_7_diensten_rust_tussendoor {w in first_week+7..last_week}:"
+        " (sum {w2 in w-7..w} Zangleiding['Liesbeth_Z',w2]) <= 1;")
     specials.add_constraint(
         "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken_historisch"
         " {w in Zangleiding_last['Liesbeth_Z']+1..Zangleiding_last['Liesbeth_Z']+7: w >= first_week}:"
         " Zangleiding['Liesbeth_Z',w] = 0;")
-
-    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
+    specials.add_constraint(
+        "subject to Onbezet_alleen_bij_Ramon_of_Hans_K_Zangleiding {w in (weeks diff {44, 51, 52})}:"
+        " Muziek['Onbezet',w] <= (Zangleiding['Hans_K',w] + Zangleiding['Ramon',w]);")
+    specials.add_constraint("subject to Gelegenheidsband_bij_Kids_Praise: Muziek['Onbezet',44] = 1;")
+    specials.add_constraint("subject to Gelegenheidsband_bij_Kerst: Muziek['Onbezet',51] = 1;")
+    if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+        exit(1)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
+    show_fixes(fixes, 'Zangleiding', 'Tim')
 
     tasks.extend([leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw])
-    write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
-    write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
-
+    specials.add_constraint("subject to Rood_in_de_dienst_bij_Kids_Praise: Leiding_Rood['In_de_dienst',44] = 1;")
+    specials.add_constraint("subject to Rood_in_de_dienst_bij_Kerst: Leiding_Rood['In_de_dienst',51] = 1;")
     specials.add_var("var wijngaardenbreuk {weeks}, binary;")
-    specials.add_objective_term("8 * (sum {w in weeks} wijngaardenbreuk[w])")
+    specials.add_objective_term("40 * (sum {w in weeks} wijngaardenbreuk[w])")
+    specials.add_var("var broekhofbreuk {weeks}, binary;")
+    specials.add_objective_term("20 * (sum {w in weeks} broekhofbreuk[w])")
+    specials.add_constraint("subject to Rood_niet_in_de_dienst_als_Muziek_onbezet_is {w in (weeks diff {44, 51})}:"
+                            " Leiding_Rood['In_de_dienst',w] + Muziek['Onbezet',w] <= 1;")
+    specials.add_constraint("subject to Mirjam_leidt_groep_Blauw_wanneer_Jan_Martijn_groep_Rood_leidt {w in weeks}:"
+                            " Leiding_Rood['Jan_Martijn',w] <= Leiding_Blauw['Mirjam',w] + broekhofbreuk[w];")
+    specials.add_constraint("subject to Jan_Martijn_leidt_groep_Rood_wanneer_Mirjam_groep_Blauw_leidt {w in weeks}:"
+                            " Leiding_Blauw['Mirjam',w] <= Leiding_Rood['Jan_Martijn',w] + broekhofbreuk[w];")
     specials.add_constraint("subject to Rachel_leidt_groep_Blauw_wanneer_Tim_groep_Rood_leidt {w in weeks}:"
                             " Leiding_Rood['Tim',w] <= Leiding_Blauw['Rachel',w] + wijngaardenbreuk[w];")
     specials.add_constraint("subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt {w in weeks}:"
                             " Leiding_Blauw['Rachel',w] <= Leiding_Rood['Tim',w] + wijngaardenbreuk[w];")
-
-    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
+    if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+        exit(1)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
-    tasks.extend([beamer, welkom, koffie, hoofdkoster])
-    write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
-    write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
+    tasks.extend([beamer])
+    if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+        exit(1)
+    fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
-    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_18_dec: Koffie['Cafe_Rouler',50] = 0;")
-    specials.add_constraint("subject to VissenCom_dus_geen_cafe_rouler_26_mrt: Koffie['Cafe_Rouler',64] = 0;")
-
-    specials.add_var("var matthijszonderlianne, binary;")
-    specials.add_objective_term("10 * matthijszonderlianne")
+    tasks.extend([welkom, koffie])
+    specials.add_var("var matthijszonderlianne {weeks}, binary;")
+    specials.add_objective_term("10 * (sum {w in weeks} matthijszonderlianne[w])")
     specials.add_constraint("subject to Als_Matthuis_hoofdkoster_is_doet_Lianne_welkom {w in weeks}:"
-                            " Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne;")
-    specials.add_var("var liannezondermatthijs, binary;")
-    specials.add_objective_term("20 * liannezondermatthijs")
+                            " Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne[w];")
+    specials.add_var("var liannezondermatthijs {weeks}, binary;")
+    specials.add_objective_term("20 * (sum {w in weeks} liannezondermatthijs[w])")
     specials.add_constraint("subject to Als_Lianne_welkom_doet_is_Matthijs_hoofdkoster {w in weeks}:"
-                            " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs;")
-
-    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
+                            " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs[w];")
+    if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+        exit(1)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([gebed])
-    write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
-    write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
-
     specials.add_var("set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};")
     specials.add_constraint("subject to Rachel_geen_gebed_met_man {w in weeks}:"
                             " Gebed['Rachel',w] <= 1 - (sum {p in gebedsmannen} Gebed[p,w]);")
@@ -576,28 +463,34 @@ def get_results(timlim):
                             " Gebed['Liesbeth_Z',w] <= Gebed['Hans_Z',w];")
     specials.add_constraint("subject to Wenny_gebed_met_Jan_P {w in weeks}:"
                             " Gebed['Wenny',w] <= Gebed['Jan_P',w];")
-
-    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
+    if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+        exit(1)
     fixes = get_fixes('results.txt', get_task_name_list(tasks))
 
     tasks.extend([hulpkoster])
-    write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
-    write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
-    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
-    optimize_phase(tasks, dont_exclude, specials, fixes, timlim)
+    specials.add_var("var roelhermanbreuk {weeks}, binary;")
+    specials.add_objective_term("5 * (sum {w in weeks} roelhermanbreuk[w])")
+    specials.add_constraint("subject to Roel_liefst_Hulpkoster_met_Hoofdkoster_Herman_B {w in weeks}:"
+                            "Hulpkoster['Roel',w] <= Hoofdkoster['Herman_B',w] + roelhermanbreuk[w];")
+    if optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
+        exit(1)
     return parse_results('results.txt')
 
 
-def optimize_phase(tasks, dont_exclude, specials, fixes, timlim):
+def optimize_phase(tasks, dont_exclude, specials, fixes, timlim, last_assignments, availabilities, commitments):
     import subprocess
     import createmodel
     import os
 
     print("#### %s ####" % ', '.join(get_task_name_list(tasks)))
+    write_last_assignments('last.dat', last_assignments, get_task_name_list(tasks))
+    write_availabilities('availability.dat', availabilities, get_task_name_list(tasks))
+    write_commitments('commitments.dat', commitments, get_task_name_list(tasks))
     createmodel.Generator(tasks, specials=specials, dont_exclude=dont_exclude, fixes=fixes).write('gen.mod',
                                                                                                   'planner.dat')
     return_code = subprocess.call(
         ['glpsol',
+         '--pcost',
          '--tmlim', timlim,
          '--model', 'gen.mod',
          '--data', 'planner.dat',
@@ -651,11 +544,12 @@ def show_file(filename):
         print(line[0:-1])
 
 
-def find_event(events, eventdate, eventtime):
-    start = create_start(eventdate, eventtime)
+def find_event(events, eventdate, description):
+    start = create_start(eventdate, time(10, 00, 00))
     for event in events:
-        if event['start'] == start:
-            return event
+        if event['start'][:11] == start[:11]:
+            if event['description'] == description:
+                return event
     return None
 
 
@@ -673,6 +567,12 @@ def get_fixes(file_in, tasks):
                 week = line[pos2 + 1:-9]
                 fixes.append((task, person, week))
     return fixes
+
+
+def read_passwd(filename):
+    with open(filename, 'r') as f:
+        passwd = f.read()
+    return passwd.strip()
 
 
 def write_rest(rooster):
@@ -693,7 +593,7 @@ def write_rest(rooster):
     eventtime = time(10, 00, 00)
     for week in sorted(weeks):
         eventdate = get_date_of_sunday_of_week(week)
-        existing_event = find_event(existing_events, eventdate, eventtime)
+        existing_event = find_event(existing_events, eventdate, 'Samenkomst')
         if existing_event is None:
             event = create_event(eventdate, time(10, 00, 00), 'Samenkomst', 'KJS', '')
             event_uid = event[0]['uid']
@@ -720,9 +620,9 @@ def write_rest(rooster):
 
 def show_help():
     print(sys.argv[0], ' [-aclp] [-o <filename>] [-h <hostname>] [-t <time-limit>]')
-    print('\t-a\tGet availability from service.')
-    print('\t-c\tGet commitments from service.')
-    print('\t-l\tGet last assignments from service.')
+    # print('\t-a\tGet availability from service.')
+    # print('\t-c\tGet commitments from service.')
+    # print('\t-l\tGet last assignments from service.')
     print('\t-p\tPublish schedule on service.')
     print('\t-o\tWrite output to this file. Default rooster.txt.')
     print('\t-s\tHostname. Default www.ichthusculemborg.nl.')
@@ -732,14 +632,13 @@ def show_help():
 if __name__ == "__main__":
     import sys
     import getopt
-    import getpass
 
-    auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
+    auth = ('hans.kalle@telfort.nl', read_passwd('passwd.txt'))
 
     time_limit = "300"
-    do_get_availability = False
-    do_get_last_assignments = False
-    do_get_commitments = False
+    # do_get_availability = False
+    # do_get_last_assignments = False
+    # do_get_commitments = False
     do_publish = False
     output_filename = 'rooster.txt'
     try:
@@ -749,15 +648,15 @@ if __name__ == "__main__":
         show_help()
         sys.exit(2)
     for opt, arg in opts:
-        if opt == "-a":
-            do_get_availability = True
-        elif opt == "-c":
-            do_get_commitments = True
-        elif opt == '-h':
+        # if opt == "-a":
+        #     do_get_availability = True
+        # elif opt == "-c":
+        #     do_get_commitments = True
+        if opt == '-h':
             show_help()
             sys.exit()
-        elif opt == "-l":
-            do_get_last_assignments = True
+        # elif opt == "-l":
+        #     do_get_last_assignments = True
         elif opt == "-o":
             output_filename = arg
         elif opt == "-p":
@@ -766,17 +665,8 @@ if __name__ == "__main__":
             host = arg
         elif opt == "-t":
             time_limit = arg
-    if do_get_availability or do_publish or do_get_last_assignments or do_get_commitments:
-        auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
-    if do_get_last_assignments:
-        update_last_assignments()
-        print('Laatste inzet opgehaald.')
-    if do_get_availability:
-        update_availability()
-        print('Beschikbaarheid opgehaald.')
-    if do_get_commitments:
-        update_commitments()
-        print('Inzet opgehaald.')
+    # if do_get_availability or do_publish or do_get_last_assignments or do_get_commitments:
+    #     auth = ('hans.kalle@telfort.nl', getpass.getpass('Password for hans: '))
     new_rooster = get_results(time_limit)
     write_markup(output_filename, new_rooster)
     if do_publish:

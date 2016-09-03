@@ -48,6 +48,16 @@ class Generator:
             overrides.append(name)
         return overrides
 
+    def get_display_lines(self):
+        import re
+
+        lines = []
+        for var in self.specials.vars:
+            varname = re.split(r'[ \t:,{\s]\s*', var)[1]
+            lines.append("display %s;" % varname)
+        lines.append('display penalties;')
+        return lines
+
     @property
     def model(self):
         overrides = self.get_overrides()
@@ -80,7 +90,7 @@ class Generator:
         model.append('solve;')
         for task in self.tasks:
             model.extend(task.get_display_lines())
-        # model.extend(self.specials.displays, 'display')
+        model.extend(self.get_display_lines())
         model.append('end;')
         return model
 
@@ -207,17 +217,17 @@ class Task:
                           'default %(succesive_count)d * floor((sum {w in weeks} %(name)s_number_needed[w])'
                           '/ %(default_number_needed)d / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * ceil((sum {w in weeks} %(name)s_number_needed[w])'
+                          'default %(succesive_count)d * ceil((sum {w in weeks} %(name)s_number_needed[w]) '
                           '/ %(default_number_needed)d / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append('param %(name)s_not_prefered_pair_penalty, >=0, default 30;' % self.dict)
         else:
             params.append('param %(name)s_ritme {p in %(name)s_persons}, >=1;' % self.dict)
             params.append('param %(name)s_min {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * '
-                          'floor(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
+                          'default %(succesive_count)d * floor((sum {w in weeks} %(name)s_number_needed[w]) '
+                          '/ %(default_number_needed)d / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append('param %(name)s_max {p in %(name)s_persons}, integer, >=0, '
-                          'default %(succesive_count)d * '
-                          'ceil(number_of_weeks / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
+                          'default %(succesive_count)d * ceil((sum {w in weeks} %(name)s_number_needed[w]) '
+                          '/ %(default_number_needed)d / %(succesive_count)d / %(name)s_ritme[p]);' % self.dict)
             params.append(
                 'param %(name)s_last {x in %(name)s_persons}, integer, < first_week, default -100;' % self.dict)
         return params
@@ -479,14 +489,18 @@ class Task:
                 'check: (sum {p in %(name)s_%(set)s} (1 / %(name)s_ritme[p])) <= (sum {w in weeks} %(name)s_number_needed[w]) / number_of_weeks + 0.5;' % self.dict)
         if self.in_teams:
             checks.append(
-                'check {p in %(name)s_leaders}: (sum {w in weeks} %(name)s_available[p,w]) >= %(name)s_min[p];' % self.dict)
+                'check {p in %(name)s_leaders}: (sum {w in weeks} %(name)s_team_available[p,w]) >= %(name)s_min[p];' % self.dict)
             checks.append(
-                'check {w in weeks}: (sum {p in %(name)s_leaders} %(name)s_available[p,w]) >= %(name)s_number_needed[w];' % self.dict)
+                'check {w in weeks}: (sum {p in %(name)s_leaders} %(name)s_team_available[p,w]) >= %(name)s_number_needed[w];' % self.dict)
         else:
             checks.append(
                 'check {p in %(name)s_persons}: (sum {w in weeks} %(name)s_available[p,w]) >= %(name)s_min[p];' % self.dict)
             checks.append(
                 'check {w in weeks}: (sum {p in %(name)s_persons} %(name)s_available[p,w]) >= %(name)s_number_needed[w];' % self.dict)
+            checks.append(
+                'check: (sum {p in %(name)s_persons} %(name)s_min[p]) <= (sum {w in weeks} %(name)s_number_needed[w]);' % self.dict)
+            checks.append(
+                'check: (sum {p in %(name)s_persons} %(name)s_max[p]) >= (sum {w in weeks} %(name)s_number_needed[w]);' % self.dict)
         return checks
 
     def get_display_lines(self):
