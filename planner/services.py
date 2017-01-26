@@ -4,9 +4,18 @@ import requests
 
 
 class Services:
-    def __init__(self, environment, credentials):
-        self.environment = environment
-        self.credentials = credentials
+    def __init__(self, host, login, services, credentials):
+        self.environment = host + services
+        self.session = requests.Session()
+        self.session.get(host + login)
+        self.session.post(host + login, {
+            'log': credentials[0],
+            'pwd': credentials[1],
+            'rememberme': 'forever',
+            'redirect_to': host + services,
+            'testcookie': 1,
+            'wp-submit': 'Log%20In'
+        })
         self.state_value = {'no': '0', 'yes': '1', 'maybe': '.5'}
 
     @staticmethod
@@ -80,7 +89,7 @@ class Services:
             'week': week,
             'state': state
         })
-        r = requests.post(url, data, auth=self.credentials)
+        r = self.session.post(url, data)
         assert (r.status_code == 200)
         return r.text
 
@@ -93,17 +102,51 @@ class Services:
         return self.get_json(url)
 
     def get_json(self, url):
-        response = requests.get(url, auth=self.credentials)
+        response = self.session.get(url)
         assert response.status_code == 200
         return json.loads(response.text)
 
-    def post_person(self, name, id, email):
+    def post_person(self, name, user_id, email):
         url = "%s/persons" % self.environment
         data = json.dumps({
             "name": name,
-            "id": id,
+            "id": user_id,
             "done": "0",
             "email": email})
-        r = requests.post(url, data, auth=self.credentials)
+        r = self.session.post(url, data)
         assert (r.status_code == 200)
         return r.json()
+
+    def create_event(self, eventdate, eventtime, description, location, remark):
+        from datetime import datetime
+
+        def create_start(the_date, the_time):
+            return datetime.combine(the_date, the_time).isoformat()
+
+        url = "%s/events" % self.environment
+        data = json.dumps({
+            "start": create_start(eventdate, eventtime),
+            "description": description,
+            "location": location,
+            "remark": remark})
+        print(data)
+        r = self.session.post(url, data)
+        assert (r.status_code == 200)
+        return r.json()
+
+    def create_assignment(self, event_uid, task, person, remark):
+        url = "%s/events/%s/assignments" % (self.environment, event_uid)
+        data = json.dumps({
+            "task": task,
+            "person": person,
+            "remark": remark})
+        print(data)
+        r = self.session.post(url, data)
+        assert (r.status_code == 200)
+        return r.json()
+
+    def delete_assignment(self, uid):
+        url = "%s/assignments/%s" % (self.environment, uid)
+        r = self.session.delete(url)
+        assert (r.status_code == 200)
+        return

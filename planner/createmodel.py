@@ -9,24 +9,28 @@ class Specials:
         self.constraints = []
         self.ignores = []
 
-    def add_var(self, var):
-        self.vars.append(var)
+    def add_var(self, var, tasks=None):
+        if tasks is None:
+            tasks = []
+        self.vars.append((var, tasks))
 
-    def add_objective_term(self, term):
-        self.objective_terms.append(term)
+    def add_objective_term(self, term, tasks=None):
+        if tasks is None:
+            tasks = []
+        self.objective_terms.append((term, tasks))
 
     def add_constraint(self, constraint):
-        self.constraints.append(constraint)
+        self.constraints.append((constraint, self.get_tasks_from_constraint(constraint)))
 
     def ignore_constraint(self, constraint):
         self.ignores.append(constraint)
 
-    def get_objective_terms(self):
-        terms = []
-        for term in self.objective_terms:
-            terms.append('+ ' + term)
-        return terms
-
+    @staticmethod
+    def get_tasks_from_constraint(constraint):
+        import re
+        right_part = ':'.join(constraint.split(":")[1:])
+        pattern = re.compile(r'([A-Z][a-z]+_?[A-Z]?[a-z]+)\[')
+        return pattern.findall(right_part)
 
 class Generator:
     def __init__(self, tasks, specials=Specials(), dont_exclude=None, fixes=None):
@@ -42,10 +46,11 @@ class Generator:
     def get_overrides(self):
         overrides = self.specials.ignores
         for constraint in self.specials.constraints:
-            name = constraint.split()[2]
-            if name[-1] == ':':
-                name = name[:-1]
-            overrides.append(name)
+            if self.has_all_tasks(constraint[1]):
+                name = constraint[0].split()[2]
+                if name[-1] == ':':
+                    name = name[:-1]
+                overrides.append(name)
         return overrides
 
     def get_display_lines(self):
@@ -53,9 +58,38 @@ class Generator:
 
         lines = []
         for var in self.specials.vars:
-            varname = re.split(r'[ \t:,{\s]\s*', var)[1]
-            lines.append("display %s;" % varname)
+            if self.has_all_tasks(var[1]):
+                varname = re.split(r'[ \t:,{\s]\s*', var[0])[1]
+                lines.append("display %s;" % varname)
         lines.append('display penalties;')
+        return lines
+
+    def has_all_tasks(self, tasks):
+        tasknames = [task.get_name() for task in self.tasks]
+        for taskname in tasks:
+            if taskname not in tasknames:
+                return False
+        return True
+
+    def get_special_constraints(self):
+        lines = []
+        for constraint in self.specials.constraints:
+            if self.has_all_tasks(constraint[1]):
+                lines.append(constraint[0])
+        return lines
+
+    def get_special_vars(self):
+        lines = []
+        for var in self.specials.vars:
+            if self.has_all_tasks(var[1]):
+                lines.append(var[0])
+        return lines
+
+    def get_special_terms(self):
+        lines = []
+        for term in self.specials.objective_terms:
+            if self.has_all_tasks(term[1]):
+                lines.append('+ ' + term[0])
         return lines
 
     @property
@@ -72,18 +106,18 @@ class Generator:
             model.extend(task.get_params())
         for task in self.tasks:
             model.extend(task.get_vars())
-        model.extend(self.specials.vars)
+        model.extend(self.get_special_vars())
         model.append('minimize penalties:')
         for task in self.tasks:
             model.extend(task.get_objective_terms())
-        model.extend(self.specials.get_objective_terms())
+        model.extend(self.get_special_terms())
         model.append(';')
         for task in self.tasks:
             model.extend(task.get_rules(overrides))
         for task1, task2 in combinations(self.tasks, 2):
             if not ((task1.name, task2.name) in self.dont_exclude or (task2.name, task1.name) in self.dont_exclude):
                 model.extend(task1.get_exclusion_rules(task2, overrides))
-        model.extend(self.specials.constraints)
+        model.extend(self.get_special_constraints())
         model.extend(self.rules_for_fixes)
         for task in self.tasks:
             model.extend(task.get_checks())
@@ -161,6 +195,9 @@ class Task:
         self.number_needed = {}
         self.essential = {}
 
+    def get_paired_task(self):
+        return self.paired_task
+
     def set_param(self, param, value):
         self.params[param] = value
 
@@ -186,6 +223,9 @@ class Task:
             if match(pattern, name):
                 return True
         return False
+
+    def get_name(self):
+        return self.name
 
     def get_sets(self):
         sets = ['set %(name)s_persons;' % self.dict]
