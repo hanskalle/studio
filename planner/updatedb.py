@@ -17,6 +17,10 @@ def insert_missing_persons(services):
         print("Database is al up-to-date.")
 
 
-auth = ('hans.kalle@telfort.nl', getpass())
-services = Services('http://www.ichthusculemborg.nl/services', auth)
-insert_missing_persons(services)
+def do_all():
+    auth = ('hans.kalle@gmail.com', getpass())
+    services = Services('http://www.ichthusculemborg.nl', '/leden/wp-login.php', '/services', auth)
+    insert_missing_persons(services)
+
+
+do_all()
