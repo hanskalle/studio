@@ -39,7 +39,6 @@ if __name__ == "__main__":
 
     from_week = 40
     till_week = 52
-    domain = "http://www.ichthusculemborg.nl/services"
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hf:t:")
     except getopt.GetoptError:
@@ -58,8 +57,9 @@ if __name__ == "__main__":
         print("Till-week must be greater then from-week.")
         sys.exit(2)
     print('get password')
-    password = getpass.getpass('Password for hans.kalle@telfort.nl: ')
-    services = Services(domain, ('hans.kalle@telfort.nl', password))
+    password = getpass.getpass('Password for hans.kalle@gmail.com: ')
+    auth = ('hans.kalle@gmail.com', password)
+    services = Services('http://www.ichthusculemborg.nl', '/leden/wp-login.php', '/services', auth)
     print('insert missing persons')
     insert_missing_persons(services)
     print('get persons')
