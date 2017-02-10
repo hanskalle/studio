@@ -6,8 +6,9 @@ from services import Services
 
 auth = ('username', 'password')
 services = None
-base_year = 2016
-first_week = 0
+base_year = 2017
+first_week = 13
+last_week = 38
 
 
 def get_last_assignments(events, before_year, before_week, commitments):
@@ -48,22 +49,21 @@ def write_last_assignments(filename, last_assignments, tasks):
                     f.write(';\n')
         f.write('end;\n')
 
-
 def write_availabilities(filename, availabilities, tasks):
     count = 0
     with open(filename, 'w') as f:
-        f.write("param first_week := 39;\n")
-        f.write("param last_week := 64;\n")
+        f.write("param first_week := %d;\n" % first_week)
+        f.write("param last_week := %d;\n" % last_week)
         for task in availabilities:
             if task.replace(' ', '_') in tasks:
                 f.write('param ' + task.replace(' ', '_') + '_available :\n')
                 f.write('\t\t\t')
-                for week in range(39, 64 + 1):
+                for week in range(first_week, last_week + 1):
                     f.write('\t%d' % week)
                 f.write(' :=\n')
                 for person in sorted(availabilities[task].keys()):
                     f.write('\t%s\t' % person.replace(' ', '_'))
-                    for week in range(39, 64 + 1):
+                    for week in range(first_week, last_week + 1):
                         key = str(week)
                         f.write('\t%s' % availabilities[task][person][key])
                         if availabilities[task][person][key] != '0':
@@ -213,6 +213,11 @@ def get_task_name_list(tasks):
     return names
 
 
+def show_strafpunten():
+    for line in open('results.txt'):
+        if line.rstrip().endswith('.val = 1'):
+            print(line.rstrip())
+
 def get_results(timlim):
     from itertools import chain
 
@@ -222,84 +227,111 @@ def get_results(timlim):
 
     specials = Specials()
 
-    zangleiding = Task('Zangleiding')
+    # TODO: Hoofdkosters met minder strafpunten
+    # TODO: Jonathan liefst met Hans of Fokkelien
+
+    # Speciale diensten
+    Afsluiting = 26
+    Jeugddienst = 27
+    Vredesdienst = 38
+    specials.add_var("set zomervakantie := 28..32;")
+    specials.add_var("var leidingwitipvblauw {zomervakantie}, binary;")
+    specials.add_var("var groepwitipvblauw {zomervakantie}, binary;")
+
+    # Gebed
+    specials.add_var("set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};")
+    specials.add_constraint("subject to Liesbeth_Z_gebed_met_Hans_Z {w in weeks}:"
+                            " Gebed['Liesbeth_Z',w] <= Gebed['Hans_Z',w];")
+    specials.add_constraint("subject to Nora_gebed_met_Wim_R {w in weeks}:"
+                            " Gebed['Nora',w] <= Gebed['Wim_R',w];")
+    specials.add_constraint("subject to Rachel_geen_gebed_als_Tim_een_taak_heeft {w in weeks}:"
+                            " Gebed['Rachel',w] <= 1 - Muziek['Tim',w] - Leiding_Rood['Tim',w];")
+    specials.add_constraint("subject to Rachel_geen_gebed_met_man {w in weeks}:"
+                            " Gebed['Rachel',w] <= 1 - (sum {p in gebedsmannen} Gebed[p,w]);")
+    specials.add_constraint("subject to Wenny_gebed_met_Jan_P {w in weeks}:"
+                            " Gebed['Wenny',w] <= Gebed['Jan_P',w];")
+    gebed = Task('Gebed', default_number_needed=2)
+    specials.add_constraint("subject to Geen_mannen_samen_gebed {w in weeks}:"
+                            " (sum {p in gebedsmannen} Gebed[p,w]) <= 1;")
+
+    # Beamer
+    beamer = Task('Beamer')
+
+    # Zangleiding
     specials.add_constraint(
-        "subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team"
-        " {p in Zangleiding_persons inter Muziek_leaders, w in weeks}:"
-        " Muziek[p,w] >= Zangleiding[p,w];")
+        "subject to Fokkelien_en_Hans_K_minimaal_4_diensten_rust_tussendoor {p in {'Fokkelien', 'Hans_K'}, w in first_week+4..last_week}:"
+        " (sum {w2 in w-4..w} Zangleiding[p,w2]) <= 1;")
+    specials.add_constraint(
+        "subject to Fokkelien_en_Hans_K_minimaal_4_diensten_rust_tussendoor_historisch"
+        " {p in {'Fokkelien', 'Hans_K'}, w in Zangleiding_last[p]+1..Zangleiding_last[p]+4: w >= first_week}:"
+        " Zangleiding[p,w] = 0;")
+    specials.add_constraint(
+        "subject to Wim_R_Ramon_en_Hans_K_mogen_zonder_band_Zangleiding {w in (weeks diff {%d,%d})}:"
+        " Muziek['Onbezet',w] <= (Zangleiding['Wim_R',w] + Zangleiding['Hans_K',w] + Zangleiding['Ramon',w]);" % (
+        Jeugddienst, Vredesdienst))
+    specials.add_constraint(
+        "subject to Jolanda_geen_bijzondere_diensten {w in {27}}: Zangleiding['Jolanda',w] = 0;")
     specials.add_constraint(
         "subject to Liesbeth_Z_minimaal_7_diensten_rust_tussendoor {w in first_week+7..last_week}:"
         " (sum {w2 in w-7..w} Zangleiding['Liesbeth_Z',w2]) <= 1;")
     specials.add_constraint(
-        "subject to Liesbeth_Z_maximaal_1_keer_per_8_weken_historisch"
+        "subject to Liesbeth_Z_minimaal_7_diensten_rust_tussendoor_historisch"
         " {w in Zangleiding_last['Liesbeth_Z']+1..Zangleiding_last['Liesbeth_Z']+7: w >= first_week}:"
         " Zangleiding['Liesbeth_Z',w] = 0;")
-    specials.add_constraint(
-        "subject to Onbezet_alleen_bij_Ramon_of_Hans_K_Zangleiding {w in (weeks diff {44, 51, 52})}:"
-        " Muziek['Onbezet',w] <= (Zangleiding['Hans_K',w] + Zangleiding['Ramon',w]);")
+    zangleiding = Task('Zangleiding')
 
+    #Muziek
+    specials.add_constraint(
+        "subject to Een_zangleider_die_ook_in_een_muziekteam_zit_leidt_de_dienst_alleen_met_eigen_team"
+        " {p in Zangleiding_persons inter Muziek_leaders, w in weeks}:"
+        " Muziek[p,w] >= Zangleiding[p,w];")
     muziek = Task('Muziek', True)
     muziek.set_essential('Wendy', 5)
-    muziek.set_essential('Vena', 5)
     muziek.set_essential('Selicia', 5)
     muziek.set_essential('David', 5)
     muziek.set_essential('Rosalie', 10)
-    muziek.set_essential('Xandra', 10)
-    muziek.set_team('Tim_alleen', ['Tim'])
-    muziek.set_team('Tim', ['Tim', 'Vena', 'Rosalie', 'Xandra'])
+    muziek.set_essential('Xandra', 5)
+    muziek.set_team('Tim', ['Tim'])
     muziek.set_team('Jonathan', ['Jonathan', 'Rosalie', 'Wendy', 'Selicia'])
-    muziek.set_team('Johan', ['Johan', 'Hans_Z', 'David'])
+    muziek.set_team('Johan', ['Johan', 'Hans_Z', 'David', 'Xandra'])
     muziek.set_team('Onbezet', ['Onbezet'])
 
+    #Geluid
     geluid = Task('Geluid')
+    specials.add_var("var hansdteveel {weeks}, binary;")
+    specials.add_objective_term("1000 * (sum {w in weeks} hansdteveel[w])")
+    specials.add_constraint("subject to Hans_D_niet_3_zondagen_achter_elkaar {w in first_week+2..last_week}:"
+                            "(sum {w2 in w-2..w} (  Hoofdkoster['Hans_D',w2] + Geluid['Hans_D',w2]))  <= 2 + hansdteveel[w];")
 
-    beamer = Task('Beamer')
-
-    leiding_rood = Task('Leiding Rood')
-    specials.add_var("var roodgeenmuziek {weeks}, binary;")
-    specials.add_objective_term("200 * (sum {w in weeks} roodgeenmuziek[w])")
-    specials.add_constraint("subject to Rood_niet_in_de_dienst_als_Muziek_onbezet_is {w in (weeks diff {44, 51})}:"
-                            " Leiding_Rood['In_de_dienst',w] + Muziek['Onbezet',w] <= 1 + roodgeenmuziek[w];")
-
+    #Wit
     leiding_wit = Task('Leiding Wit')
-
     groep_wit = Task('Groep Wit', paired_task='Leiding Wit')
-
     groep_wit.set_pair('Dieuwke', 'Emma')
     groep_wit.set_pair('Jacolien', 'Esther')
     groep_wit.set_pair('Elsa', 'Esther')
     groep_wit.set_pair('Elsa', 'Ferdinand')
+    groep_wit.set_pair('Lianne', 'Hanna_Vera')
     groep_wit.set_pair('Marian', 'Jannienke')
-    groep_wit.set_pair('Lianne', 'Thirza')
+    leiding_wit.set_number_needed(Afsluiting, 2)
+    groep_wit.set_number_needed(Afsluiting, 2)
+    leiding_wit.set_number_needed(Jeugddienst, 2)
+    groep_wit.set_number_needed(Jeugddienst, 0)
+    specials.ignore_constraint("number_needed_Leiding_Wit")
+    specials.add_constraint("subject to Leiding_Wit_number_needed_normaal {w in weeks diff zomervakantie}:"
+                            "   (sum {x in Leiding_Wit_persons} Leiding_Wit[x,w])"
+                            "   = Leiding_Wit_number_needed[w];")
+    specials.add_constraint("subject to Leiding_Wit_number_needed_zomervakantie {w in zomervakantie}:"
+                            "   (sum {x in Leiding_Wit_persons} Leiding_Wit[x,w])"
+                            "   = leidingwitipvblauw[w];")
+    specials.ignore_constraint("number_needed_Groep_Wit")
+    specials.add_constraint("subject to Groep_Wit_number_needed_normaal {w in weeks diff zomervakantie}:"
+                            "   (sum {x in Groep_Wit_persons} Groep_Wit[x,w])"
+                            "   = Groep_Wit_number_needed[w];")
+    specials.add_constraint("subject to Groep_Wit_number_needed_zomervakantie {w in zomervakantie}:"
+                            "   (sum {x in Groep_Wit_persons} Groep_Wit[x,w])"
+                            "   = groepwitipvblauw[w];")
 
-    leiding_blauw = Task('Leiding Blauw')
-
-    groep_blauw = Task('Groep Blauw', paired_task='Leiding Blauw')
-    groep_blauw.set_pair('Rachel', 'Vivianne')
-    #    groep_blauw.set_pair('Mieke', 'Anneke')
-    #    groep_blauw.set_pair('Annelies', 'Noa')
-    groep_blauw.set_pair('Mirjam', 'Selicia')
-    groep_blauw.set_pair('Lidian', 'Hanna_Vera')
-    groep_blauw.set_pair('Wenny', 'Hanna_Vera')
-    groep_blauw.set_pair('Miranda', 'Chiara')
-
-    gebed = Task('Gebed', default_number_needed=2)
-    specials.add_var("set gebedsmannen := {'Hans_Z', 'Hans_K', 'Wim_R', 'Andreas', 'Roeland', 'Jan_P'};")
-    specials.add_constraint("subject to Rachel_geen_gebed_met_man {w in weeks}:"
-                            " Gebed['Rachel',w] <= 1 - (sum {p in gebedsmannen} Gebed[p,w]);")
-    specials.add_constraint("subject to Rachel_geen_gebed_als_Tim_een_taak_heeft {w in weeks}:"
-                            " Gebed['Rachel',w] <= 1 - Muziek['Tim',w] - Leiding_Rood[Tim',w];")
-    specials.add_constraint("subject to Geen_mannen_samen_gebed {w in weeks}:"
-                            " (sum {p in gebedsmannen} Gebed[p,w]) <= 1;")
-    specials.add_constraint("subject to Nora_gebed_met_Wim_R {w in weeks}:"
-                            " Gebed['Nora',w] <= Gebed['Wim_R',w];")
-    specials.add_constraint("subject to Liesbeth_Z_gebed_met_Hans_Z {w in weeks}:"
-                            " Gebed['Liesbeth_Z',w] <= Gebed['Hans_Z',w];")
-    specials.add_constraint("subject to Wenny_gebed_met_Jan_P {w in weeks}:"
-                            " Gebed['Wenny',w] <= Gebed['Jan_P',w];")
-
-    welkom = Task('Welkom')
-
+    #Koffie
     koffie = Task('Koffie', in_teams=True)
     koffie.set_team('Cafe_Rouler', ['Cafe_Rouler'])
     koffie.set_team('Jacolien', ['Jacolien', 'Miranda'])
@@ -309,7 +341,16 @@ def get_results(timlim):
     koffie.set_team('Nora', ['Nora', 'Wim_R'])
     koffie.set_team('Dieuwke', ['Dieuwke', 'Hans_M'])
     koffie.set_team('Dieuwke', ['Ailine', 'Emma'])
+    specials.add_var("var hanskkanniethelpen {weeks}, binary;")
+    specials.add_objective_term("500 * (sum {w in weeks} hanskkanniethelpen[w])")
+    specials.add_constraint("subject to Hans_K_helpt_graag_bij_koffie {w in weeks}:"
+                            "Koffie['Emmely',w] + Zangleiding['Hans_K',w] + Geluid['Hans_K',w] <= 1 + hanskkanniethelpen[w];")
 
+    # Hoofdkoster
+    specials.add_var("var matthijszonderlianne {weeks}, binary;")
+    specials.add_objective_term("10 * (sum {w in weeks} matthijszonderlianne[w])")
+    specials.add_constraint("subject to Als_Matthuis_hoofdkoster_is_doet_Lianne_welkom {w in weeks}:"
+                            " Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne[w];")
     hoofdkoster = Task('Hoofdkoster', succesive_count=1)
     specials.ignore_constraint("ritme_Hoofdkoster_X")
     specials.add_constraint("subject to ritme_Hoofdkoster_XX "
@@ -319,44 +360,96 @@ def get_results(timlim):
     specials.add_objective_term("1000 * (sum {p in Hoofdkoster_persons, w in weeks} hoofdkoster_niet_dubbel[p,w])",
                                 ['Hoofdkoster'])
     specials.add_constraint("subject to ritme_Hoofdkoster_XXX "
-                            "{p in Hoofdkoster_persons, w in first_week+1..last_week}:"
+                            "{p in Hoofdkoster_persons diff {'Hans_D'}, w in first_week+1..last_week}:"
                             "Hoofdkoster[p, w] >= Hoofdkoster[p, w - 1] - hoofdkoster_niet_dubbel[p, w];")
     specials.add_constraint("subject to ritme_Hoofdkoster_XXXX "
                             "{p in Hoofdkoster_persons, w in first_week+2..last_week}:"
                             "Hoofdkoster[p, w] + Hoofdkoster[p, w - 1] + Hoofdkoster[p, w - 2] <= 2;")
 
+    # Hulpkoster
+    specials.add_var("var roelhermanbreuk {weeks}, binary;", ["Hulpkoster", "Hoofdkoster"])
+    specials.add_objective_term("5 * (sum {w in weeks} roelhermanbreuk[w])", ["Hulpkoster", "Hoofdkoster"])
+    specials.add_constraint("subject to Roel_liefst_Hulpkoster_met_Hoofdkoster_Herman_B {w in weeks}:"
+                            "Hulpkoster['Roel',w] <= Hoofdkoster['Herman_B',w] + roelhermanbreuk[w];")
     hulpkoster = Task('Hulpkoster', default_number_needed=2)
+    hulpkoster.set_number_needed(19, 3)  # 7-5, meivakantie
+    hulpkoster.set_number_needed(33, 3)  # 20-8, zomervakantie
 
-    # Einde herfstvakantie
-    hulpkoster.set_number_needed(42, 3)  # Matten zuigen
+    # Welkom
+    specials.add_var("var liannezondermatthijs {weeks}, binary;")
+    specials.add_objective_term("20 * (sum {w in weeks} liannezondermatthijs[w])")
+    specials.add_constraint("subject to Als_Lianne_welkom_doet_is_Matthijs_hoofdkoster {w in weeks}:"
+                            " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs[w];")
+    welkom = Task('Welkom')
 
-    # Kids Praise 6 november
-    specials.add_constraint("subject to Jolanda_doet_de_Kids_Praise: Zangleiding['Jolanda', 44] = 1;")
-    specials.add_constraint("subject to Gelegenheidsband_bij_Kids_Praise: Muziek['Onbezet',44] = 1;")
-    specials.add_constraint("subject to Rood_in_de_dienst_bij_Kids_Praise: Leiding_Rood['In_de_dienst',44] = 1;")
-    leiding_wit.set_number_needed(44, 0)
-    groep_wit.set_number_needed(44, 0)
-    leiding_blauw.set_number_needed(44, 2)
-    groep_blauw.set_number_needed(44, 2)
-    hoofdkoster.set_number_needed(44, 2)
-    hulpkoster.set_number_needed(44, 4)
-    koffie.set_number_needed(44, 2)
+    # Blauw
+    leiding_blauw = Task('Leiding Blauw')
+    groep_blauw = Task('Groep Blauw', paired_task='Leiding Blauw')
+    groep_blauw.set_pair('Annelies', 'Noa')
+    groep_blauw.set_pair('Lidian', 'Hanna_Vera')
+    groep_blauw.set_pair('Marieke_Vm', 'Anneke')
+    groep_blauw.set_pair('Miranda', 'Chiara')
+    groep_blauw.set_pair('Mirjam', 'Selicia')
+    groep_blauw.set_pair('Rachel', 'Vivianne')
+    groep_blauw.set_pair('Wenny', 'Hanna_Vera')
+    groep_blauw.set_pair('Xandra', 'Jannienke')
+    specials.ignore_constraint("number_needed_Leiding_Blauw")
+    specials.add_constraint("subject to Leiding_Blauw_number_needed_normaal {w in weeks diff zomervakantie}:"
+                            "   (sum {x in Leiding_Blauw_persons} Leiding_Blauw[x,w])"
+                            "   = Leiding_Blauw_number_needed[w];")
+    specials.add_constraint("subject to Leiding_Blauw_number_needed_zomervakantie {w in zomervakantie}:"
+                            "   (sum {x in Leiding_Blauw_persons} Leiding_Blauw[x,w])"
+                            "   = 1 - leidingwitipvblauw[w];")
+    specials.ignore_constraint("number_needed_Groep_Blauw")
+    specials.add_constraint("subject to Groep_Blauw_number_needed_normaal {w in weeks diff zomervakantie}:"
+                            "   (sum {x in Groep_Blauw_persons} Groep_Blauw[x,w])"
+                            "   = Groep_Blauw_number_needed[w];")
+    specials.add_constraint("subject to Groep_Blauw_number_needed_zomervakantie {w in zomervakantie}:"
+                            "   (sum {x in Groep_Blauw_persons} Groep_Blauw[x,w])"
+                            "   = 1 - groepwitipvblauw[w];")
+    specials.add_var("var wijngaardenbreuk {weeks}, binary;")
+    specials.add_objective_term("40 * (sum {w in weeks} wijngaardenbreuk[w])")
+    specials.add_constraint("subject to Rachel_leidt_groep_Blauw_wanneer_Tim_groep_Rood_leidt {w in weeks}:"
+                            " Leiding_Rood['Tim',w] <= Leiding_Blauw['Rachel',w] + wijngaardenbreuk[w];")
+    specials.add_var("var broekhofbreuk {weeks}, binary;")
+    specials.add_objective_term("20 * (sum {w in weeks} broekhofbreuk[w])")
+    specials.add_constraint("subject to Mirjam_leidt_groep_Blauw_wanneer_Jan_Martijn_groep_Rood_leidt {w in weeks}:"
+                            " Leiding_Rood['Jan_Martijn',w] <= Leiding_Blauw['Mirjam',w] + broekhofbreuk[w];")
+    leiding_blauw.set_number_needed(Jeugddienst, 2)
+    groep_blauw.set_number_needed(Jeugddienst, 0)
 
-    # Kerst
-    specials.add_constraint("subject to Gelegenheidsband_bij_Kerst: Muziek['Onbezet',51] = 1;")
-    specials.add_constraint("subject to Rood_in_de_dienst_bij_Kerst: Leiding_Rood['In_de_dienst',51] = 1;")
-    hoofdkoster.set_number_needed(51, 4)
-    hulpkoster.set_number_needed(51, 4)
-    leiding_wit.set_number_needed(51, 0)
-    groep_wit.set_number_needed(51, 0)
-    leiding_blauw.set_number_needed(51, 0)
-    groep_blauw.set_number_needed(51, 0)
+    # Rood
+    leiding_rood = Task('Leiding Rood')
+    specials.add_var("var roodgeenmuziek {weeks}, binary;")
+    specials.add_objective_term("200 * (sum {w in weeks} roodgeenmuziek[w])")
+    specials.add_constraint(
+        "subject to Rood_niet_in_de_dienst_als_Muziek_onbezet_is {w in (weeks diff {" + str(Jeugddienst) + "})}:"
+                                                                                                           " Leiding_Rood['In_de_dienst',w] + Muziek['Onbezet',w] <= 1 + roodgeenmuziek[w];")
+    specials.add_constraint("subject to Jan_Martijn_leidt_groep_Rood_wanneer_Mirjam_groep_Blauw_leidt {w in weeks}:"
+                            " Leiding_Blauw['Mirjam',w] <= Leiding_Rood['Jan_Martijn',w] + broekhofbreuk[w];")
+    specials.add_constraint(
+        "subject to Liesbeth_geen_Rood_wanneer_Hans_Z_zangleiding_heeft {w in first_week..last_week}:"
+        " Zangleiding['Hans_Z',w] + Leiding_Rood['Liesbeth_Z',w] <= 1;")
+    specials.add_constraint("subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt {w in weeks}:"
+                            " Leiding_Blauw['Rachel',w] <= Leiding_Rood['Tim',w] + wijngaardenbreuk[w];")
+    specials.add_constraint(
+        "subject to Rood_in_de_dienst_bij_Jeugddienst: Leiding_Rood['In_de_dienst'," + str(Jeugddienst) + "] = 1;")
+    leiding_rood.set_number_needed(Afsluiting, 2)
+    for week in range(28, 33):
+        leiding_rood.set_number_needed(week, 0)
 
-    # Einde kerstvakantie
-    hulpkoster.set_number_needed(53, 3)  # Matten zuigen
-
-    # Einde voorjaarsvakantie
-    hulpkoster.set_number_needed(61, 3)  # Matten zuigen
+    # vredesdienst 24-9
+    zangleiding.set_number_needed(Vredesdienst, 0)
+    geluid.set_number_needed(Vredesdienst, 0)
+    beamer.set_number_needed(Vredesdienst, 0)
+    leiding_rood.set_number_needed(Vredesdienst, 0)
+    leiding_blauw.set_number_needed(Vredesdienst, 0)
+    groep_blauw.set_number_needed(Vredesdienst, 0)
+    koffie.set_number_needed(Vredesdienst, 0)
+    welkom.set_number_needed(Vredesdienst, 0)
+    hoofdkoster.set_number_needed(Vredesdienst, 0)
+    hulpkoster.set_number_needed(Vredesdienst, 0)
+    specials.add_constraint("subject to Geen_muziek_bij_Vredesdienst: Muziek['Onbezet'," + str(Vredesdienst) + "] = 1;")
 
     dont_exclude = [
         ('Beamer', 'Hulpkoster'),
@@ -366,52 +459,42 @@ def get_results(timlim):
         ('Leiding_Rood', 'Leiding_Wit'),
         ('Gebed', 'Welkom')]
 
-    # Persoonlijke specials
-    specials.add_var("var hansteveel {weeks}, binary;")
-    specials.add_objective_term("500 * (sum {w in weeks} hansteveel[w])")
-    specials.add_constraint("subject to Hans_D_niet_3_zondagen_achter_elkaar {w in first_week+2..last_week}:"
-                            "(sum {w2 in w-2..w} (  Hoofdkoster['Hans_D',w2] + Geluid['Hans_D',w2]))  <= 2 + hansteveel[w];")
-
-    specials.add_var("var wijngaardenbreuk {weeks}, binary;")
-    specials.add_objective_term("40 * (sum {w in weeks} wijngaardenbreuk[w])")
-    specials.add_constraint("subject to Rachel_leidt_groep_Blauw_wanneer_Tim_groep_Rood_leidt {w in weeks}:"
-                            " Leiding_Rood['Tim',w] <= Leiding_Blauw['Rachel',w] + wijngaardenbreuk[w];")
-    specials.add_constraint("subject to Tim_leidt_groep_Rood_wanneer_Rachel_groep_Blauw_leidt {w in weeks}:"
-                            " Leiding_Blauw['Rachel',w] <= Leiding_Rood['Tim',w] + wijngaardenbreuk[w];")
-
-    specials.add_var("var broekhofbreuk {weeks}, binary;")
-    specials.add_objective_term("20 * (sum {w in weeks} broekhofbreuk[w])")
-    specials.add_constraint("subject to Mirjam_leidt_groep_Blauw_wanneer_Jan_Martijn_groep_Rood_leidt {w in weeks}:"
-                            " Leiding_Rood['Jan_Martijn',w] <= Leiding_Blauw['Mirjam',w] + broekhofbreuk[w];")
-    specials.add_constraint("subject to Jan_Martijn_leidt_groep_Rood_wanneer_Mirjam_groep_Blauw_leidt {w in weeks}:"
-                            " Leiding_Blauw['Mirjam',w] <= Leiding_Rood['Jan_Martijn',w] + broekhofbreuk[w];")
-
-    specials.add_var("var matthijszonderlianne {weeks}, binary;")
-    specials.add_objective_term("10 * (sum {w in weeks} matthijszonderlianne[w])")
-    specials.add_constraint("subject to Als_Matthuis_hoofdkoster_is_doet_Lianne_welkom {w in weeks}:"
-                            " Hoofdkoster['Matthijs',w] <= Welkom['Lianne',w] + matthijszonderlianne[w];")
-
-    specials.add_var("var liannezondermatthijs {weeks}, binary;")
-    specials.add_objective_term("20 * (sum {w in weeks} liannezondermatthijs[w])")
-    specials.add_constraint("subject to Als_Lianne_welkom_doet_is_Matthijs_hoofdkoster {w in weeks}:"
-                            " Welkom['Lianne',w] <= Hoofdkoster['Matthijs',w] + liannezondermatthijs[w];")
-
-    specials.add_var("var roelhermanbreuk {weeks}, binary;")
-    specials.add_objective_term("5 * (sum {w in weeks} roelhermanbreuk[w])")
-    specials.add_constraint("subject to Roel_liefst_Hulpkoster_met_Hoofdkoster_Herman_B {w in weeks}:"
-                            "Hulpkoster['Roel',w] <= Hoofdkoster['Herman_B',w] + roelhermanbreuk[w];")
-
     groups = [
         [zangleiding, muziek, geluid, hoofdkoster],
         [leiding_rood, leiding_wit, groep_wit, leiding_blauw, groep_blauw],
         [beamer],
         [welkom, koffie],
         [gebed],
-        [hulpkoster]
+        [hulpkoster],
     ]
 
-    del availabilities['Leiding Blauw']['Annelies']
-    del availabilities['Leiding Blauw']['Mieke']
+    # TODO: Echte availability
+    availabilities = {'Koffie': {'Cafe Rouler': {'13': 1}}}
+    availabilities['Koffie']['Cafe Rouler']['14'] = 1
+    availabilities['Koffie']['Cafe Rouler']['15'] = 1
+    availabilities['Koffie']['Cafe Rouler']['16'] = 0
+    availabilities['Koffie']['Cafe Rouler']['17'] = 1
+    availabilities['Koffie']['Cafe Rouler']['18'] = 1
+    availabilities['Koffie']['Cafe Rouler']['19'] = 1
+    availabilities['Koffie']['Cafe Rouler']['20'] = 1
+    availabilities['Koffie']['Cafe Rouler']['21'] = 1
+    availabilities['Koffie']['Cafe Rouler']['22'] = 1
+    availabilities['Koffie']['Cafe Rouler']['23'] = 0
+    availabilities['Koffie']['Cafe Rouler']['24'] = 1
+    availabilities['Koffie']['Cafe Rouler']['25'] = 1
+    availabilities['Koffie']['Cafe Rouler']['26'] = 0
+    availabilities['Koffie']['Cafe Rouler']['27'] = 0
+    availabilities['Koffie']['Cafe Rouler']['28'] = 0
+    availabilities['Koffie']['Cafe Rouler']['29'] = 0
+    availabilities['Koffie']['Cafe Rouler']['30'] = 0
+    availabilities['Koffie']['Cafe Rouler']['31'] = 0
+    availabilities['Koffie']['Cafe Rouler']['32'] = 0
+    availabilities['Koffie']['Cafe Rouler']['33'] = 0
+    availabilities['Koffie']['Cafe Rouler']['34'] = 1
+    availabilities['Koffie']['Cafe Rouler']['35'] = 0
+    availabilities['Koffie']['Cafe Rouler']['36'] = 1
+    availabilities['Koffie']['Cafe Rouler']['37'] = 1
+    availabilities['Koffie']['Cafe Rouler']['38'] = 0
 
     fixes = []
     if check_feasability_per_task:
@@ -420,17 +503,18 @@ def get_results(timlim):
             tasks = [task]
             paired_task = task.get_paired_task()
             if paired_task:
-                for task in list(chain(*groups)):
-                    if task.get_name() == paired_task:
-                        tasks.append(task)
+                for task2 in list(chain(*groups)):
+                    if task2.get_name() == paired_task:
+                        tasks.append(task2)
             return_code = optimize_phase(tasks, dont_exclude, specials, fixes, "10", last_assignments, availabilities,
                                          commitments)
             if return_code:
-                problems.append(task.get_name())
-
-        if len(problems):
-            print(problems)
-            # exit(1)
+                problems.append(task.get_name() + " " + str(return_code))
+            else:
+                show_strafpunten()
+            if len(problems):
+                print(problems)
+                exit(1)
 
     tasks = []
     for group in groups:
