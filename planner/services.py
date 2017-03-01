@@ -44,6 +44,7 @@ class Services:
         return self.get_json(url)
 
     def get_persons_matching(self, name):
+        print(name)
         url = "%s/persons/matching/%s" % (self.environment, name)
         return self.get_json(url)
 
@@ -90,6 +91,8 @@ class Services:
             'state': state
         })
         r = self.session.post(url, data)
+        if r.status_code != 200:
+            print(r.status_code, data)
         assert (r.status_code == 200)
         return r.text
 

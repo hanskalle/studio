@@ -4,10 +4,10 @@ from services import Services
 domain = 'http://www.ichthusculemborg.nl/services'
 
 
-def exists(availabilities, person, task, week):
+def exists(availabilities, task, person, week):
     if task in availabilities:
         if person in availabilities[task]:
-            return week in availabilities[task][person]
+            return str(week) in availabilities[task][person]
     return False
 
 
